@@ -143,6 +143,44 @@ engine efficiency; the kernel-version confound was real but ran AGAINST reinfors
 net-matched before the parallel comparison can be interpreted (async 1ms-deadline batcher vs
 lockstep pooling).
 
+### Parallel decomposition (8 games / 8 actors, identical net, matched kernels)
+
+Same treatment as the sequential table: identical resnet(32,1) net both sides, ε=0, their
+evaluator instrumented. reinfors rows at torch 2.3.0 (their libtorch generation) and 2.13.
+
+| config (identical net) | moves/s | achieved batch | forwards/move | us/call (us/row) | scaling vs own seq |
+|---|---|---|---|---|---|
+| reinfors n_games=8, torch 2.3.0 | **355** | 8.00 | 6.9 | 400 (50) | 6.1x |
+| reinfors n_games=8, torch 2.13 | 197 | 8.00 | 6.9 | 728 (91) | 4.7x |
+| open_spiel 8 actors, batch 8 | 157 | 8.00 | 3.5 (61.6% cache) | 1741 (218) | 2.5x |
+| open_spiel 8 actors, OMP_NUM_THREADS=1 | 200 | 8.00 | 3.6 | 1302 (163) | 3.2x |
+
+What the parallel comparison actually verified (and falsified):
+
+- **Batch formation is NOT the differentiator — both designs achieve full batch-8.** The
+  async-batcher "convoy" hypothesis is dead at this scale: their 1ms-deadline batcher fills
+  every batch when 8 actors feed one inference thread.
+- **The differentiator is per-row wrapper cost.** Their ~133 us/call fixed cost (sequential
+  table) is really ~133 us/ROW — input tensor build and per-element output unpacking scale
+  linearly with batch rows: batch-8 costs 8x133 ~ 1064 us of plumbing + ~240 us of kernels
+  (matches the measured 1302 with OMP pinned). Batching amortizes their kernels but not their
+  marshaling, capping per-row improvement at 526->163 (3.2x). reinfors' seam marshals one flat
+  buffer per call regardless of rows, so batching gets full amortization: 309->50 us/row (6.2x).
+- **Intra-op thread oversubscription costs them another ~25%** (1741->1302 with OMP=1): free-
+  running actors + libtorch's default intra-op pool compete for cores. reinfors' lockstep never
+  oversubscribes (workers idle during the forward) — the flip side of forgoing overlap.
+- Their shared cache rises slightly with 8 actors (61.6% vs 58.5% hit rate) — real but small;
+  with dirichlet noise on (real training) it would be lower.
+- **Kernel-version footnote applies here too**: on current torch 2.13 reinfors does 91 us/row
+  (2.13's small-batch regression persists at batch-8) and lands at ~197 moves/s — tied with
+  their best configuration. At matched kernel generations reinfors leads ~1.8x.
+
+Fair reading: on a single CPU node with homogeneous rollouts, lockstep pooling + a thin
+flat-buffer seam beats the async batcher by ~1.8x at matched kernels — for reasons that are
+about marshaling design, not language or architecture-of-parallelism. The async design's real
+advantages (search/inference overlap, heterogeneous/remote actors, GPU inference server) are
+out of scope of this single-node benchmark and are expected to dominate in that topology.
+
 ## Summary of findings
 
 The investigation arc: the headline tables above (kept for the record) suggested reinfors
@@ -187,9 +225,14 @@ engineering. What survives:
    resnet (431 vs 309 us/forward) — an upstream small-batch regression worth knowing about
    independent of this benchmark.
 
-7. **Open item**: the parallel comparison (reinfors n_games=8 lockstep pooling vs their
-   8-actor 1ms-deadline async batcher) has NOT yet had the same treatment; the parallel
-   headline rows above are net-confounded and should not be quoted until redone matched.
+7. **Parallel (now measured, matched)**: both designs form full batch-8 batches — batch
+   formation is a tie, the convoy hypothesis was wrong. reinfors' ~1.8x parallel win at matched
+   kernels comes from marshaling design: their inference wrapper costs ~133 us per ROW (scales
+   with batch, capping amortization at 3.2x); reinfors' flat-buffer seam is per-CALL, giving
+   full 6.2x amortization. Their intra-op oversubscription adds ~25% (reinfors' lockstep
+   sidesteps it by idling workers during the forward). On current torch 2.13 the frameworks tie
+   (~197 vs ~200 moves/s); the async design's genuine advantages (overlap, remote actors, GPU
+   server topology) are out of this benchmark's scope.
 
 This mirrors the companion finding (in the reinfors repo) that reinfors' own fully-fused Rust
 training path buys ~0.5-3% over the Python callback: the boundary everyone designs to avoid —

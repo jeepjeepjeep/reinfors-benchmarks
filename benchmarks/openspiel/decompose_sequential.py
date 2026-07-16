@@ -27,10 +27,10 @@ from common import AZResnetReplica, ZeroNet, seed_all  # noqa: E402
 NETS = {"replica": AZResnetReplica, "zero": ZeroNet}
 
 
-def run_reinfors(net_name: str, device: str, n_records: int) -> None:
+def run_reinfors(net_name: str, device: str, n_records: int, n_games: int = 1) -> None:
     seed_all()
     net = NETS[net_name](in_channels=2).to(device).eval()
-    engine = build_engine(n_games=1)
+    engine = build_engine(n_games=n_games)
     infer = make_infer(net, device)
     engine.collect(min(500, n_records), infer)  # warmup
     t0 = time.perf_counter()
@@ -38,7 +38,7 @@ def run_reinfors(net_name: str, device: str, n_records: int) -> None:
     wall = time.perf_counter() - t0
     tel = batch[len(batch) - 1]
     moves, fwds, net_s = int(tel["decisions"]), int(tel["infer_calls"]), float(tel["infer_seconds"])
-    print(f"reinfors [{net_name} net, {device}, torch {torch.__version__}]:")
+    print(f"reinfors [{net_name} net, {device}, torch {torch.__version__}, n_games={n_games}]:")
     print(f"  moves/s        {moves / wall:8.1f}")
     print(f"  forwards/move  {fwds / moves:8.1f}   (rows/call {tel['infer_rows'] / fwds:.2f})")
     print(f"  us/forward     {net_s / fwds * 1e6:8.1f}   (net {net_s / wall * 100:.1f}% of wall)")
@@ -83,12 +83,13 @@ def main() -> None:
     r.add_argument("--net", choices=list(NETS), default="replica")
     r.add_argument("--device", default="cpu")
     r.add_argument("--records", type=int, default=2000)
+    r.add_argument("--n-games", type=int, default=1)
     p = sub.add_parser("parse-az")
     p.add_argument("stdout_file")
     p.add_argument("logdir")
     args = ap.parse_args()
     if args.cmd == "reinfors":
-        run_reinfors(args.net, args.device, args.records)
+        run_reinfors(args.net, args.device, args.records, args.n_games)
     else:
         parse_az(args.stdout_file, args.logdir)
 
