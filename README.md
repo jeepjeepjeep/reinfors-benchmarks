@@ -108,3 +108,37 @@ Reading notes:
 - macOS caveat: their libtorch path is CPU-only (no MPS device exists in it); reinfors' callback
   can use any device torch supports. On CUDA hardware their batcher may fare better — this table
   is Apple-silicon CPU only.
+
+### Sequential decomposition (1 game / 1 actor) — variables removed one at a time
+
+The headline tables above conflate several variables. Removing them (identical net — an exact
+torch replica of their resnet(32,1) incl. BatchNorm and both heads; kernels pinned to their
+libtorch 2.3 generation; dirichlet noise off; their evaluator instrumented for
+requests/cache-hits/forwards/forward-time):
+
+| config (identical net) | moves/s | forwards/move | us/forward | engine us/move |
+|---|---|---|---|---|
+| reinfors, torch 2.13 (python) | 41.8 | 55.3 | 431 | 66 |
+| reinfors, torch 2.3.0 (python) | 58.3 | 55.3 | 309 | 58 |
+| open_spiel C++ AZ (libtorch 2.3), cache on | 61.9 | 30.5 (58% hit rate) | 526 | 133 |
+| open_spiel C++ AZ (libtorch 2.3), cache off | 26.7 | 70.5 | 523 | ~130-500 (noise) |
+| reinfors, near-zero net | 1187 | 56.9 | 14 | 31 |
+| open_spiel C++ AZ, near-zero net (tiny mlp) | 103 | 71.9 | 133 | 164 |
+
+**Conclusion: at truly matched settings the two frameworks are at sequential parity
+(58.3 vs 61.9 moves/s)**, via two offsetting differences:
+
+1. Their evaluator has a transposition/LRU cache (~2.3x fewer real forwards in connect4
+   early self-play). reinfors has no eval cache and pays every leaf.
+2. Their per-forward cost is ~1.6x higher: a fixed ~133 us/call on the libtorch C++ inference
+   path (input assembly, dispatch, output unpacking — measured with a near-zero net) vs ~14 us
+   for reinfors' whole numpy->pyo3->python-torch callback round trip. Kernel time proper is
+   similar (same ATen generation).
+
+Both engines are negligible sequentially (reinfors ~31-66 us/move, theirs ~130-160 us/move; 1-2%
+of wall). The earlier headline gaps decompose as: sequential 2.2x = net-architecture choice
+(their BN-heavy resnet is ~3x costlier at batch-1 than this benchmark's plain trunk) and NOT
+engine efficiency; the kernel-version confound was real but ran AGAINST reinfors (torch 2.13 is
+~40% slower than 2.3 at batch-1 on this net); the n_games=8 headline row remains to be redone
+net-matched before the parallel comparison can be interpreted (async 1ms-deadline batcher vs
+lockstep pooling).

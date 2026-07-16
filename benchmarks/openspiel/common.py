@@ -112,3 +112,54 @@ def report(label: str, wall: float, moves: int, evals: int, net_seconds: float, 
 def seed_all() -> None:
     np.random.seed(SEED)
     torch.manual_seed(SEED)
+
+
+class AZResnetReplica(nn.Module):
+    """Exact torch mirror of open_spiel alpha_zero_torch's resnet(width=32, depth=1) — input
+    conv+BN, one residual block, and BOTH output heads (value computed and discarded; policy
+    logits returned as the Q output, with the same masking op). Used to remove net architecture
+    as a variable in the sequential decomposition. BN eps/momentum match their model.cc."""
+
+    def __init__(self, in_channels: int, h: int = 6, w: int = 7) -> None:
+        super().__init__()
+        self.in_channels = in_channels
+        c = TRUNK_CHANNELS
+        bn = dict(eps=0.001, momentum=0.01)
+        self.in_conv = nn.Conv2d(in_channels, c, 3, padding=1)
+        self.in_bn = nn.BatchNorm2d(c, **bn)
+        self.res_conv1 = nn.Conv2d(c, c, 3, padding=1)
+        self.res_bn1 = nn.BatchNorm2d(c, **bn)
+        self.res_conv2 = nn.Conv2d(c, c, 3, padding=1)
+        self.res_bn2 = nn.BatchNorm2d(c, **bn)
+        self.value_conv = nn.Conv2d(c, 1, 1)
+        self.value_bn = nn.BatchNorm2d(1, **bn)
+        self.value_l1 = nn.Linear(h * w, c)
+        self.value_l2 = nn.Linear(c, 1)
+        self.policy_conv = nn.Conv2d(c, 2, 1)
+        self.policy_bn = nn.BatchNorm2d(2, **bn)
+        self.policy_lin = nn.Linear(2 * h * w, CONNECT4_ACTIONS)
+        self.register_buffer("mask", torch.ones(1, CONNECT4_ACTIONS, dtype=torch.bool))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = torch.relu(self.in_bn(self.in_conv(x)))
+        y = torch.relu(self.res_bn1(self.res_conv1(x)))
+        y = self.res_bn2(self.res_conv2(y))
+        x = torch.relu(x + y)
+        v = torch.relu(self.value_bn(self.value_conv(x))).flatten(1)
+        _ = torch.tanh(self.value_l2(torch.relu(self.value_l1(v))))  # computed, discarded
+        p = torch.relu(self.policy_bn(self.policy_conv(x))).flatten(1)
+        p = self.policy_lin(p)
+        p = torch.where(self.mask, p, torch.full_like(p, -65536.0))
+        return p.reshape(-1, 1, CONNECT4_ACTIONS)
+
+
+class ZeroNet(nn.Module):
+    """Near-free net (single 7-out linear on 3 inputs) — engine-cost isolation."""
+
+    def __init__(self, in_channels: int) -> None:
+        super().__init__()
+        self.in_channels = in_channels
+        self.lin = nn.Linear(3, CONNECT4_ACTIONS)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.lin(x.flatten(1)[:, :3]).reshape(-1, 1, CONNECT4_ACTIONS)
