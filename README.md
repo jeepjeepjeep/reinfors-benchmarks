@@ -77,3 +77,34 @@ Reading notes:
   cpu. This — not the boundary — is the structural advantage: batching across parallel games.
 - The tiny trunk + small batches keep the GPU (mps) uncompetitive on both sides; that is a
   property of the workload, not of either framework.
+
+### C++ libtorch AlphaZero (all-native path) — 2026-07-16, same machine
+
+`alpha_zero_torch_example` at the pinned commit (see scripts/setup_openspiel_cpp.sh), connect4,
+64 sims/move, uct_c 1.4, `--nn_model resnet --nn_width 32 --nn_depth 1`, evaluators off; ~2-3 min
+runs, learner idle (buffer filling), so this is pure self-play data generation. moves/s parsed
+from the actor logs' per-game timestamps.
+
+| config | moves/s | trunk-normalized* |
+|---|---|---|
+| open_spiel C++ AZ, 1 actor | 60 | ~98 |
+| open_spiel C++ AZ, 8 actors, inference_batch_size 8 | 144 | ~235 |
+| (reinfors + torch callback [cpu], n_games=1, from above) | 132 | 132 |
+| (reinfors + torch callback [cpu], n_games=8, from above) | 544 | 544 |
+
+*their resnet(32,1) torso is 810k MACs/row vs this benchmark's 497k trunk (1.63x) — no exactly
+matching torso exists on both sides, so the normalized column scales their moves/s by 1.63 as if
+net cost were the whole story (it is ~85-99% of wall on the python side, unmeasured in theirs).
+Treat it as an upper bound on their adjusted throughput.
+
+Reading notes:
+- **moves/s at matched sims/move is the metric here** — the C++ AZ does not log its net-forward
+  count (it also runs a 262k-entry inference cache, which only helps it).
+- Even trunk-normalized, reinfors' callback path at n_games=8 is **~2.3x** their all-native
+  batched path (8 actors); sequential vs sequential it is ~1.3-2.2x.
+- Their AZ self-play adds dirichlet noise + temperature (algorithmic difference, negligible for
+  throughput). Their 8-actor mode uses 8 threads + an async inference batcher; reinfors' engine
+  is single-threaded, pooling requests into one torch call — fewer cores for more throughput.
+- macOS caveat: their libtorch path is CPU-only (no MPS device exists in it); reinfors' callback
+  can use any device torch supports. On CUDA hardware their batcher may fare better — this table
+  is Apple-silicon CPU only.
