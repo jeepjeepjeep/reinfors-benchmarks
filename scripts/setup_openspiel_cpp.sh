@@ -30,6 +30,12 @@ fi
 cd open_spiel
 git checkout -q "$OPEN_SPIEL_COMMIT"
 
+# benchmark instrumentation: request/cache/forward counters in VPNetEvaluator ([inst] stderr
+# lines, parsed by decompose_sequential.py). Idempotent.
+if git apply --check ../../scripts/instrument_vpevaluator.patch 2>/dev/null; then
+  git apply ../../scripts/instrument_vpevaluator.patch
+fi
+
 # fetches abseil/json/... plus (with the flags above) libtorch and libnop; cached + resumable
 ./install.sh
 

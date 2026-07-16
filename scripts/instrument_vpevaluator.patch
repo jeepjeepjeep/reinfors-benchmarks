@@ -1,0 +1,93 @@
+diff --git a/open_spiel/algorithms/alpha_zero_torch/vpevaluator.cc b/open_spiel/algorithms/alpha_zero_torch/vpevaluator.cc
+index e1e4c729..dc6ddb66 100644
+--- a/open_spiel/algorithms/alpha_zero_torch/vpevaluator.cc
++++ b/open_spiel/algorithms/alpha_zero_torch/vpevaluator.cc
+@@ -14,7 +14,9 @@
+ 
+ #include "open_spiel/algorithms/alpha_zero_torch/vpevaluator.h"
+ 
++#include <chrono>
+ #include <cstdint>
++#include <cstdio>
+ #include <memory>
+ 
+ #include "open_spiel/abseil-cpp/absl/hash/hash.h"
+@@ -88,6 +90,17 @@ VPNetModel::InferenceOutputs VPNetEvaluator::Inference(const State& state) {
+   VPNetModel::InferenceInputs inputs = {state.LegalActions(),
+                                         state.ObservationTensor()};
+ 
++  int64_t req = ++inst_requests_;
++  if (req % 8192 == 0) {
++    fprintf(stderr,
++            "[inst] req=%lld hits=%lld fwd=%lld rows=%lld fwd_ms=%.1f\n",
++            static_cast<long long>(req),
++            static_cast<long long>(inst_cache_hits_.load()),
++            static_cast<long long>(inst_forwards_.load()),
++            static_cast<long long>(inst_forward_rows_.load()),
++            inst_forward_ns_.load() / 1e6);
++  }
++
+   uint64_t key;
+   int cache_shard;
+   if (!cache_.empty()) {
+@@ -96,12 +109,19 @@ VPNetModel::InferenceOutputs VPNetEvaluator::Inference(const State& state) {
+     absl::optional<const VPNetModel::InferenceOutputs> opt_outputs =
+         cache_[cache_shard]->Get(key);
+     if (opt_outputs) {
++      ++inst_cache_hits_;
+       return *opt_outputs;
+     }
+   }
+   VPNetModel::InferenceOutputs outputs;
+   if (batch_size_ <= 1) {
++    auto t0 = std::chrono::steady_clock::now();
+     outputs = device_manager_.Get(1)->Inference(std::vector{inputs})[0];
++    inst_forward_ns_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
++                            std::chrono::steady_clock::now() - t0)
++                            .count();
++    ++inst_forwards_;
++    ++inst_forward_rows_;
+   } else {
+     std::promise<VPNetModel::InferenceOutputs> prom;
+     std::future<VPNetModel::InferenceOutputs> fut = prom.get_future();
+@@ -148,8 +168,14 @@ void VPNetEvaluator::Runner() {
+       batch_size_hist_.Add(inputs.size());
+     }
+ 
++    auto t0 = std::chrono::steady_clock::now();
+     std::vector<VPNetModel::InferenceOutputs> outputs =
+         device_manager_.Get(inputs.size())->Inference(inputs);
++    inst_forward_ns_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
++                            std::chrono::steady_clock::now() - t0)
++                            .count();
++    ++inst_forwards_;
++    inst_forward_rows_ += inputs.size();
+     for (int i = 0; i < promises.size(); ++i) {
+       promises[i]->set_value(outputs[i]);
+     }
+diff --git a/open_spiel/algorithms/alpha_zero_torch/vpevaluator.h b/open_spiel/algorithms/alpha_zero_torch/vpevaluator.h
+index b344ce76..a22add35 100644
+--- a/open_spiel/algorithms/alpha_zero_torch/vpevaluator.h
++++ b/open_spiel/algorithms/alpha_zero_torch/vpevaluator.h
+@@ -15,6 +15,7 @@
+ #ifndef OPEN_SPIEL_ALGORITHMS_ALPHA_ZERO_TORCH_VPEVALUATOR_H_
+ #define OPEN_SPIEL_ALGORITHMS_ALPHA_ZERO_TORCH_VPEVALUATOR_H_
+ 
++#include <atomic>  // benchmark instrumentation
+ #include <future>  // NOLINT
+ #include <vector>
+ 
+@@ -74,6 +75,13 @@ class VPNetEvaluator : public Evaluator {
+   absl::Mutex stats_m_;
+   open_spiel::BasicStats batch_size_stats_;
+   open_spiel::HistogramNumbered batch_size_hist_;
++
++  // benchmark instrumentation: request/cache/forward counters, dumped to stderr periodically
++  std::atomic<int64_t> inst_requests_{0};
++  std::atomic<int64_t> inst_cache_hits_{0};
++  std::atomic<int64_t> inst_forwards_{0};
++  std::atomic<int64_t> inst_forward_rows_{0};
++  std::atomic<int64_t> inst_forward_ns_{0};
+ };
+ 
+ }  // namespace torch_az

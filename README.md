@@ -142,3 +142,56 @@ engine efficiency; the kernel-version confound was real but ran AGAINST reinfors
 ~40% slower than 2.3 at batch-1 on this net); the n_games=8 headline row remains to be redone
 net-matched before the parallel comparison can be interpreted (async 1ms-deadline batcher vs
 lockstep pooling).
+
+## Summary of findings
+
+The investigation arc: the headline tables above (kept for the record) suggested reinfors
+handily beats both OpenSpiel paths. Removing confounds one at a time at 1 game/actor showed
+those gaps were dominated by variables that have nothing to do with either framework's
+engineering. What survives:
+
+1. **At truly matched settings, the frameworks are at sequential parity** (58.3 vs 61.9
+   moves/s). The supported claim is NOT "reinfors is faster than OpenSpiel"; it is: **the
+   Python-callback pipeline carries no systems penalty versus an all-native C++ pipeline.**
+
+2. **Per-forward fixed cost: 14 us (reinfors' numpy->pyo3->python-torch round trip) vs 133 us
+   (their libtorch C++ inference wrapper)** — measured with a near-zero net. Counterintuitive
+   but structural: at sub-millisecond kernel granularity the cost driver is copies, allocations,
+   locks and per-element extraction, not language. Their generic threaded evaluator API
+   (device loans, defensive copies, per-call mask construction, ActionsAndProbs unpacking,
+   cache writes under a lock) does more work per call than reinfors' raw
+   flat-buffer-in/values-out contract. Kernels proper are the same ATen either way.
+
+3. **Their evaluator LRU cache is their one genuine edge** — but ~50% of its measured 58.5% hit
+   rate refunds their own interface's Prior()/Evaluate() double-call per leaf (cache-off run:
+   70.5 forwards/move = 2x unique leaves). The transferable part (within-search transpositions,
+   cross-move reuse absent tree reuse, cross-game repeats) is worth ~10-20% in
+   transposition-rich games like connect4, ~nothing in games whose states rarely repeat. It is
+   sound in training because the learner clears the cache on every weight update
+   (alpha_zero.cc: LoadCheckpoint then ClearCache each learn step). An optional infer-seam LRU
+   in reinfors would capture the same; an AZ-style planner in reinfors should keep a
+   one-forward-per-leaf contract (priors+value from one call), starting where their cached path
+   ends without any cache.
+
+4. **Both engines (game sim + tree ops) are negligible** sequentially: 1-2% of wall each.
+   OpenSpiel's generic virtual-dispatch State API is NOT a bottleneck at this granularity;
+   neither is reinfors' Rust core the source of its throughput.
+
+5. **Algorithm comparability caveat**: PUCT-with-priors (their AZ) vs value-only UCT (reinfors'
+   Mcts) makes end-to-end moves/s an algorithm-confounded metric; sample efficiency and
+   strength-per-simulation are out of scope by design. The decomposition quantities
+   (us/forward, fixed cost/call, engine us/move) are algorithm-independent; forwards/move is
+   algorithm-dependent and reported separately with causes named.
+
+6. **Version footnote**: python torch 2.13 is ~40% slower than 2.3 at batch-1 on the BN-heavy
+   resnet (431 vs 309 us/forward) — an upstream small-batch regression worth knowing about
+   independent of this benchmark.
+
+7. **Open item**: the parallel comparison (reinfors n_games=8 lockstep pooling vs their
+   8-actor 1ms-deadline async batcher) has NOT yet had the same treatment; the parallel
+   headline rows above are net-confounded and should not be quoted until redone matched.
+
+This mirrors the companion finding (in the reinfors repo) that reinfors' own fully-fused Rust
+training path buys ~0.5-3% over the Python callback: the boundary everyone designs to avoid —
+Python in the loop — is cheap when calls are pooled; the costs that matter live in batch
+formation, per-call plumbing, and redundant forwards.
