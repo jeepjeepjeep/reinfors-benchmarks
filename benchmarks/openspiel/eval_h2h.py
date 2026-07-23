@@ -69,6 +69,9 @@ def play_one(rf_ckpt_net: AZResnetReplica, os_path: str, os_ckpt: int, our_playe
         "--player1", p1, "--player2", p2,
         "--az_path", os_path, "--az_checkpoint", str(os_ckpt),
         "--max_simulations", str(sims), "--uct_c", str(uct_c),
+        # solver OFF: their game_example defaults --solve=true, which bolts an exact MCTS-Solver
+        # onto their az bot — no longer net-vs-net (it converts every provable tactic perfectly).
+        "--solve=false",
         "--num_games", "1", "--quiet=false", "--seed", str(seed),
     ]
     proc = subprocess.Popen(
