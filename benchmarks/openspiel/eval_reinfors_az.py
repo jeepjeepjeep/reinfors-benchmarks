@@ -107,7 +107,7 @@ def rollout(state: C4, rng: random.Random) -> float:
 
 
 def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
-           net: AZResnetReplica | None, rollouts: int) -> int:
+           net: AZResnetReplica | None, rollouts: int, return_visits: bool = False) -> int | list[int]:
     """One move's search. net=None -> vanilla UCT with `rollouts` random playouts per leaf
     (their RandomRolloutEvaluator); net set -> PUCT with net priors + value (their az bot)."""
 
@@ -164,6 +164,8 @@ def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
             parent.value_sum[action] += v
             parent.visits[action] += 1
             value = v
+    if return_visits:
+        return root.visits
     return max(range(COLS), key=lambda a: root.visits[a])
 
 
