@@ -77,6 +77,7 @@ def main() -> None:
     ap.add_argument("--n-games", type=int, default=8, help="parallel games (their --actors)")
     ap.add_argument("--collect-size", type=int, default=512, help="records per stream batch")
     ap.add_argument("--depth", default="none", help="stream depth: int | none")
+    ap.add_argument("--infer-cache", type=int, default=0, help="engine infer-cache entries (0 = off)")
     ap.add_argument("--checkpoint-every", type=float, default=60.0, help="seconds between checkpoints")
     args = ap.parse_args()
 
@@ -108,6 +109,7 @@ def main() -> None:
         rf.learners.AlphaZero(gamma=1.0),
         n_games=args.n_games,
         seed=args.seed,
+        infer_cache=args.infer_cache,
     )
 
     collector_net = copy.deepcopy(net)
@@ -131,6 +133,8 @@ def main() -> None:
     infer_calls = 0
     infer_rows = 0
     infer_seconds = 0.0
+    cache_hits = 0
+    cache_lookups = 0
     debt = 0.0
     next_ckpt = args.checkpoint_every
     net.train()
@@ -140,6 +144,7 @@ def main() -> None:
             batch = stream.next()
             with sync_lock:
                 collector_net.load_state_dict(net.state_dict())
+            engine.weights_updated()  # cache contract: entries from the old weights must not serve
             obs, pi, z = batch.obs, batch.policy_targets, batch.value_targets
             buffer.push(obs, pi, z)
             states += obs.shape[0]
@@ -147,6 +152,8 @@ def main() -> None:
             infer_calls += batch.telemetry["infer_calls"]
             infer_rows += batch.telemetry["infer_rows"]
             infer_seconds += batch.telemetry["infer_seconds"]
+            cache_hits += batch.telemetry["cache_hits"]
+            cache_lookups += batch.telemetry["cache_lookups"]
             if buffer.size < args.batch_size:
                 continue
             # their pacing: reuse learn-passes per state -> one step per batch_size/reuse new states
@@ -196,6 +203,8 @@ def main() -> None:
             f"{infer_rows / wall:.0f} rows/s)  rows/state {infer_rows / states:.1f}  "
             f"net share {infer_seconds / wall * 100:.0f}%"
         )
+        if cache_lookups:
+            print(f"  cache: {cache_hits}/{cache_lookups} hits ({cache_hits / cache_lookups * 100:.0f}%)")
 
 
 if __name__ == "__main__":
