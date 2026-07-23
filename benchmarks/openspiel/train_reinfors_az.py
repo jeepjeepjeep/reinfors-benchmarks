@@ -128,6 +128,9 @@ def main() -> None:
     deadline = t0 + args.minutes * 60.0
     states = 0
     steps = 0
+    infer_calls = 0
+    infer_rows = 0
+    infer_seconds = 0.0
     debt = 0.0
     next_ckpt = args.checkpoint_every
     net.train()
@@ -140,6 +143,10 @@ def main() -> None:
             obs, pi, z = batch.obs, batch.policy_targets, batch.value_targets
             buffer.push(obs, pi, z)
             states += obs.shape[0]
+            # engine-side net telemetry: rows = forwards (no cache), calls = pooled batches
+            infer_calls += batch.telemetry["infer_calls"]
+            infer_rows += batch.telemetry["infer_rows"]
+            infer_seconds += batch.telemetry["infer_seconds"]
             if buffer.size < args.batch_size:
                 continue
             # their pacing: reuse learn-passes per state -> one step per batch_size/reuse new states
@@ -166,6 +173,9 @@ def main() -> None:
                             "policy_loss": float(policy_loss.item()),
                             "value_loss": float(value_loss.item()),
                             "pending": stream.pending(),
+                            "infer_calls": infer_calls,
+                            "infer_rows": infer_rows,
+                            "infer_seconds": infer_seconds,
                         }
                     )
                     + "\n"
@@ -180,6 +190,12 @@ def main() -> None:
         f"done: {wall:.0f}s  states {states} ({states / wall:.0f}/s)  learn steps {steps} "
         f"({steps / wall:.2f}/s)"
     )
+    if states:
+        print(
+            f"  infer: {infer_rows} rows in {infer_calls} calls ({infer_rows / max(infer_calls, 1):.2f} rows/call, "
+            f"{infer_rows / wall:.0f} rows/s)  rows/state {infer_rows / states:.1f}  "
+            f"net share {infer_seconds / wall * 100:.0f}%"
+        )
 
 
 if __name__ == "__main__":
