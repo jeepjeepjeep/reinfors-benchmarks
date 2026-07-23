@@ -18,16 +18,16 @@ prior+value evaluator), so playing strength and sample efficiency are out of sco
 
 Requires a local reinfors checkout as a sibling directory (until reinfors is published).
 
-```bash
-# 1. build the reinfors wheel (from the reinfors repo, using ITS venv's maturin — not uv;
-#    `maturin build` writes only to the -o dir and never touches the source tree's .so)
-cd ../reinfors
-.venv/bin/maturin build --release --features nn-metal,nn-accelerate -o ../reinfors-benchmarks/wheels
+**Canonical env: `.venv23` (torch 2.3.0).** It matches the libtorch generation OpenSpiel's C++ AZ
+pins (2.3.0) and measured ~1.29× faster than torch 2.13 on this small-net CPU workload — so all
+current and future runs use it. `.venv` (torch 2.13) is kept only to reproduce the older
+kernel-skew ablation rows below.
 
-# 2. create this repo's env and install everything
+```bash
+# 1. install reinfors (release build) straight into the canonical env
+cd ../reinfors
+VIRTUAL_ENV=../reinfors-benchmarks/.venv23 uvx maturin develop --release -m crates/reinfors-py/Cargo.toml
 cd ../reinfors-benchmarks
-uv sync
-uv pip install wheels/reinfors-*.whl
 ```
 
 ## Run
