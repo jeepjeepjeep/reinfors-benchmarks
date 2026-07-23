@@ -127,7 +127,10 @@ def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
         # select
         while True:
             if node.state.done:
-                value = 0.0 if node.state.winner == -1 else -1.0  # mover at a terminal has lost
+                # C4.play does NOT flip the turn on a terminal move, so at a terminal `turn` is the
+                # mover who ended the game: winner == turn for a win, != turn for a full-column loss.
+                w = node.state.winner
+                value = 0.0 if w == -1 else (1.0 if w == node.state.turn else -1.0)
                 break
             total = sum(node.visits)
             if net is None:
@@ -151,7 +154,8 @@ def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
                 child = Node(child_state)
                 node.children[a] = child
                 if child_state.done:
-                    value = 0.0 if child_state.winner == -1 else -1.0
+                    w = child_state.winner
+                    value = 0.0 if w == -1 else (1.0 if w == child_state.turn else -1.0)
                 else:
                     value = evaluate(child)
                 node = child

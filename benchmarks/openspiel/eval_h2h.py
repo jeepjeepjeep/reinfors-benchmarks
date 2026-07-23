@@ -61,7 +61,7 @@ def our_move(state: C4, net: AZResnetReplica, sims: int, uct_c: float, ply: int,
 
 
 def play_one(rf_ckpt_net: AZResnetReplica, os_path: str, os_ckpt: int, our_player: int,
-             sims: int, uct_c: float, opening_plies: int, seed: int) -> float:
+             sims: int, our_sims: int, uct_c: float, opening_plies: int, seed: int) -> float:
     """Returns our score for one game (1 win / 0.5 draw / 0 loss)."""
     p1, p2 = ("human", "az") if our_player == 0 else ("az", "human")
     cmd = [
@@ -86,7 +86,7 @@ def play_one(rf_ckpt_net: AZResnetReplica, os_path: str, os_ckpt: int, our_playe
     try:
         # If we open, submit before reading (their HumanBot blocks on stdin first).
         if state.turn == our_player:
-            col = our_move(state, rf_ckpt_net, sims, uct_c, ply, opening_plies, rng)
+            col = our_move(state, rf_ckpt_net, our_sims, uct_c, ply, opening_plies, rng)
             proc.stdin.write(f"{marks[our_player]}{col}\n")
             proc.stdin.flush()
             submitted = True
@@ -98,7 +98,7 @@ def play_one(rf_ckpt_net: AZResnetReplica, os_path: str, os_ckpt: int, our_playe
                 ply += 1
                 submitted = False
                 if not state.done and state.turn == our_player:
-                    col = our_move(state, rf_ckpt_net, sims, uct_c, ply, opening_plies, rng)
+                    col = our_move(state, rf_ckpt_net, our_sims, uct_c, ply, opening_plies, rng)
                     proc.stdin.write(f"{marks[our_player]}{col}\n")
                     proc.stdin.flush()
                     submitted = True
@@ -120,7 +120,8 @@ def main() -> None:
     ap.add_argument("os_path")
     ap.add_argument("--os-checkpoint", type=int, required=True)
     ap.add_argument("--games", type=int, default=50)
-    ap.add_argument("--sims", type=int, default=64)
+    ap.add_argument("--sims", type=int, default=64, help="their az bot's simulations")
+    ap.add_argument("--our-sims", type=int, default=None, help="our side's simulations (default: same)")
     ap.add_argument("--uct-c", type=float, default=2.0)
     ap.add_argument("--opening-plies", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
@@ -135,8 +136,8 @@ def main() -> None:
     for g in range(args.games):
         s = play_one(
             net, args.os_path, args.os_checkpoint, our_player=g % 2,
-            sims=args.sims, uct_c=args.uct_c, opening_plies=args.opening_plies,
-            seed=args.seed + g,
+            sims=args.sims, our_sims=args.our_sims or args.sims, uct_c=args.uct_c,
+            opening_plies=args.opening_plies, seed=args.seed + g,
         )
         score += s
         wins += s == 1.0
