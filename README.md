@@ -320,3 +320,43 @@ skew. With the cache implemented in reinfors core and kernels pinned, **reinfors
 outright** while keeping its 0.85 head-to-head strength win and tighter weight-sync cadence.
 (Conditions: fresh nets, 4-min legs, one seed — the longer round should confirm at trained-net
 reuse rates.)
+
+## AlphaZero training comparison — 2h matched-cadence round (2026-07-23, Apple silicon)
+
+The definitive round: 2h/side, one seed, cache ON both (262,144 entries), torch/libtorch 2.3.0,
+CPU, matched net (resnet 32×1) + search (64 sims, c=2, ε=0.25/α=0.3, temp-drop 10) + learner
+(replay 65,536, batch 1,024, reuse 3, lr 1e-4) knobs, and **matched refresh cadence**: one weight
+refresh + cache clear per `replay_buffer_size/reuse = 21,845` collected states on both sides
+(their learner's own outer-step pacing; ours via `--collect-size 21845`). Launcher:
+`scripts/run_round_matched.sh`. reinfors ran the merged Evaluator build (engine-level cache,
+`weights_updated` contract).
+
+| | reinfors | open_spiel C++ AZ |
+|---|---|---|
+| states/s (2h avg) | **298** | 162 |
+| total states | 2,142,558 | 1,158,506 |
+| SGD steps (reuse≈3 both) | 6,220 | ~3,400 |
+| cache hit rate | 71% | 66% (65.7% overall) |
+| net rows/state | 15.2 | — |
+| net share of wall | 97% | — |
+
+**Head-to-head (final nets, 64 sims both, solver off, opening sampling): reinfors 43W 0D 7L —
+score 0.86** (`results/h2h_120.txt`).
+
+Reading:
+- **The cadence-matching answered the quick round's open question.** Round 1 left "reinfors
+  refreshes more often" as a candidate explanation for its 0.85 h2h win. With refresh + cache-clear
+  cadence structurally equalized, the strength edge is unchanged (0.86) — the edge is not a
+  staleness artifact.
+- **Cache-clear cadence is a big throughput lever.** Clearing once per 21,845 states (vs per
+  512-record stream batch in round 1) lifted reinfors' hit rate from ~47% to **71%** and cut
+  rows/state to 15.2 — widening the throughput lead from 1.03× (round 1) to **1.85×**. Their side
+  also slowed vs round 1 (162 vs 182 states/s), consistent with full-replay-buffer outer steps
+  (~64 SGD passes) competing with actors for CPU over the longer run.
+- Cadence was matched **per states** (their pacing rule), which at unequal throughput means
+  unequal wall-clock intervals (~73s vs ~136s). This is the structural mirror of their pipeline,
+  not wall-clock synchronization.
+- Net verdict at matched algorithm + matched cadence + equal wall-clock: reinfors collects 1.85×
+  the states, takes 1.8× the SGD steps, and its net wins the head-to-head 0.86. Combined with
+  round 1 (fewer states, still 0.85), the equal-wall-clock strength advantage is robust in both
+  data regimes.
