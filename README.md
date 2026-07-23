@@ -287,3 +287,36 @@ MCTS-Solver (net-vs-solver, not net-vs-net); (2) a terminal-value sign bug in OU
 where both sides shared the search, exposed only by the cross-implementation match, diagnosed via
 an asymmetric-sims probe (4× sims failing to help ruled out a mere quality gap). Defaults and
 shared assumptions are confounds until enumerated.
+
+
+### Search-shape investigation + corrected attribution (2026-07-24, 4-min fresh-net legs)
+
+The quick round left a "1.28× search-shape" residual. Splitting their evaluator's Prior vs
+Evaluate counters resolved it: **the residual was an accounting artifact** (requests are E
+evaluations + P interior-expansion priors, not 2 x per leaf — P only fires when a node is first
+descended *through*, so frontier leaves never pay it). Measured anatomy, matched fresh-net
+conditions:
+
+| per state | open_spiel | reinfors |
+|---|---|---|
+| unique evaluations (E) | **60.2** | **52.6** (reinfors evaluates ~13% FEWER — more in-tree terminal hits, 11.4 vs 3.8 sims/move) |
+| interior priors (P) | 18.9 (always cache-refunded; zero edge) | — (no double-dip by construction) |
+| genuine cache reuse | 28.5 of E = **47%** (larger than the earlier ~23% estimate — same accounting error) | — |
+| effective rows/state | 31.7 | 52.6 uncached -> **32.6 with the new reinfors infer cache** |
+
+**With reinfors' infer cache (engine `infer_cache=` + `weights_updated()` contract, per-batch
+weight-sync honesty) the ledger closes:**
+
+| 4-min leg | rows/s | rows/state | states/s |
+|---|---|---|---|
+| reinfors, no cache, torch 2.13 | 6,681 | 52.6 | 127 |
+| reinfors, cache, torch 2.13 | 5,545 | 32.6 | 170 (**1.34× — as priced**) |
+| **reinfors, cache, torch 2.3** | 6,110 | 32.5 | **188** |
+| open_spiel (cache on, libtorch 2.3) | 5,773 | 31.7 | 182 |
+
+Corrected conclusion: OpenSpiel held **no structural search or systems advantage** — their edge
+was one feature (the eval cache, reuse-rate ~47% at fresh-net conditions) plus our kernel-version
+skew. With the cache implemented in reinfors core and kernels pinned, **reinfors leads states/s
+outright** while keeping its 0.85 head-to-head strength win and tighter weight-sync cadence.
+(Conditions: fresh nets, 4-min legs, one seed — the longer round should confirm at trained-net
+reuse rates.)
