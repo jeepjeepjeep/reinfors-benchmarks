@@ -238,3 +238,52 @@ This mirrors the companion finding (in the reinfors repo) that reinfors' own ful
 training path buys ~0.5-3% over the Python callback: the boundary everyone designs to avoid —
 Python in the loop — is cheap when calls are pooled; the costs that matter live in batch
 formation, per-call plumbing, and redundant forwards.
+
+
+## AlphaZero training comparison — quick round (2026-07-24, Apple silicon)
+
+Like-for-like AZ training: connect4, matched search knobs (64 sims, c_puct 2.0, noise 0.25/0.3,
+temperature 1.0 drop 10, cutoffs off), matched learner hyperparameters (buffer 65,536, batch 1,024,
+reuse 3, lr 1e-4, wd 1e-4), same resnet(32,1) torso, 8 actors ↔ n_games=8, single 30-minute run per
+stack (quick round: one seed — trends, not headlines).
+
+### Throughput identity: states/s = net-rows/s ÷ rows-per-state (15-min ablation legs)
+
+| | net rows/s | rows/state | states/s |
+|---|---|---|---|
+| reinfors, torch 2.13 | ~6,300 | 51.8 | 121 |
+| reinfors, torch 2.3.0 | **8,088** | 51.8 | 156 |
+| open_spiel, cache ON | 5,867 | **30.2** | 201 |
+| open_spiel, cache OFF | 5,885 | 80.8 | 80 |
+
+- **reinfors pushes 1.38× more net rows/s** at matched kernels (their row rate is identical cache
+  on/off — they are row-bound; the callback seam + pooled batching is the faster system).
+- **Their states/s lead is entirely rows-per-state**: cache-off exposes their Prior/Evaluate
+  double-call (80.8 rows/state). Of the cache's effect, 80.8→40.4 refunds their own double-call
+  (zero edge vs reinfors, which never pays it); **40.4→30.2 is genuine transposition reuse
+  (1.34×)** — the transferable edge, matching the earlier sequential-benchmark estimate. The
+  remaining 51.8-vs-40.4 (1.28×) is a search-shape difference (unique evaluations per move), not
+  caching.
+- **torch 2.13 → 2.3.0 is 1.29×** for reinfors (upstream small-batch regression, previously
+  measured; pin accordingly).
+
+### Strength (round-1 30-min checkpoints)
+
+| metric | reinfors net | open_spiel net |
+|---|---|---|
+| vs open_spiel python MCTSBot referee | **0.70** | — |
+| vs own-stack referee | 0.83 (py) | 0.52 (C++) |
+| **head-to-head, 50 games, 64 sims both, solver off** | **0.85 (38W 9D 3L)** | 0.15 |
+
+**The referee-free verdict: the reinfors-trained net beats the open_spiel-trained net 0.85 at
+equal wall-clock budget** — despite the open_spiel run generating ~1.9× the states and gradient
+steps. Learning-per-state strongly favors the reinfors pipeline (candidate causes: single-call π
+targets, legal-set priors, no double-call dilution — not yet isolated).
+
+Bench-archaeology notes (kept for honesty): the first h2h attempts scored 0.03/0.00 for reinfors —
+(1) their `game_example` defaults `--solve=true`, silently arming their az bot with an exact
+MCTS-Solver (net-vs-solver, not net-vs-net); (2) a terminal-value sign bug in OUR python search
+(turn does not flip on terminal moves) made it flee winning moves — invisible in referee evals
+where both sides shared the search, exposed only by the cross-implementation match, diagnosed via
+an asymmetric-sims probe (4× sims failing to help ruled out a mere quality gap). Defaults and
+shared assumptions are confounds until enumerated.
