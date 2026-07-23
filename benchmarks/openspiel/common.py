@@ -140,16 +140,23 @@ class AZResnetReplica(nn.Module):
         self.policy_lin = nn.Linear(2 * h * w, CONNECT4_ACTIONS)
         self.register_buffer("mask", torch.ones(1, CONNECT4_ACTIONS, dtype=torch.bool))
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def heads(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """One trunk pass -> (policy logits (N, A), tanh value (N,)) — the AZ training interface."""
         x = torch.relu(self.in_bn(self.in_conv(x)))
         y = torch.relu(self.res_bn1(self.res_conv1(x)))
         y = self.res_bn2(self.res_conv2(y))
         x = torch.relu(x + y)
         v = torch.relu(self.value_bn(self.value_conv(x))).flatten(1)
-        _ = torch.tanh(self.value_l2(torch.relu(self.value_l1(v))))  # computed, discarded
+        v = torch.tanh(self.value_l2(torch.relu(self.value_l1(v)))).squeeze(-1)
         p = torch.relu(self.policy_bn(self.policy_conv(x))).flatten(1)
         p = self.policy_lin(p)
         p = torch.where(self.mask, p, torch.full_like(p, -65536.0))
+        return p, v
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # value-family view (used by the sequential decomposition benchmark): policy logits as the
+        # (N, 1, A) Q layout, value computed in the same pass and discarded.
+        p, _v = self.heads(x)
         return p.reshape(-1, 1, CONNECT4_ACTIONS)
 
 
