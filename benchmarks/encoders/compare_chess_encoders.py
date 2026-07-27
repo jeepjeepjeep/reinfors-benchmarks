@@ -111,6 +111,12 @@ def train(args: argparse.Namespace) -> None:
             "policy_loss": round(ploss / nb, 4),
             "value_loss": round(vloss / nb, 4),
             "ep_len": round(float(np.mean([n for _, n, _ in eps])), 1) if eps else None,
+            # Authoritative cache metrics (Evaluator globals) — the hit-rate measurement.
+            "cache_hit_rate": round(t["cache_hits"] / t["cache_lookups"], 4) if t.get("cache_lookups") else None,
+            "cache_lookups": t.get("cache_lookups"),
+            "infer_rows": t.get("infer_rows"),
+            "infer_calls": t.get("infer_calls"),
+            # Tree simulation fates (search-local) — kept separately; NOT the cache hit rate.
             "fresh_rows": t.get("fresh_rows"),
             "hit_rows": t.get("hit_rows"),
         }
@@ -130,8 +136,12 @@ def load(run: str) -> tuple[ChessAzNet, str, object]:
 
 
 def h2h(args: argparse.Namespace) -> None:
-    """Lockstep envs (chess is deterministic): each net observes through ITS OWN encoder and
-    reads logits through ITS OWN action map; moves are exchanged as game-frame ids."""
+    """SEARCH-FREE POLICY-HEAD PROBE, not full AlphaZero strength: raw policy logits pick the
+    moves (value head and PUCT unused). Symmetric across the two nets, so it measures what the
+    representations taught the policy head at equal budget; a search-backed h2h needs per-net
+    search drivers and rides the cross-framework UCI referee work. Lockstep envs (chess is
+    deterministic): each net observes through ITS OWN encoder and reads logits through ITS OWN
+    action map; moves are exchanged as game-frame ids."""
     nets = [load(args.a), load(args.b)]
     rng = np.random.default_rng(0)
     score = [0.0, 0.0]
@@ -170,7 +180,11 @@ def h2h(args: argparse.Namespace) -> None:
             score[1] += 0.5
         print(f"game {g + 1}/{args.games}: score A={score[0]:.1f} B={score[1]:.1f}", flush=True)
     n = args.games
-    print(f"FINAL  A({args.a})={score[0]}/{n}  B({args.b})={score[1]}/{n}  B-score={score[1] / n:.3f}", flush=True)
+    print(
+        f"FINAL (policy-head probe, search-free)  A({args.a})={score[0]}/{n}  "
+        f"B({args.b})={score[1]}/{n}  B-score={score[1] / n:.3f}",
+        flush=True,
+    )
 
 
 def main() -> None:
