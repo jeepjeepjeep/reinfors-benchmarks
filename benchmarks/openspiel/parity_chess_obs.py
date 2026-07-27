@@ -59,7 +59,28 @@ def check_their_repetition_normalization() -> None:
     print(f"their repetition plane after recurrences: {rep_plane[0]} — formula (rep-1)/2 confirmed")
 
 
+DEAD_POSITION_TABLE = [
+    # (fen, dead?) — FIDE's dead-position rule; reinfors' predicate is pinned to the same table
+    # by its Rust tests (chess.rs::fide_dead_position_tests), so agreement here = cross parity.
+    ("8/8/4k3/8/8/3K4/8/8 w - - 0 1", True),
+    ("8/8/4k3/8/8/3KB3/8/8 w - - 0 1", True),
+    ("8/8/4kn2/8/8/3K4/8/8 w - - 0 1", True),
+    ("8/8/3bk3/8/8/3KB3/8/8 w - - 0 1", True),   # same-colored bishops
+    ("8/8/2bk4/8/8/3KB3/8/8 w - - 0 1", False),  # opposite-colored bishops
+    ("8/8/3nk3/8/8/2NK4/8/8 w - - 0 1", False),  # KN vs KN
+    ("8/8/4k3/8/8/2NKN3/8/8 w - - 0 1", False),  # KNN vs K
+]
+
+
+def check_dead_position_parity() -> None:
+    for fen, dead in DEAD_POSITION_TABLE:
+        got = GAME.new_initial_state(fen).is_terminal()
+        assert got == dead, f"pyspiel disagrees with the FIDE table at {fen}: {got}"
+    print(f"dead-position parity: {len(DEAD_POSITION_TABLE)} material boundaries agree")
+
+
 if __name__ == "__main__":
     n = compare_walk()
     check_their_repetition_normalization()
+    check_dead_position_parity()
     print(f"PARITY OK: {n} positions, 19/20 planes exact + repetition formula confirmed")
