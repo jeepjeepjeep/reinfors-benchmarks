@@ -360,3 +360,16 @@ Reading:
   the states, takes 1.8× the SGD steps, and its net wins the head-to-head 0.86. Combined with
   round 1 (fewer states, still 0.85), the equal-wall-clock strength advantage is robust in both
   data regimes.
+
+## Chess encoder measurement — absolute vs mover-relative (2026-07-27, Apple silicon CPU)
+
+Decision run for reinfors' default chess training encoder (`benchmarks/encoders/compare_chess_encoders.py`):
+45 min/side AZ self-play, identical net/knobs/seed, `MinimalChess` (absolute) vs `RelativeChess`
+(mover's frame, matching action view). Result: **no evidence for relative at this budget — absolute
+mildly ahead on every axis.** Records 394k vs 380k (~4% — σ-transform cost); late-half cache hit
+0.401 vs 0.352 (the predicted mirror-merging bonus NOT observed — outweighed, plausibly by
+per-perspective splitting of tail/eval observations that absolute encoding shares bytewise);
+policy loss 7.05→2.45 vs 7.16→2.54; value loss 0.0087 vs 0.0165; policy-head probe 20–20/40.
+Caveats: one seed, small net, search-free probe. Decision: `MinimalChess` stays the default;
+`RelativeChess` remains available. Revisit only with a longer multi-seed run if equivariance is
+suspected to pay at scale.
