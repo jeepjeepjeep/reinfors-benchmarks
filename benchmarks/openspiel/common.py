@@ -120,9 +120,10 @@ class AZResnetReplica(nn.Module):
     logits returned as the Q output, with the same masking op). Used to remove net architecture
     as a variable in the sequential decomposition. BN eps/momentum match their model.cc."""
 
-    def __init__(self, in_channels: int, h: int = 6, w: int = 7) -> None:
+    def __init__(self, in_channels: int, h: int = 6, w: int = 7, n_actions: int = CONNECT4_ACTIONS) -> None:
         super().__init__()
         self.in_channels = in_channels
+        self.n_actions = n_actions
         c = TRUNK_CHANNELS
         bn = dict(eps=0.001, momentum=0.01)
         self.in_conv = nn.Conv2d(in_channels, c, 3, padding=1)
@@ -137,8 +138,8 @@ class AZResnetReplica(nn.Module):
         self.value_l2 = nn.Linear(c, 1)
         self.policy_conv = nn.Conv2d(c, 2, 1)
         self.policy_bn = nn.BatchNorm2d(2, **bn)
-        self.policy_lin = nn.Linear(2 * h * w, CONNECT4_ACTIONS)
-        self.register_buffer("mask", torch.ones(1, CONNECT4_ACTIONS, dtype=torch.bool))
+        self.policy_lin = nn.Linear(2 * h * w, n_actions)
+        self.register_buffer("mask", torch.ones(1, n_actions, dtype=torch.bool))
 
     def heads(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """One trunk pass -> (policy logits (N, A), tanh value (N,)) — the AZ training interface."""
@@ -157,7 +158,7 @@ class AZResnetReplica(nn.Module):
         # value-family view (used by the sequential decomposition benchmark): policy logits as the
         # (N, 1, A) Q layout, value computed in the same pass and discarded.
         p, _v = self.heads(x)
-        return p.reshape(-1, 1, CONNECT4_ACTIONS)
+        return p.reshape(-1, 1, self.n_actions)
 
 
 class ZeroNet(nn.Module):

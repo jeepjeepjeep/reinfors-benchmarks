@@ -58,6 +58,7 @@ class ReplayBuffer:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--minutes", type=float, default=3.0)
+    ap.add_argument("--game", choices=["connect4", "chess"], default="connect4")
     ap.add_argument("--out", type=str, required=True, help="output dir (jsonl + checkpoints)")
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--seed", type=int, default=0)
@@ -87,10 +88,20 @@ def main() -> None:
     seed_all()
     torch.manual_seed(args.seed)
 
-    game = rf.games.Connect4()
+    if args.game == "chess":
+        # Their observation exactly (parity-gated OpenSpielChess encoder) and THEIR head width:
+        # 4674 = 4672 + their two dedicated castling actions. Our pi occupies slots 0..4671; the
+        # top two are dead — mirroring their own dead in-grid king-slide slots. Exact net-shape
+        # identity; index semantics stay native per framework (see the ledger).
+        game = rf.games.Chess(encoder=rf.encoders.OpenSpielChess(), max_ticks=None)
+        head_actions = 4674
+    else:
+        game = rf.games.Connect4()
+        head_actions = rf.games.Connect4().action_space().n
+    obs_c, obs_h, obs_w = game.observation_space().shape
     dim = int(np.prod(game.observation_space().shape))
     actions = game.action_space().n
-    net = AZResnetReplica(in_channels=2).to(args.device)
+    net = AZResnetReplica(in_channels=obs_c, h=obs_h, w=obs_w, n_actions=head_actions).to(args.device)
     # value head participates here (unlike the review benchmark where it was discarded)
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
@@ -101,8 +112,7 @@ def main() -> None:
         rf.policies.AlphaZero(
             num_simulations=args.sims,
             c_puct=args.c_puct,
-            noise_epsilon=args.noise_eps,
-            noise_alpha=args.noise_alpha,
+            noise=rf.noise.Dirichlet(epsilon=args.noise_eps, alpha=args.noise_alpha),
             temperature=1.0,
             temperature_drop=args.temperature_drop,
         ),
@@ -115,13 +125,15 @@ def main() -> None:
     collector_net = copy.deepcopy(net)
     collector_net.eval()
     sync_lock = threading.Lock()
-    c, h, w = 2, 6, 7
+    c, h, w = obs_c, obs_h, obs_w
 
     def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         with sync_lock, torch.no_grad():
             x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(args.device)
             logits, values = collector_net.heads(x)
-        return logits.cpu().double().numpy(), values.cpu().double().numpy()
+        # The engine's infer contract is (N, A) over the GAME's action space; a padded head
+        # (chess: 4674) is sliced back to the native width here.
+        return logits[:, :actions].cpu().double().numpy(), values.cpu().double().numpy()
 
 
     depth = None if str(args.depth).lower() in ("none", "inf") else int(args.depth)
@@ -163,6 +175,8 @@ def main() -> None:
                 bo, bp, bz = buffer.sample(args.batch_size)
                 x = torch.from_numpy(bo).reshape(-1, c, h, w).to(args.device)
                 target_pi = torch.from_numpy(bp).float().to(args.device)
+                if head_actions != actions:  # pad pi with zeros over the dead head slots
+                    target_pi = torch.nn.functional.pad(target_pi, (0, head_actions - actions))
                 target_z = torch.from_numpy(bz).float().to(args.device)
                 logits, values = net.heads(x)
                 policy_loss = -(target_pi * torch.log_softmax(logits, dim=-1)).sum(-1).mean()
