@@ -142,6 +142,8 @@ def bench_net(args, shape, head_actions, results) -> None:
 
 
 def bench_engine(args, game, head_actions, results) -> None:
+    import threading
+
     shape = game.observation_space().shape
     c, h, w = shape
     actions = game.action_space().n
@@ -149,55 +151,76 @@ def bench_engine(args, game, head_actions, results) -> None:
         if not device_ok(device):
             print(f"engine w{width} d{depth} [{device}]  SKIP (device unavailable)")
             continue
-        for n_games in args.n_games:
+        for n_games, engines in itertools.product(args.n_games, args.engines):
             seed_all()
             net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
 
             def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+                # Shared eval-mode net; concurrent forwards from several engine threads are
+                # the POINT when engines > 1 (one engine's CPU phase overlaps another's
+                # forward — a script-level approximation of the collect_async double-buffer).
                 with torch.no_grad():
                     x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(device)
                     logits, values = net.heads(x)
                 return logits[:, :actions].cpu().double().numpy(), values.cpu().double().numpy()
 
-            engine = rf.Engine(
-                game,
-                rf.Reward(win=1.0, loss=-1.0),
-                rf.policies.AlphaZero(
-                    num_simulations=args.sims,
-                    c_puct=args.c_puct,
-                    noise=rf.noise.Dirichlet(epsilon=0.25, alpha=0.3),
-                    temperature=1.0,
-                    temperature_drop=10,
-                ),
-                rf.learners.AlphaZero(gamma=1.0),
-                n_games=n_games,
-                seed=args.seed,
-                infer_cache=args.infer_cache,
-            )
-            engine.collect(args.warmup_records, infer)  # torch/device warmup outside the clock
+            def make_engine(idx: int) -> "rf.Engine":
+                return rf.Engine(
+                    game,
+                    rf.Reward(win=1.0, loss=-1.0),
+                    rf.policies.AlphaZero(
+                        num_simulations=args.sims,
+                        c_puct=args.c_puct,
+                        noise=rf.noise.Dirichlet(epsilon=0.25, alpha=0.3),
+                        temperature=1.0,
+                        temperature_drop=10,
+                    ),
+                    rf.learners.AlphaZero(gamma=1.0),
+                    n_games=n_games,
+                    seed=args.seed + idx,
+                    infer_cache=args.infer_cache,
+                )
+
+            engs = [make_engine(e) for e in range(engines)]
+            for eng in engs:
+                eng.collect(args.warmup_records, infer)  # torch/device warmup outside the clock
+
+            totals = [dict(rows=0, calls=0, decisions=0, records=0, net_seconds=0.0) for _ in engs]
+            deadline = time.perf_counter() + args.engine_leg_seconds
+
+            def run(eng, tot) -> None:
+                while time.perf_counter() < deadline:
+                    batch = eng.collect(args.chunk_records, infer)
+                    tel = batch.telemetry
+                    tot["rows"] += int(tel["infer_rows"])
+                    tot["calls"] += int(tel["infer_calls"])
+                    tot["decisions"] += int(tel["decisions"])
+                    tot["net_seconds"] += float(tel["infer_seconds"])
+                    tot["records"] += batch.obs.shape[0]
+
             t0 = time.perf_counter()
-            rows = calls = decisions = records = 0
-            net_seconds = 0.0
-            while time.perf_counter() - t0 < args.engine_leg_seconds:
-                batch = engine.collect(args.chunk_records, infer)
-                tel = batch.telemetry
-                rows += int(tel["infer_rows"])
-                calls += int(tel["infer_calls"])
-                decisions += int(tel["decisions"])
-                net_seconds += float(tel["infer_seconds"])
-                records += batch.obs.shape[0]
+            threads = [threading.Thread(target=run, args=(eng, tot)) for eng, tot in zip(engs, totals)]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
             wall = time.perf_counter() - t0
+            rows = sum(t["rows"] for t in totals)
+            calls = sum(t["calls"] for t in totals)
+            decisions = sum(t["decisions"] for t in totals)
+            net_seconds = sum(t["net_seconds"] for t in totals)  # summed thread-time, > wall when overlapping
             row = dict(
                 part="engine", game=args.game, width=width, depth=depth, device=device,
-                n_games=n_games, rows_s=rows / wall, moves_s=decisions / wall,
+                n_games=n_games, engines=engines, rows_s=rows / wall, moves_s=decisions / wall,
                 achieved_batch=rows / max(calls, 1), net_share=net_seconds / wall,
-                records=records, wall=wall, sims=args.sims, infer_cache=args.infer_cache,
+                records=sum(t["records"] for t in totals), wall=wall, sims=args.sims,
+                infer_cache=args.infer_cache,
             )
             results.append(row)
             print(
-                f"engine w{width:<4} d{depth} [{device:4}] n_games {n_games:<4} "
+                f"engine w{width:<4} d{depth} [{device:4}] {engines}x{n_games:<4} "
                 f"{row['rows_s']:>9.0f} rows/s  {row['moves_s']:>7.1f} moves/s  "
-                f"batch {row['achieved_batch']:>6.1f}  net {row['net_share'] * 100:5.1f}%"
+                f"batch {row['achieved_batch']:>6.1f}  net-thread {row['net_share'] * 100:5.1f}%"
             )
 
 
@@ -205,7 +228,7 @@ def verdict(results, args) -> None:
     """Per net config: the smallest batch / n_games where CUDA clears the threshold vs CPU."""
     print(f"\n--- verdict (cuda >= {args.gpu_threshold}x cpu rows/s) ---")
     for part, lever in (("net", "batch"), ("engine", "n_games")):
-        rows = [r for r in results if r["part"] == part]
+        rows = [r for r in results if r["part"] == part and r.get("engines", 1) == 1]
         for width, depth in itertools.product(args.widths, args.depths):
             by_dev: dict[str, dict[int, float]] = {}
             for r in rows:
@@ -228,7 +251,8 @@ def main() -> None:
     ap.add_argument("--widths", type=str, default="32,64,128")
     ap.add_argument("--depths", type=str, default="1,4")
     ap.add_argument("--batches", type=str, default="1,8,32,128,512", help="net part: rows per forward")
-    ap.add_argument("--n-games", type=str, default="1,8,32", help="engine part: parallel games")
+    ap.add_argument("--n-games", type=str, default="1,8,32", help="engine part: parallel games PER ENGINE")
+    ap.add_argument("--engines", type=str, default="1", help="engine part: concurrent engines (threads) sharing the net")
     ap.add_argument("--sims", type=int, default=64)
     ap.add_argument("--c-puct", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=0)
@@ -247,6 +271,7 @@ def main() -> None:
     args.depths = [int(x) for x in args.depths.split(",")]
     args.batches = [int(x) for x in args.batches.split(",")]
     args.n_games = [int(x) for x in args.n_games.split(",")]
+    args.engines = [int(x) for x in args.engines.split(",")]
 
     torch.set_num_threads(args.torch_threads)
     affinity = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else "n/a (macOS)"
