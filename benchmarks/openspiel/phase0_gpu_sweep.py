@@ -155,10 +155,34 @@ def bench_engine(args, game, head_actions, results) -> None:
             seed_all()
             net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
 
+            pin = (
+                torch.empty((n_games * max(engines, 1), c * h * w), pin_memory=True)
+                if args.callback == "fast" and device.startswith("cuda")
+                else None
+            )
+
             def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
                 # Shared eval-mode net; concurrent forwards from several engine threads are
                 # the POINT when engines > 1 (one engine's CPU phase overlaps another's
                 # forward — a script-level approximation of the collect_async double-buffer).
+                if args.callback == "fast":
+                    # Plumbing-only fast path (kernels identical; needs the PR #136 build):
+                    # inference_mode; pinned staging for the H2D; NO pre-transfer slice (the
+                    # binding accepts padded logits — a slice forces a device-side gather);
+                    # ONE packed D2H (logits+value), handed over with zero python slicing:
+                    # the packed array IS the padded logits, values ride as its last column.
+                    n = obs_batch.shape[0]
+                    with torch.inference_mode():
+                        src = torch.from_numpy(np.ascontiguousarray(obs_batch))
+                        if pin is not None and n <= pin.shape[0]:
+                            staging = pin[:n]
+                            staging.copy_(src.reshape(n, -1))
+                            x = staging.to(device, non_blocking=True).reshape(n, c, h, w)
+                        else:
+                            x = src.reshape(-1, c, h, w).to(device)
+                        logits, values = net.heads(x)
+                        packed = torch.cat([logits, values.unsqueeze(1)], dim=1).cpu().numpy()
+                    return packed, packed[:, -1]
                 with torch.no_grad():
                     x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(device)
                     logits, values = net.heads(x)
@@ -216,7 +240,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                 n_games=n_games, engines=engines, rows_s=rows / wall, moves_s=decisions / wall,
                 achieved_batch=rows / max(calls, 1), net_share=net_seconds / wall,
                 records=sum(t["records"] for t in totals), wall=wall, sims=args.sims,
-                infer_cache=args.infer_cache, infer_dtype=args.infer_dtype,
+                infer_cache=args.infer_cache, infer_dtype=args.infer_dtype, callback=args.callback,
             )
             results.append(row)
             print(
@@ -256,6 +280,7 @@ def main() -> None:
     ap.add_argument("--n-games", type=str, default="1,8,32", help="engine part: parallel games PER ENGINE")
     ap.add_argument("--engines", type=str, default="1", help="engine part: concurrent engines (threads) sharing the net")
     ap.add_argument("--infer-dtype", choices=["f64", "f32"], default="f64", help="callback output dtype (f32 needs the f32-contract build)")
+    ap.add_argument("--callback", choices=["legacy", "fast"], default="legacy", help="fast = inference_mode + pinned H2D + no slice + single packed D2H (needs the PR #136 build; implies f32)")
     ap.add_argument("--sims", type=int, default=64)
     ap.add_argument("--c-puct", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=0)
