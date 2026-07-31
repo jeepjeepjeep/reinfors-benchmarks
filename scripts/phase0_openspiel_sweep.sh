@@ -55,18 +55,17 @@ for device in $DEVICES; do
         for _ in $(seq 1 30); do kill -0 "$pid" 2>/dev/null || break; sleep 2; done
         kill -TERM "$pid" 2>/dev/null || true
         wait "$pid" 2>/dev/null || true
-        # Primary source: the learner's own shutdown summary (written on clean SIGINT close):
-        #   "Collected  N states from  G games, R states/s; ..."
-        # Fallback (unclean exit): count action tokens after "Actions:" in the actor logs —
-        # one token per ply, game-agnostic. Raw logs stay in $out for exact re-parsing.
-        collected=$(grep -h 'Collected' "$out"/log-learner.txt 2>/dev/null | tail -1)
-        if [[ -n "$collected" ]]; then
-          states=$(echo "$collected" | grep -oE 'Collected +[0-9]+' | grep -oE '[0-9]+')
-          echo "$tag  leg_s=$LEG_SECONDS  states_s=$(awk "BEGIN{printf \"%.1f\", $states/$LEG_SECONDS}")  theirs: ${collected#*] }" | tee -a "$SUMMARY"
-        else
-          plies=$(grep -h 'Actions:' "$out"/log-actor* 2>/dev/null | sed 's/.*Actions://' | wc -w)
-          echo "$tag  leg_s=$LEG_SECONDS  plies=$plies  states_s=$(awk "BEGIN{printf \"%.1f\", $plies/$LEG_SECONDS}")  (fallback: no learner summary)" | tee -a "$SUMMARY"
-        fi
+        # Primary metric: the instrumented evaluator's cumulative counters on stdout
+        # ("[inst] req=.. hits=.. fwd=.. rows=.."): rows/leg = net rows/s, the same metric as
+        # the reinfors sweep, and robust to games not finishing within the leg (chess CPU legs
+        # complete ZERO games). Learner "Collected" summary + ply count are appended when
+        # present. Every grep is no-match-safe: set -euo pipefail aborts the sweep otherwise.
+        inst=$(grep -h '\[inst\]' "${out}.stdout" 2>/dev/null | tail -1 || true)
+        rows=$(echo "$inst" | grep -oE 'rows=[0-9]+' | grep -oE '[0-9]+' || true)
+        collected=$(grep -h 'Collected' "$out"/log-learner.txt 2>/dev/null | tail -1 || true)
+        plies=$(grep -h 'Actions:' "$out"/log-actor* 2>/dev/null | sed 's/.*Actions://' | wc -w || true)
+        rows_s=$(awk "BEGIN{printf \"%.1f\", ${rows:-0}/$LEG_SECONDS}")
+        echo "$tag  leg_s=$LEG_SECONDS  net_rows=${rows:-0}  rows_s=$rows_s  plies=${plies:-0}${collected:+  theirs: ${collected#*] }}" | tee -a "$SUMMARY"
       done
     done
   done
