@@ -83,5 +83,8 @@ cmake -DCMAKE_BUILD_TYPE=Release \
   -DPython3_EXECUTABLE="$(command -v python3)" \
   -DCMAKE_CXX_COMPILER="${CXX:-clang++}" \
   ../open_spiel
-make -j"$(sysctl -n hw.ncpu)" alpha_zero_torch_example
+# Portable job count: `sysctl -n hw.ncpu` is macOS-only — on Linux it yields EMPTY, and
+# bare `make -j` means UNLIMITED jobs (wedged the 32GB bench box via OOM on a full build).
+JOBS="$( (sysctl -n hw.ncpu || nproc) 2>/dev/null )"
+make -j"${JOBS:-4}" alpha_zero_torch_example
 echo "binary: $(find . -name 'alpha_zero_torch_example' -type f)"
