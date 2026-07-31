@@ -55,11 +55,18 @@ for device in $DEVICES; do
         for _ in $(seq 1 30); do kill -0 "$pid" 2>/dev/null || break; sleep 2; done
         kill -TERM "$pid" 2>/dev/null || true
         wait "$pid" 2>/dev/null || true
-        # Best-effort moves/s: total plies over actor-log game lines within the leg. Their
-        # actor logs print one line per finished game including its move count ("Game N: ...
-        # N moves"); raw logs stay in $out for exact re-parsing.
-        moves=$(grep -hoE '[0-9]+ moves' "$out"/log-actor* 2>/dev/null | awk '{s+=$1} END {print s+0}')
-        echo "$tag  moves_total=$moves  leg_s=$LEG_SECONDS  moves_s=$(awk "BEGIN{printf \"%.1f\", $moves/$LEG_SECONDS}")" | tee -a "$SUMMARY"
+        # Primary source: the learner's own shutdown summary (written on clean SIGINT close):
+        #   "Collected  N states from  G games, R states/s; ..."
+        # Fallback (unclean exit): count action tokens after "Actions:" in the actor logs —
+        # one token per ply, game-agnostic. Raw logs stay in $out for exact re-parsing.
+        collected=$(grep -h 'Collected' "$out"/log-learner.txt 2>/dev/null | tail -1)
+        if [[ -n "$collected" ]]; then
+          states=$(echo "$collected" | grep -oE 'Collected +[0-9]+' | grep -oE '[0-9]+')
+          echo "$tag  leg_s=$LEG_SECONDS  states_s=$(awk "BEGIN{printf \"%.1f\", $states/$LEG_SECONDS}")  theirs: ${collected#*] }" | tee -a "$SUMMARY"
+        else
+          plies=$(grep -h 'Actions:' "$out"/log-actor* 2>/dev/null | sed 's/.*Actions://' | wc -w)
+          echo "$tag  leg_s=$LEG_SECONDS  plies=$plies  states_s=$(awk "BEGIN{printf \"%.1f\", $plies/$LEG_SECONDS}")  (fallback: no learner summary)" | tee -a "$SUMMARY"
+        fi
       done
     done
   done
