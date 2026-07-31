@@ -3,9 +3,9 @@
 # (actors x inference_batch_size) x device, to locate where their stack wants the GPU. Run on
 # the bench box AFTER building open_spiel with CUDA libtorch (scripts/setup_openspiel_cpp.sh).
 #
-# UNVALIDATED on CUDA (authored on macOS where their libtorch path is CPU-only): flag names
-# match run_round_matched.sh / their alpha_zero_torch_example; the --devices value for CUDA
-# ("/gpu:0") follows their device_manager convention — verify with a single short leg first.
+# Flag names match run_round_matched.sh / their alpha_zero_torch_example. Device strings pass
+# through (slash stripped) to libtorch's c10::Device parser, so CUDA is "/cuda:0" — "/gpu:0"
+# is TF naming and is rejected (measured on the bench box).
 #
 # Isolation: the taskset below pins their whole process tree to CORES; keep it identical to the
 # core set used for the reinfors sweep legs. One leg at a time, nothing else on the box.
@@ -25,7 +25,7 @@ GAME="${GAME:-chess}"           # their game name: chess | connect_four
 WIDTHS="${WIDTHS:-32 64 128}"
 DEPTHS="${DEPTHS:-1 4}"
 ACTORS="${ACTORS:-1 4 8}"       # inference_batch_size is tied to actors below (full batch)
-DEVICES="${DEVICES:-/cpu:0 /gpu:0}"
+DEVICES="${DEVICES:-/cpu:0 /cuda:0}"
 OUT_ROOT=results/phase0_os
 mkdir -p "$OUT_ROOT"
 SUMMARY="$OUT_ROOT/summary.txt"
