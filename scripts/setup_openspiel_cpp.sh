@@ -56,6 +56,16 @@ git reset --hard -q
 git checkout -q "$OPEN_SPIEL_COMMIT"
 git checkout -q 86fe553c^ -- open_spiel/libtorch open_spiel/libnop
 
+# Dependency caches are version-pinned by the source tree, and install.sh skips existing
+# dirs — so a commit switch can strand them (master's abseil 20250814.1 vs a cached
+# 20250127.1 broke the build on the MutexLock API change). Refresh on mismatch, and drop
+# the build dir with it: its objects were compiled against the old headers.
+want_absl=$(grep -oE 'OPEN_SPIEL_ABSL_VERSION:-"[^"]+"' open_spiel/scripts/global_variables.sh | cut -d'"' -f2)
+if [[ -d open_spiel/abseil-cpp ]] && ! git -C open_spiel/abseil-cpp describe --tags 2>/dev/null | grep -q "$want_absl"; then
+  echo "refreshing stale abseil-cpp cache -> $want_absl"
+  rm -rf open_spiel/abseil-cpp build
+fi
+
 # benchmark instrumentation: request/cache/forward counters in VPNetEvaluator ([inst] stderr
 # lines, parsed by decompose_sequential.py). Idempotent.
 if git apply --check ../../scripts/instrument_vpevaluator.patch 2>/dev/null; then
