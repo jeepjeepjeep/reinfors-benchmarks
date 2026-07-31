@@ -78,10 +78,12 @@ fi
 # fetches abseil/json/... plus (with the flags above) libtorch and libnop; cached + resumable
 ./install.sh
 
+# Prefer clang++-15 when present: Ubuntu 22.04's default clang-14 frontend SEGFAULTS parsing
+# games/dou_dizhu/dou_dizhu.cc at master (-std=gnu++20), deterministically.
 mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release \
   -DPython3_EXECUTABLE="$(command -v python3)" \
-  -DCMAKE_CXX_COMPILER="${CXX:-clang++}" \
+  -DCMAKE_CXX_COMPILER="${CXX:-$(command -v clang++-15 || echo clang++)}" \
   ../open_spiel
 # Portable job count: `sysctl -n hw.ncpu` is macOS-only — on Linux it yields EMPTY, and
 # bare `make -j` means UNLIMITED jobs (wedged the 32GB bench box via OOM on a full build).
