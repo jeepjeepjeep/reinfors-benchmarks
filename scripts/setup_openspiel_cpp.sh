@@ -85,6 +85,10 @@ cmake -DCMAKE_BUILD_TYPE=Release \
   ../open_spiel
 # Portable job count: `sysctl -n hw.ncpu` is macOS-only — on Linux it yields EMPTY, and
 # bare `make -j` means UNLIMITED jobs (wedged the 32GB bench box via OOM on a full build).
-JOBS="$( (sysctl -n hw.ncpu || nproc) 2>/dev/null )"
-make -j"${JOBS:-4}" alpha_zero_torch_example
+# Build on a SUBSET of cores (cores - 1): the OS keeps a schedulable core, so even a
+# memory/link spike degrades to slow instead of taking sshd down with it.
+CORES="$( (sysctl -n hw.ncpu || nproc) 2>/dev/null )"
+CORES="${CORES:-4}"
+JOBS=$(( CORES > 1 ? CORES - 1 : 1 ))
+make -j"$JOBS" alpha_zero_torch_example
 echo "binary: $(find . -name 'alpha_zero_torch_example' -type f)"
