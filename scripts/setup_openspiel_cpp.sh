@@ -4,9 +4,9 @@
 #
 # Notes:
 #  - libtorch AZ needs LIBTORCH + LIBNOP enabled BEFORE install.sh (that step downloads them).
-#  - default libtorch URL upstream is Linux+CUDA; overridden here to the macOS arm64 CPU build
-#    matching upstream's pinned 2.3.0. There is no MPS/Metal libtorch AZ upstream — CPU-only on
-#    macOS, which is itself a benchmark datapoint.
+#  - libtorch URL is platform-selected below, pinned to upstream's 2.3.0 generation: macOS
+#    arm64 gets the CPU build (no MPS/Metal libtorch AZ upstream — CPU-only there, itself a
+#    benchmark datapoint); Linux gets the cxx11-abi CUDA 12.1 build (the GPU bench box).
 #  - Python bindings are disabled: we only need the C++ example, and it sidesteps the known
 #    libtorch/pybind11 interference (open_spiel issue #966).
 set -euo pipefail
@@ -15,7 +15,11 @@ cd "$(dirname "$0")/.."
 export OPEN_SPIEL_BUILD_WITH_LIBTORCH=ON
 export OPEN_SPIEL_BUILD_WITH_LIBNOP=ON
 export OPEN_SPIEL_BUILD_WITH_PYTHON=OFF
-export OPEN_SPIEL_BUILD_WITH_LIBTORCH_DOWNLOAD_URL="https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.3.0.zip"
+if [[ "$(uname)" == "Darwin" ]]; then
+  export OPEN_SPIEL_BUILD_WITH_LIBTORCH_DOWNLOAD_URL="https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.3.0.zip"
+else
+  export OPEN_SPIEL_BUILD_WITH_LIBTORCH_DOWNLOAD_URL="https://download.pytorch.org/libtorch/cu121/libtorch-cxx11-abi-shared-with-deps-2.3.0%2Bcu121.zip"
+fi
 
 mkdir -p open_spiel_cpp
 cd open_spiel_cpp
