@@ -50,6 +50,9 @@ if [ ! -d open_spiel ]; then
 fi
 cd open_spiel
 git fetch -q origin master
+# Every tracked-file modification here is a patch this script manages (instrumentation) —
+# reset before switching commits so re-runs are idempotent; patches re-apply below.
+git reset --hard -q
 git checkout -q "$OPEN_SPIEL_COMMIT"
 git checkout -q 86fe553c^ -- open_spiel/libtorch open_spiel/libnop
 
