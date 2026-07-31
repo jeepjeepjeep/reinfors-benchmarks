@@ -1,0 +1,50 @@
+diff --git a/open_spiel/algorithms/alpha_zero_torch/vpnet.cc b/open_spiel/algorithms/alpha_zero_torch/vpnet.cc
+--- a/open_spiel/algorithms/alpha_zero_torch/vpnet.cc
++++ b/open_spiel/algorithms/alpha_zero_torch/vpnet.cc
+@@ -152,31 +152,40 @@
+   //   - Their default data type is a 32-bit float
+   //   - Use the byte data type for boolean
+ 
++  // Stage inputs on the CPU and transfer once per batch: element-wise writes into a
++  // device-resident tensor are one tiny CUDA op EACH (~1300/row for chess), costing ~9 ms
++  // per ROW on GPU while being invisible on CPU. One .to(device) makes it one transfer.
+   torch::Tensor torch_inf_inputs =
+-      torch::empty({inference_batch_size, flat_input_size_}, torch_device_);
++      torch::empty({inference_batch_size, flat_input_size_});
+   torch::Tensor torch_inf_legal_mask = torch::full(
+       {inference_batch_size, num_actions_}, false,
+-      torch::TensorOptions().dtype(torch::kByte).device(torch_device_));
++      torch::TensorOptions().dtype(torch::kByte));
+ 
++  auto inf_inputs_acc = torch_inf_inputs.accessor<float, 2>();
++  auto inf_legal_mask_acc = torch_inf_legal_mask.accessor<uint8_t, 2>();
+   for (int batch = 0; batch < inference_batch_size; ++batch) {
+     // Copy legal mask(s) to a Torch tensor.
+     for (Action action : inputs[batch].legal_actions) {
+-      torch_inf_legal_mask[batch][action] = true;
++      inf_legal_mask_acc[batch][action] = 1;
+     }
+ 
+     // Copy the observation(s) to a Torch tensor.
+     for (int i = 0; i < inputs[batch].observations.size(); ++i) {
+-      torch_inf_inputs[batch][i] = inputs[batch].observations[i];
++      inf_inputs_acc[batch][i] = inputs[batch].observations[i];
+     }
+   }
++  torch_inf_inputs = torch_inf_inputs.to(torch_device_);
++  torch_inf_legal_mask = torch_inf_legal_mask.to(torch_device_);
+ 
+   // Run the inference.
+   model_->eval();
+   std::vector<torch::Tensor> torch_outputs =
+       model_(torch_inf_inputs, torch_inf_legal_mask);
+ 
+-  torch::Tensor value_batch = torch_outputs[0];
+-  torch::Tensor policy_batch = torch_outputs[1];
++  // One device-to-host transfer per output batch; the per-element .item() reads below are
++  // then CPU-cheap (on the GPU they are a blocking round-trip per legal action).
++  torch::Tensor value_batch = torch_outputs[0].cpu();
++  torch::Tensor policy_batch = torch_outputs[1].cpu();
+ 
+   // Copy the Torch tensor output to the appropriate structure.
+   std::vector<InferenceOutputs> output;
