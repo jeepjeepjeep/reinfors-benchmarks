@@ -162,6 +162,8 @@ def bench_engine(args, game, head_actions, results) -> None:
                 with torch.no_grad():
                     x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(device)
                     logits, values = net.heads(x)
+                if args.infer_dtype == "f32":  # native f32: the binding widens exactly (PR #136)
+                    return logits[:, :actions].cpu().numpy(), values.cpu().numpy()
                 return logits[:, :actions].cpu().double().numpy(), values.cpu().double().numpy()
 
             def make_engine(idx: int) -> "rf.Engine":
@@ -214,7 +216,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                 n_games=n_games, engines=engines, rows_s=rows / wall, moves_s=decisions / wall,
                 achieved_batch=rows / max(calls, 1), net_share=net_seconds / wall,
                 records=sum(t["records"] for t in totals), wall=wall, sims=args.sims,
-                infer_cache=args.infer_cache,
+                infer_cache=args.infer_cache, infer_dtype=args.infer_dtype,
             )
             results.append(row)
             print(
@@ -253,6 +255,7 @@ def main() -> None:
     ap.add_argument("--batches", type=str, default="1,8,32,128,512", help="net part: rows per forward")
     ap.add_argument("--n-games", type=str, default="1,8,32", help="engine part: parallel games PER ENGINE")
     ap.add_argument("--engines", type=str, default="1", help="engine part: concurrent engines (threads) sharing the net")
+    ap.add_argument("--infer-dtype", choices=["f64", "f32"], default="f64", help="callback output dtype (f32 needs the f32-contract build)")
     ap.add_argument("--sims", type=int, default=64)
     ap.add_argument("--c-puct", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=0)
