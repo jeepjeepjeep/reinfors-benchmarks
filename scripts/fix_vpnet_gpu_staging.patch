@@ -48,3 +48,57 @@ diff --git a/open_spiel/algorithms/alpha_zero_torch/vpnet.cc b/open_spiel/algori
  
    // Copy the Torch tensor output to the appropriate structure.
    std::vector<InferenceOutputs> output;
+@@ -204,35 +213,45 @@
+   //   - Their default data type is a 32-bit float
+   //   - Use the byte data type for boolean
+ 
++  // Same staging fix as Inference(): fill on the CPU, transfer once. At the default
++  // training batch of 1024 rows the element-wise device fill costs SECONDS per SGD step.
+   torch::Tensor torch_train_inputs =
+-      torch::empty({training_batch_size, flat_input_size_}, torch_device_);
++      torch::empty({training_batch_size, flat_input_size_});
+   torch::Tensor torch_train_legal_mask = torch::full(
+       {training_batch_size, num_actions_}, false,
+-      torch::TensorOptions().dtype(torch::kByte).device(torch_device_));
++      torch::TensorOptions().dtype(torch::kByte));
+   torch::Tensor torch_policy_targets =
+-      torch::zeros({training_batch_size, num_actions_}, torch_device_);
++      torch::zeros({training_batch_size, num_actions_});
+   torch::Tensor torch_value_targets =
+-      torch::empty({training_batch_size, 1}, torch_device_);
++      torch::empty({training_batch_size, 1});
+ 
++  auto train_inputs_acc = torch_train_inputs.accessor<float, 2>();
++  auto train_legal_mask_acc = torch_train_legal_mask.accessor<uint8_t, 2>();
++  auto policy_targets_acc = torch_policy_targets.accessor<float, 2>();
++  auto value_targets_acc = torch_value_targets.accessor<float, 2>();
+   for (int batch = 0; batch < training_batch_size; ++batch) {
+     // Copy the legal mask(s) to a Torch tensor.
+     for (Action action : inputs[batch].legal_actions) {
+-      torch_train_legal_mask[batch][action] = true;
++      train_legal_mask_acc[batch][action] = 1;
+     }
+ 
+     // Copy the observation(s) to a Torch tensor.
+     for (int i = 0; i < inputs[batch].observations.size(); ++i) {
+-      torch_train_inputs[batch][i] = inputs[batch].observations[i];
++      train_inputs_acc[batch][i] = inputs[batch].observations[i];
+     }
+ 
+     // Copy the policy target(s) to a Torch tensor.
+     for (const auto& [action, probability] : inputs[batch].policy) {
+-      torch_policy_targets[batch][action] = probability;
++      policy_targets_acc[batch][action] = static_cast<float>(probability);
+     }
+ 
+     // Copy the value target(s) to a Torch tensor.
+-    torch_value_targets[batch][0] = inputs[batch].value;
++    value_targets_acc[batch][0] = static_cast<float>(inputs[batch].value);
+   }
++  torch_train_inputs = torch_train_inputs.to(torch_device_);
++  torch_train_legal_mask = torch_train_legal_mask.to(torch_device_);
++  torch_policy_targets = torch_policy_targets.to(torch_device_);
++  torch_value_targets = torch_value_targets.to(torch_device_);
+ 
+   // Run a training step and get the losses.
+   model_->train();
