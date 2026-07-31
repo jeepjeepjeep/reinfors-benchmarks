@@ -396,3 +396,36 @@ Protocol on the box: one process at a time, pinned to the same physical-core set
 (decide and record whether SMT siblings stay idle), medians over repeated legs, torch pinned to
 the libtorch kernel generation of the OpenSpiel build. The head-to-head rounds (connect4
 calibration, then chess) run at the operating point Phase 0 selects.
+
+### Phase 0 results — 2026-07-31, g5.2xlarge (4 cores SMT-off, A10G), chess, 64 sims, cache OFF
+
+reinfors: release build, torch 2.3.0+cu121, AZ engine legs (20s+, medians of 3 where noted).
+OpenSpiel: MASTER 112b7770 (restored build glue — see docs/openspiel_upstream_notes.md; the
+as-shipped pinned era measured 134 rows/s flat on CUDA from the since-fixed staging bug).
+Raw legs: results/phase0*/ on the bench box (gitignored here).
+
+Net rows/s, chess depth-8, CUDA (each column = batch: reinfors n_games / their actors):
+
+| stack        | w    | 8     | 32     | 64     | 128    |
+|--------------|------|-------|--------|--------|--------|
+| reinfors     | 128  | ~4.8k | 10,035 | 16,202 | 22,209 |
+| openspiel    | 128  | 4,714 | 14,604 | 22,245 | 29,054 |
+| reinfors     | 256  | ~4.6k | 10,096 | 11,293 | 10,790 |
+| openspiel    | 256  | 4,916 | 11,556 | 14,613 | 16,358 |
+
+- GPU-advantage gate: PASS both stacks (reinfors ~9-30x, openspiel 20-44x over own CPU).
+- At matched batch their fixed stack leads rows/s ~1.15-1.45x: the async actors overlap CPU
+  tree work with GPU forwards, while reinfors' lockstep alternates the two — the topology
+  advantage the CPU rounds predicted, now measured. Empirical motivation for reinfors'
+  shelved collect_async double-buffer design.
+- Their useful throughput (states/s) peaks at actors=64 (87.4 w128, 40.9 w256) and FALLS at
+  128 actors while rows/s still climbs (thread thrash + redundant evals; note their
+  "Collected" counter omits in-flight games, biasing states/s low at high actor counts).
+- rows/state differs across stacks (~64 for reinfors at 64 sims; ~250 theirs, cache off) —
+  rows/s is the systems metric only; learning throughput is settled by the matched-cadence
+  round, cache ON.
+- OPERATING POINT for the head-to-head rounds: **w256 d8, batch 64 both (reinfors
+  n_games=64, openspiel actors=64), inference cache ON, CUDA both sides** — GPU genuinely
+  engaged on both stacks, AZ-realistic net. Secondary/contested regime if hours allow:
+  w128 d8. Before the rounds: repeat legs for medians + the learner-contention check
+  (SGD shares the A10G with collection).
