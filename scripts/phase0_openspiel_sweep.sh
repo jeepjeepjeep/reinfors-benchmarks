@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Phase 0, OpenSpiel side: short self-play legs of their C++ AZ across (nn_width, nn_depth) x
+# (actors x inference_batch_size) x device, to locate where their stack wants the GPU. Run on
+# the bench box AFTER building open_spiel with CUDA libtorch (scripts/setup_openspiel_cpp.sh).
+#
+# UNVALIDATED on CUDA (authored on macOS where their libtorch path is CPU-only): flag names
+# match run_round_matched.sh / their alpha_zero_torch_example; the --devices value for CUDA
+# ("/gpu:0") follows their device_manager convention — verify with a single short leg first.
+#
+# Isolation: the taskset below pins their whole process tree to CORES; keep it identical to the
+# core set used for the reinfors sweep legs. One leg at a time, nothing else on the box.
+#
+#   CORES=0-3 LEG_SECONDS=120 GAME=chess bash scripts/phase0_openspiel_sweep.sh
+#
+# Output: results/phase0_os/<config>/ raw logs + one summary line per leg parsed from the actor
+# logs (games and moves counted over the leg; states/s = moves/s here). Parsing is best-effort —
+# the raw logs are the artifact of record.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
+CORES="${CORES:-0-3}"
+LEG_SECONDS="${LEG_SECONDS:-120}"
+GAME="${GAME:-chess}"           # their game name: chess | connect_four
+WIDTHS="${WIDTHS:-32 64 128}"
+DEPTHS="${DEPTHS:-1 4}"
+ACTORS="${ACTORS:-1 4 8}"       # inference_batch_size is tied to actors below (full batch)
+DEVICES="${DEVICES:-/cpu:0 /gpu:0}"
+OUT_ROOT=results/phase0_os
+mkdir -p "$OUT_ROOT"
+SUMMARY="$OUT_ROOT/summary.txt"
+
+for device in $DEVICES; do
+  for width in $WIDTHS; do
+    for depth in $DEPTHS; do
+      for actors in $ACTORS; do
+        tag="$(echo "${GAME}_${device}_w${width}_d${depth}_a${actors}" | tr -c 'A-Za-z0-9_\n' '_')"
+        out="$OUT_ROOT/$tag"
+        echo "=== $tag (${LEG_SECONDS}s) ==="
+        rm -rf "$out"
+        taskset -c "$CORES" "$BIN" --game="$GAME" --path="$out" \
+          --actors="$actors" --evaluators=0 --devices="$device" \
+          --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
+          --temperature=1 --temperature_drop=10 \
+          --nn_model=resnet --nn_width="$width" --nn_depth="$depth" \
+          --inference_batch_size="$actors" --inference_threads=1 --inference_cache=0 \
+          --replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
+          --learning_rate=0.0001 --weight_decay=0.0001 \
+          --checkpoint_freq=1000000 --evaluation_window=100 --eval_levels=7 \
+          --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false \
+          --max_steps=0 > "${out}.stdout" 2>&1 &
+        pid=$!
+        sleep "$LEG_SECONDS"
+        kill -INT "$pid" 2>/dev/null || true
+        for _ in $(seq 1 30); do kill -0 "$pid" 2>/dev/null || break; sleep 2; done
+        kill -TERM "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+        # Best-effort moves/s: total plies over actor-log game lines within the leg. Their
+        # actor logs print one line per finished game including its move count ("Game N: ...
+        # N moves"); raw logs stay in $out for exact re-parsing.
+        moves=$(grep -hoE '[0-9]+ moves' "$out"/log-actor* 2>/dev/null | awk '{s+=$1} END {print s+0}')
+        echo "$tag  moves_total=$moves  leg_s=$LEG_SECONDS  moves_s=$(awk "BEGIN{printf \"%.1f\", $moves/$LEG_SECONDS}")" | tee -a "$SUMMARY"
+      done
+    done
+  done
+done
+echo "done -> $SUMMARY (verify one leg's raw logs before trusting the parse)"

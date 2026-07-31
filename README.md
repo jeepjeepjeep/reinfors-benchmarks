@@ -373,3 +373,26 @@ policy loss 7.05→2.45 vs 7.16→2.54; value loss 0.0087 vs 0.0165; policy-head
 Caveats: one seed, small net, search-free probe. Decision: `MinimalChess` stays the default;
 `RelativeChess` remains available. Revisit only with a longer multi-seed run if equivariance is
 suspected to pay at scale.
+
+## Phase 0 — GPU-advantage sweep (prerequisite for the AWS GPU round)
+
+The GPU round (g5.2xlarge: 8 vCPU / 4 physical cores, 1x A10G) only means something at an
+operating point where the GPU actually beats CPU on both stacks — otherwise the result is "you
+shouldn't have used the GPU", not a framework comparison. Two levers set that point: net size
+(width/depth of the shared resnet family) and batch rows per forward (`n_games` here; actors x
+inference_batch_size there).
+
+- `benchmarks/openspiel/phase0_gpu_sweep.py` — reinfors side + the stack-independent surface.
+  `--mode net` sweeps pure forwards of the width/depth-parameterized resnet over batch x device
+  (same ATen kernels both stacks); `--mode engine` sweeps end-to-end AZ self-play over
+  n_games x device (realized rows/s, achieved batch, % wall in net). The verdict table prints,
+  per net config, the smallest batch / n_games where CUDA clears `--gpu-threshold` (2x) over
+  CPU. Pin cores and threads: `taskset -c 0-3 ... --torch-threads 4`.
+- `scripts/phase0_openspiel_sweep.sh` — their side: short pinned legs of the C++ AZ across
+  (nn_width, nn_depth) x actors x device, raw logs + best-effort moves/s summary. UNVALIDATED
+  on CUDA until the instance exists; verify one leg's logs before trusting the parse.
+
+Protocol on the box: one process at a time, pinned to the same physical-core set both stacks
+(decide and record whether SMT siblings stay idle), medians over repeated legs, torch pinned to
+the libtorch kernel generation of the OpenSpiel build. The head-to-head rounds (connect4
+calibration, then chess) run at the operating point Phase 0 selects.
