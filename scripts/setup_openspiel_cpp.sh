@@ -92,5 +92,18 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 CORES="$( (sysctl -n hw.ncpu || nproc) 2>/dev/null )"
 CORES="${CORES:-4}"
 JOBS=$(( CORES > 1 ? CORES - 1 : 1 ))
+if [[ "$(uname)" != "Darwin" ]]; then
+  # Ubuntu 22.04's clang 14 AND 15 frontends SEGV parsing games/dou_dizhu/dou_dizhu.cc at
+  # master (solo repro, any stack size); g++ compiles it fine. Pre-build that one TU with
+  # g++ — same Itanium ABI + libstdc++, so the object links cleanly among clang objects —
+  # and make skips it as up to date.
+  obj=games/CMakeFiles/games.dir/dou_dizhu/dou_dizhu.cc.o
+  rule=$(make -n VERBOSE=1 "$obj" 2>/dev/null | grep -m1 -- "-c .*dou_dizhu.cc" || true)
+  if [[ -n "$rule" ]]; then
+    eval "$(echo "$rule" | sed -E "s|[^ ]*clang\+\+[^ ]*|g++|")" \
+      && echo "dou_dizhu.cc pre-built with g++" \
+      || echo "WARNING: g++ pre-build of dou_dizhu.cc failed; clang may crash on it"
+  fi
+fi
 make -j"$JOBS" alpha_zero_torch_example
 echo "binary: $(find . -name 'alpha_zero_torch_example' -type f)"
