@@ -63,7 +63,10 @@ git checkout -q 86fe553c^ -- open_spiel/libtorch open_spiel/libnop
 want_absl=$(grep -oE 'OPEN_SPIEL_ABSL_VERSION:-"[^"]+"' open_spiel/scripts/global_variables.sh | cut -d'"' -f2)
 if [[ -d open_spiel/abseil-cpp ]] && ! git -C open_spiel/abseil-cpp describe --tags 2>/dev/null | grep -q "$want_absl"; then
   echo "refreshing stale abseil-cpp cache -> $want_absl"
-  rm -rf open_spiel/abseil-cpp build
+  # install.sh's cached_clone keys its download cache by DIRECTORY NAME ONLY (ignores the
+  # requested tag) and cp -r's the cached copy back — purge that too or the stale version
+  # simply reappears.
+  rm -rf open_spiel/abseil-cpp download_cache/abseil-cpp build
 fi
 
 # benchmark instrumentation: request/cache/forward counters in VPNetEvaluator ([inst] stderr
