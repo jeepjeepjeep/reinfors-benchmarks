@@ -429,3 +429,19 @@ Net rows/s, chess depth-8, CUDA (each column = batch: reinfors n_games / their a
   engaged on both stacks, AZ-realistic net. Secondary/contested regime if hours allow:
   w128 d8. Before the rounds: repeat legs for medians + the learner-contention check
   (SGD shares the A10G with collection).
+
+### Phase 0 addendum — overlap hypothesis refuted; the gap is the callback path (2026-07-31)
+
+Two-engine experiment (threaded engines sharing the net — script-level collect_async
+approximation), chess w256 d8 CUDA: 2x32 = 9.7k rows/s vs 1x64 = 11.3k (NOT additive; both
+threads sit ~93% inside their forward, serializing on one CUDA stream), 2x16 = +17% over
+1x16 (only the small-batch case gains). At this shape single-engine net share is 92.7%, so
+overlap could hide at most ~7-8% — the async-topology explanation for their lead is WRONG
+at the operating point.
+
+Decomposition (w256 d8 batch 64 CUDA): pure kernels 15.2k rows/s; openspiel end-to-end
+14.6k (96% of ceiling); reinfors end-to-end 11.3k (74%). Their lead is per-call forward-path
+efficiency, not scheduling. Prime suspect in ours: the infer contract's float64 outputs
+(fp32->fp64 conversion + double-width D2H of the 64x4674 policy every call) + numpy/pyo3
+plumbing. Roadmap implication: f32 infer outputs / slimmer callback (~up to +25-30% at this
+shape) is the cheap fix; collect_async is NOT motivated by this workload (<=8% here).
