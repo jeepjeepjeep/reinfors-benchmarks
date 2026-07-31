@@ -19,6 +19,17 @@ if [[ "$(uname)" == "Darwin" ]]; then
   export OPEN_SPIEL_BUILD_WITH_LIBTORCH_DOWNLOAD_URL="https://download.pytorch.org/libtorch/cpu/libtorch-macos-arm64-2.3.0.zip"
 else
   export OPEN_SPIEL_BUILD_WITH_LIBTORCH_DOWNLOAD_URL="https://download.pytorch.org/libtorch/cu121/libtorch-cxx11-abi-shared-with-deps-2.3.0%2Bcu121.zip"
+  # libtorch 2.3 (cu121 generation) links libnvToolsExt, which CUDA toolkits >= 12.9 no longer
+  # ship — steer CMake to the newest installed 12.x that still has it. Build-time discovery
+  # only; the driver runs libtorch's bundled kernels regardless of the toolkit picked here.
+  for d in /usr/local/cuda-12.*; do
+    [[ -e "$d/lib64/libnvToolsExt.so" ]] && cuda12="$d"
+  done
+  if [[ -n "${cuda12:-}" ]]; then
+    export CUDAToolkit_ROOT="$cuda12"
+    export PATH="$cuda12/bin:$PATH"
+    echo "CUDA toolkit for libtorch discovery: $cuda12"
+  fi
 fi
 
 mkdir -p open_spiel_cpp
