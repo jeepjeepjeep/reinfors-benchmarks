@@ -35,15 +35,23 @@ fi
 mkdir -p open_spiel_cpp
 cd open_spiel_cpp
 
-# pinned: master's libtorch build is broken since 86fe553c (deleted libnop/libtorch CMakeLists
-# but left the root references); d15d49f8 is its parent — the last commit where it builds.
-OPEN_SPIEL_COMMIT=d15d49f8
+# Master snapshot (2026-07-17), which carries both upstream vpnet perf fixes (Oct 2025
+# batched tensor staging; Mar 2026 NoGradGuard + batched output extraction, PR #1488) — the
+# benchmark target is their code as maintained today. Master cannot build the libtorch path
+# as-is: 86fe553c deleted the libtorch/libnop CMake glue while the root CMakeLists still
+# add_subdirectory's both (configure error; unreported upstream as of 2026-07). Restored
+# below content-identical from that commit's parent — build glue only, zero behavior.
+# (Historical: pre-master-era "as shipped" measurements used pin d15d49f8 +
+# scripts/fix_vpnet_gpu_staging.patch, kept for the record.)
+OPEN_SPIEL_COMMIT=112b7770
 
 if [ ! -d open_spiel ]; then
   git clone https://github.com/google-deepmind/open_spiel.git
 fi
 cd open_spiel
+git fetch -q origin master
 git checkout -q "$OPEN_SPIEL_COMMIT"
+git checkout -q 86fe553c^ -- open_spiel/libtorch open_spiel/libnop
 
 # benchmark instrumentation: request/cache/forward counters in VPNetEvaluator ([inst] stderr
 # lines, parsed by decompose_sequential.py). Idempotent.
