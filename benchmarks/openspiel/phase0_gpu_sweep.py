@@ -155,6 +155,9 @@ def bench_engine(args, game, head_actions, results) -> None:
             seed_all()
             net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
 
+            noop_l = np.zeros((max(n_games * max(engines, 1) + 8, 8), actions), dtype=np.float32)
+            noop_v = np.zeros((noop_l.shape[0],), dtype=np.float32)
+
             pin = (
                 torch.empty((n_games * max(engines, 1), c * h * w), pin_memory=True)
                 if args.callback == "fast" and device.startswith("cuda")
@@ -162,6 +165,11 @@ def bench_engine(args, game, head_actions, results) -> None:
             )
 
             def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+                if args.callback == "noop":
+                    # No torch at all: measures engine + Rust roundtrip + binding pack/widen,
+                    # isolating the device-independent CPU residual (RF_INFER_TIMING gives pack).
+                    m = obs_batch.shape[0]
+                    return noop_l[:m], noop_v[:m]
                 # Shared eval-mode net; concurrent forwards from several engine threads are
                 # the POINT when engines > 1 (one engine's CPU phase overlaps another's
                 # forward — a script-level approximation of the collect_async double-buffer).
@@ -280,7 +288,7 @@ def main() -> None:
     ap.add_argument("--n-games", type=str, default="1,8,32", help="engine part: parallel games PER ENGINE")
     ap.add_argument("--engines", type=str, default="1", help="engine part: concurrent engines (threads) sharing the net")
     ap.add_argument("--infer-dtype", choices=["f64", "f32"], default="f64", help="callback output dtype (f32 needs the f32-contract build)")
-    ap.add_argument("--callback", choices=["legacy", "fast"], default="legacy", help="fast = inference_mode + pinned H2D + no slice + single packed D2H (needs the PR #136 build; implies f32)")
+    ap.add_argument("--callback", choices=["legacy", "fast", "noop"], default="legacy", help="fast = inference_mode + pinned H2D + no slice + single packed D2H; noop = no-torch (residual decomposition)")
     ap.add_argument("--sims", type=int, default=64)
     ap.add_argument("--c-puct", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=0)
