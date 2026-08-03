@@ -9,6 +9,10 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MINUTES="${MINUTES:-120}"
+# Never orphan a trainer: if this launcher dies during either sleep (Ctrl-C, dropped SSH),
+# the active background trainer is killed on exit.
+ACTIVE_PID=""
+trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 OS_OUT="results/os${MINUTES}_cache"
@@ -27,7 +31,7 @@ rm -rf "$OS_OUT"
   --checkpoint_freq=5 --evaluation_window=100 --eval_levels=7 \
   --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false \
   --max_steps=0 > "${OS_OUT}.stdout" 2>&1 &
-OS_PID=$!
+OS_PID=$!; ACTIVE_PID=$OS_PID
 sleep "$SECS"
 # HARD wall-clock stop (2026-08-03): SIGINT + grace let actors DRAIN in-flight games,
 # giving this side extra collection minutes beyond the nominal budget — unfair in any
@@ -35,6 +39,7 @@ sleep "$SECS"
 # artifact is "the last checkpoint written before T" — symmetric across stacks.
 kill -9 "$OS_PID" 2>/dev/null || true
 wait "$OS_PID" 2>/dev/null || true
+ACTIVE_PID=""
 echo "=== openspiel done ==="
 
 echo "=== reinfors: ${MINUTES}m -> ${RF_OUT} ==="
@@ -48,9 +53,10 @@ rm -rf "$RF_OUT"
   --seed 0 --n-games 8 --sims 64 --c-puct 2.0 \
   --infer-cache 262144 --collect-size 21845 \
   > "${RF_OUT}.stdout" 2>&1 &
-RF_PID=$!
+RF_PID=$!; ACTIVE_PID=$RF_PID
 sleep "$SECS"
 kill -9 "$RF_PID" 2>/dev/null || true
 wait "$RF_PID" 2>/dev/null || true
+ACTIVE_PID=""
 echo "=== reinfors done (hard deadline) ==="
 tail -4 "${RF_OUT}.stdout"
