@@ -27,7 +27,7 @@ import reinfors as rf
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import AZResnetReplica, seed_all  # noqa: E402
+from common import SweepResnet, seed_all  # noqa: E402
 
 
 class ReplayBuffer:
@@ -80,6 +80,10 @@ def main() -> None:
     ap.add_argument("--depth", default="none", help="stream depth: int | none")
     ap.add_argument("--infer-cache", type=int, default=0, help="engine infer-cache entries (0 = off)")
     ap.add_argument("--checkpoint-every", type=float, default=60.0, help="seconds between checkpoints")
+    # net architecture — MUST match the OpenSpiel side's --nn_width/--nn_depth (the round
+    # launcher passes both sides from one env var; the printed param count is the check)
+    ap.add_argument("--width", type=int, default=32)
+    ap.add_argument("--depth", type=int, default=1)
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -101,7 +105,9 @@ def main() -> None:
     obs_c, obs_h, obs_w = game.observation_space().shape
     dim = int(np.prod(game.observation_space().shape))
     actions = game.action_space().n
-    net = AZResnetReplica(in_channels=obs_c, h=obs_h, w=obs_w, n_actions=head_actions).to(args.device)
+    net = SweepResnet(obs_c, obs_h, obs_w, head_actions, args.width, args.depth).to(args.device)
+    n_params = sum(p.numel() for p in net.parameters())
+    print(f"net: SweepResnet w{args.width} d{args.depth} head={head_actions} params={n_params:,}")
     # value head participates here (unlike the review benchmark where it was discarded)
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
@@ -128,12 +134,13 @@ def main() -> None:
     c, h, w = obs_c, obs_h, obs_w
 
     def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        with sync_lock, torch.no_grad():
+        with sync_lock, torch.inference_mode():
             x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(args.device)
             logits, values = collector_net.heads(x)
-        # The engine's infer contract is (N, A) over the GAME's action space; a padded head
-        # (chess: 4674) is sliced back to the native width here.
-        return logits[:, :actions].cpu().double().numpy(), values.cpu().double().numpy()
+        # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE — the
+        # binding accepts width >= A and ignores the tail (a pre-transfer slice costs a
+        # device-side gather). This is the measured operating-point path.
+        return logits.cpu().numpy(), values.cpu().numpy()
 
 
     depth = None if str(args.depth).lower() in ("none", "inf") else int(args.depth)

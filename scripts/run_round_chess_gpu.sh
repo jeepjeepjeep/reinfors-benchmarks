@@ -58,6 +58,7 @@ rm -rf "$RF_OUT"
 taskset -c 0-3 $PY benchmarks/openspiel/train_reinfors_az.py \
   --minutes "$MINUTES" --out "$RF_OUT" --device cuda --game chess \
   --seed 0 --n-games "$RF_NGAMES" --sims 64 --c-puct 2.0 \
+  --width $WIDTH --depth $DEPTH \
   --infer-cache $CACHE --collect-size 21845 --checkpoint-every 60 \
   > "${RF_OUT}.stdout" 2>&1 &
 RF_PID=$!; ACTIVE_PID=$RF_PID
