@@ -24,10 +24,11 @@ WIDTH=256
 DEPTH=8
 # Cache is ARCHITECTURE, not a matched knob: their evaluator issues Prior+Evaluate as two
 # Inference() calls per node and relies on the cache to merge them (sparse legal-only
-# entries, cleared per learn step) — they keep their 2^18 default. Ours holds dense rows;
-# 32768 is the measured saturation point.
+# entries, cleared per learn step) — they keep their 2^18 default. Ours also runs 2^18:
+# hit rate is monotone in capacity (13.6% @32k -> 14.1% @262k), the ~4.3GB of dense entries
+# is host RAM the 32GB box doesn't need elsewhere, and throughput is the only criterion.
 OS_CACHE=262144
-RF_CACHE=32768
+RF_CACHE=262144
 SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 PY=.venv23/bin/python

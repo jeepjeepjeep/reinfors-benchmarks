@@ -501,9 +501,10 @@ OS 11,316 (**+9%**) — and reinfors does this on ~1 busy core against their 4.
 > direction. What survives: within-stack deltas (f32 A/C/B/F arms, boundary probe, the
 > batch-128 kernel regression) and the drain-protocol findings. The decision-relevant
 > cross-stack metric is round-true states/s — cache ON both sides, each side its own
-> architecture-appropriate capacity (theirs 262144 default, sparse legal-only entries,
-> cleared per learn step like ours; ours 32768, the measured dense-entry saturation point) —
-> measured by scripts/measure_states.sh + scripts/measure_states_rf.sh.
+> best capacity (262144 both as it happens: their default, and for reinfors hit rate is
+> monotone in capacity — 13.6% @32k -> 14.1% @262k — with the ~4.3GB of dense entries in
+> host RAM the box doesn't need elsewhere) — measured by scripts/measure_states.sh +
+> scripts/measure_states_rf.sh.
 
 Every cell is explained:
 - **w128 b32 (their one win, +6%)**: the latency-bound cell where async overlap genuinely
