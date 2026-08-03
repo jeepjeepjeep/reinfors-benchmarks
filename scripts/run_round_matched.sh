@@ -39,10 +39,18 @@ echo "=== openspiel done ==="
 
 echo "=== reinfors: ${MINUTES}m -> ${RF_OUT} ==="
 rm -rf "$RF_OUT"
+# SAME external hard deadline as the OpenSpiel side: the internal --minutes check only runs
+# BETWEEN stream batches (a 21,845-record next() can block far past T, then write a final
+# checkpoint the other side was denied). SIGKILL at T on both stacks makes the h2h artifact
+# genuinely symmetric: the last PERIODIC checkpoint written before T (--checkpoint-every).
 .venv23/bin/python benchmarks/openspiel/train_reinfors_az.py \
   --minutes "$MINUTES" --out "$RF_OUT" \
   --seed 0 --n-games 8 --sims 64 --c-puct 2.0 \
   --infer-cache 262144 --collect-size 21845 \
-  > "${RF_OUT}.stdout" 2>&1
-echo "=== reinfors done ==="
+  > "${RF_OUT}.stdout" 2>&1 &
+RF_PID=$!
+sleep "$SECS"
+kill -9 "$RF_PID" 2>/dev/null || true
+wait "$RF_PID" 2>/dev/null || true
+echo "=== reinfors done (hard deadline) ==="
 tail -4 "${RF_OUT}.stdout"

@@ -32,6 +32,10 @@ ACTORS="${ACTORS:-1 4 8}"       # inference_batch_size is tied to actors below (
 DEVICES="${DEVICES:-/cpu:0 /cuda:0}"
 OUT_ROOT=results/phase0_os
 mkdir -p "$OUT_ROOT"
+# Never orphan a launched leg: if the script dies mid-leg (any error under set -e), the
+# active benchmark process is killed on exit.
+ACTIVE_PID=""
+trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 SUMMARY="$OUT_ROOT/summary.txt"
 
 for device in $DEVICES; do
@@ -53,15 +57,16 @@ for device in $DEVICES; do
           --checkpoint_freq=1000000 --evaluation_window=100 --eval_levels=7 \
           --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false \
           --max_steps=0 > "${out}.stdout" 2>&1 &
-        pid=$!
+        pid=$!; ACTIVE_PID=$pid
         sleep "$WARMUP"
-        t1=$(date +%s.%N); r1=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2)
+        t1=$(date +%s.%N); r1=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
         sleep "$LEG_SECONDS"
-        t2=$(date +%s.%N); r2=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2)
+        t2=$(date +%s.%N); r2=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
         # HARD stop: no SIGINT/grace — their graceful path keeps generating rows while
         # draining in-flight games (the source of the inflation this script once had).
         kill -9 "$pid" 2>/dev/null || true
         wait "$pid" 2>/dev/null || true
+        ACTIVE_PID=""
         # Primary metric: the instrumented evaluator's cumulative counters on stdout
         # ("[inst] req=.. hits=.. fwd=.. rows=.."): rows/leg = net rows/s, the same metric as
         # the reinfors sweep, and robust to games not finishing within the leg (chess CPU legs
@@ -75,10 +80,11 @@ for device in $DEVICES; do
           rows_s=$(awk "BEGIN{printf \"%.1f\", ($r2 - $r1) / ($t2 - $t1)}")
           method="steady(dt=$(awk "BEGIN{printf \"%.0f\", $t2 - $t1}")s)"
         else
-          # no interior samples (counter prints every 8192 requests; very slow legs may miss the
-          # window) — fall back to total/nominal, EXPLICITLY marked as drain-inflated.
-          rows_s=$(awk "BEGIN{printf \"%.1f\", ${rows:-0}/$LEG_SECONDS}")
-          method="DRAIN-INFLATED-FALLBACK"
+          # No interior samples (counter prints every 8192 requests; a leg this slow has no
+          # valid throughput measurement) — report NA, never a fabricated number: total rows
+          # span WARMUP+LEG, so total/LEG would overstate by (WARMUP+LEG)/LEG (~1.4x default).
+          rows_s="NA"
+          method="FAILED-NO-INTERIOR-SAMPLES"
         fi
         echo "$tag  method=$method  net_rows=${rows:-0}  rows_s=$rows_s  plies=${plies:-0}${collected:+  theirs: ${collected#*] }}" | tee -a "$SUMMARY"
       done
