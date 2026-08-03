@@ -22,7 +22,12 @@ OS_ACTORS="${OS_ACTORS:?set OS_ACTORS from the states/s measurement}"
 RF_NGAMES="${RF_NGAMES:-64}"
 WIDTH=256
 DEPTH=8
-CACHE=32768
+# Cache is ARCHITECTURE, not a matched knob: their evaluator issues Prior+Evaluate as two
+# Inference() calls per node and relies on the cache to merge them (sparse legal-only
+# entries, cleared per learn step) — they keep their 2^18 default. Ours holds dense rows;
+# 32768 is the measured saturation point.
+OS_CACHE=262144
+RF_CACHE=32768
 SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 PY=.venv23/bin/python
@@ -39,7 +44,7 @@ taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
   --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
   --temperature=1 --temperature_drop=10 \
   --nn_model=resnet --nn_width=$WIDTH --nn_depth=$DEPTH \
-  --inference_batch_size="$OS_ACTORS" --inference_threads=1 --inference_cache=$CACHE \
+  --inference_batch_size="$OS_ACTORS" --inference_threads=1 --inference_cache=$OS_CACHE \
   --replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
   --learning_rate=0.0001 --weight_decay=0.0001 \
   --checkpoint_freq=1 --evaluation_window=100 --eval_levels=7 \
@@ -59,7 +64,7 @@ taskset -c 0-3 $PY benchmarks/openspiel/train_reinfors_az.py \
   --minutes "$MINUTES" --out "$RF_OUT" --device cuda --game chess \
   --seed 0 --n-games "$RF_NGAMES" --sims 64 --c-puct 2.0 \
   --width $WIDTH --depth $DEPTH \
-  --infer-cache $CACHE --collect-size 21845 --checkpoint-every 60 \
+  --infer-cache $RF_CACHE --collect-size 21845 --checkpoint-every 60 \
   > "${RF_OUT}.stdout" 2>&1 &
 RF_PID=$!; ACTIVE_PID=$RF_PID
 sleep "$SECS"

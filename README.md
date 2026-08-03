@@ -474,8 +474,9 @@ generating rows while draining in-flight games, and the summary divided total ro
 NOMINAL leg time (reinfors legs were internally timed — an asymmetric bias in OpenSpiel's
 favor, 18–31% depending on config). Discovered when their single inference thread logged
 135.8s of busy time inside a "120s" leg. All numbers below: same box (g5.2xlarge, A10G, SMT
-off, cores 0-3), same session, chess d8, 64 sims, cache off, 120s measured windows both
-sides, matched grid. reinfors = f32-contract build (PR #136); OpenSpiel = master 112b7770
+off, cores 0-3), same session, chess d8, 64 sims, cache off (SEE CAVEAT BELOW — this
+condition invalidates cross-stack reads of the table), 120s measured windows both sides,
+matched grid. reinfors = f32-contract build (PR #136); OpenSpiel = master 112b7770
 with restored build glue.
 
 | batch (rf n_games / os actors) | reinfors rows/s | openspiel rows/s | Δ |
@@ -489,6 +490,20 @@ with restored build glue.
 
 Each side at its own best config: w128 RF 26,755 vs OS 20,694 (**+29%**); w256 RF 12,367 vs
 OS 11,316 (**+9%**) — and reinfors does this on ~1 busy core against their 4.
+
+> **CACHE-OFF CAVEAT (2026-08-03, second correction layer): the cross-stack cells above are
+> NOT comparable as useful search throughput.** OpenSpiel's MCTS calls `Prior()` at expansion
+> and `Evaluate()` at the leaf — two separate `Inference()` requests on the SAME state
+> (mcts.cc:282/373); its LRU cache is the mechanism that merges the pair into one forward.
+> With `--inference_cache=0` a "row" is therefore ~half a search node for OpenSpiel and one
+> full node for reinfors (single both-heads infer contract) — the units differ per stack, so
+> no cache-off rows/s comparison across stacks measures relative AZ capability, in either
+> direction. What survives: within-stack deltas (f32 A/C/B/F arms, boundary probe, the
+> batch-128 kernel regression) and the drain-protocol findings. The decision-relevant
+> cross-stack metric is round-true states/s — cache ON both sides, each side its own
+> architecture-appropriate capacity (theirs 262144 default, sparse legal-only entries,
+> cleared per learn step like ours; ours 32768, the measured dense-entry saturation point) —
+> measured by scripts/measure_states.sh + scripts/measure_states_rf.sh.
 
 Every cell is explained:
 - **w128 b32 (their one win, +6%)**: the latency-bound cell where async overlap genuinely
