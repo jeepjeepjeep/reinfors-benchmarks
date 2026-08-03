@@ -19,6 +19,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 MINUTES="${MINUTES:-120}"
 OS_ACTORS="${OS_ACTORS:?set OS_ACTORS from the states/s measurement}"
+OS_BATCH="${OS_BATCH:-$OS_ACTORS}"  # decoupled if the measurement picked e.g. 64:32
 RF_NGAMES="${RF_NGAMES:-64}"
 WIDTH=256
 DEPTH=8
@@ -32,20 +33,20 @@ RF_CACHE=262144
 SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 PY=.venv23/bin/python
-OS_OUT="results/round_chess_os_${MINUTES}m_a${OS_ACTORS}"
+OS_OUT="results/round_chess_os_${MINUTES}m_a${OS_ACTORS}_b${OS_BATCH}"
 RF_OUT="results/round_chess_rf_${MINUTES}m_n${RF_NGAMES}"
 
 ACTIVE_PID=""
 trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 
-echo "=== openspiel: chess ${MINUTES}m actors=${OS_ACTORS} w${WIDTH} d${DEPTH} -> ${OS_OUT} ==="
+echo "=== openspiel: chess ${MINUTES}m actors=${OS_ACTORS} batch=${OS_BATCH} w${WIDTH} d${DEPTH} -> ${OS_OUT} ==="
 rm -rf "$OS_OUT"
 taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
   --actors="$OS_ACTORS" --evaluators=0 --devices=/cuda:0 \
   --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
   --temperature=1 --temperature_drop=10 \
   --nn_model=resnet --nn_width=$WIDTH --nn_depth=$DEPTH \
-  --inference_batch_size="$OS_ACTORS" --inference_threads=1 --inference_cache=$OS_CACHE \
+  --inference_batch_size="$OS_BATCH" --inference_threads=1 --inference_cache=$OS_CACHE \
   --replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
   --learning_rate=0.0001 --weight_decay=0.0001 \
   --checkpoint_freq=1 --evaluation_window=100 --eval_levels=7 \

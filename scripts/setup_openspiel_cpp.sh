@@ -105,5 +105,6 @@ if [[ "$(uname)" != "Darwin" ]]; then
       || echo "WARNING: g++ pre-build of dou_dizhu.cc failed; clang may crash on it"
   fi
 fi
-make -j"$JOBS" alpha_zero_torch_example
+make -j"$JOBS" alpha_zero_torch_example alpha_zero_torch_game_example
 echo "binary: $(find . -name 'alpha_zero_torch_example' -type f)"
+echo "h2h binary: $(find . -name 'alpha_zero_torch_game_example' -type f)"

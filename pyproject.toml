@@ -7,6 +7,7 @@ dependencies = [
     "numpy>=1.26",
     "torch>=2.4",
     "open_spiel>=1.5",
+    "chess>=1.10",  # SAN<->UCI conversion in the chess H2H bridge
     # reinfors is installed from a locally built wheel (see README) until it is published.
 ]
 

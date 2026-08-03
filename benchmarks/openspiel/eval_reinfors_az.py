@@ -122,7 +122,9 @@ def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
     root = Node(root_state.clone())
     if net is not None:
         evaluate(root)
-    for _ in range(sims):
+    # matched budget: their MCTS spends simulation #1 expanding+evaluating the root (mcts.cc
+    # MCTSearch), so with a net the separate root evaluate() above consumes one sim here too
+    for _ in range(max(sims - 1, 0) if net is not None else sims):
         node, path = root, []
         # select
         while True:

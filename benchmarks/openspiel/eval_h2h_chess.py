@@ -16,9 +16,15 @@ Three state mirrors, each doing the one job it is authoritative for:
                 dedicated castling ids (vs our in-grid king-slide encoding) need no hardcoded
                 mapping. Wheel-vs-source skew is guarded by the echo desync assertion.
 
-Diversity: our side samples its first `--opening-plies` moves from the visit distribution
-(seeded per game), argmax after; their az bot gets a fresh `--seed` per game. Scoring authority
-is their `Returns:` line.
+Diversity: fixed openings, each played TWICE with colors swapped (paired scoring cancels
+opening imbalance to first order). Openings are seeded uniform-random legal lines of
+`--opening-plies` plies, generated via the pyspiel mirror (their SAN rendering) and forced on
+their side through game_example's positional initial_actions — so BOTH engines play pure
+argmax from the exit; neither side is handicapped with exploration moves. Their az bot still
+gets a fresh `--seed` per game (tie-breaks only). Scoring authority is their `Returns:` line.
+
+Budget parity: their MCTS counts the root expansion+eval as simulation #1 (mcts.cc
+MCTSearch), so our search runs the root eval + sims-1 traversals = sims net evals total.
 
 Smoke test (untrained checkpoints, REQUIRED before the round — validates announcement format,
 HumanBot numeric input, castling ids, draw handling):
@@ -83,7 +89,8 @@ def search(root_env: "rf.Env", net: SweepResnet, sims: int, c_puct: float, devic
     values). Perspective handling is explicit per edge — value flips iff movers differ."""
     root = Node(root_env.fork())
     evaluate(root, net, device)
-    for _ in range(sims):
+    # root eval counts against the budget (their MCTS spends simulation #1 expanding the root)
+    for _ in range(max(sims - 1, 0)):
         node, path = root, []
         while True:
             if node.terminal_value is not None:
@@ -120,24 +127,14 @@ def search(root_env: "rf.Env", net: SweepResnet, sims: int, c_puct: float, devic
     return root.visits
 
 
-def our_move(env: "rf.Env", net: SweepResnet, sims: int, c_puct: float, ply: int,
-             opening_plies: int, rng: random.Random, device: str) -> int:
-    """Returns a reinfors action id: opening plies sample ∝ visits, argmax after."""
+def our_move(env: "rf.Env", net: SweepResnet, sims: int, c_puct: float, device: str) -> int:
+    """Returns a reinfors action id — pure argmax by visits (diversity comes from the fixed
+    openings, not from sampling; sampling here would handicap only our side)."""
     mover = env.active_agents()[0]
     legal = env.legal_actions(mover)
     if len(legal) == 1:
         return legal[0]
     visits = search(env, net, sims, c_puct, device)
-    if ply >= opening_plies:
-        return legal[max(range(len(legal)), key=lambda i: visits[i])]
-    total = sum(visits)
-    if total <= 0:
-        return rng.choice(legal)
-    r = rng.random() * total
-    for i, n in enumerate(visits):
-        r -= n
-        if n > 0 and r <= 0:
-            return legal[i]
     return legal[max(range(len(legal)), key=lambda i: visits[i])]
 
 
@@ -186,8 +183,28 @@ class Mirror:
         return self.os_action_from_san(san)
 
 
+def make_opening(plies: int, rng: random.Random) -> list[str]:
+    """One uniformly-random legal opening line, SANs in THEIR rendering (generated on the
+    pyspiel mirror so the strings exact-match the binary's GetAction). Uniform because
+    generating with either net would bias the position distribution toward that net.
+    Resamples the whole line if it ends the game early (fool's-mate-class accidents)."""
+    while True:
+        m = Mirror()
+        sans: list[str] = []
+        for _ in range(plies):
+            acts = m.os_state.legal_actions()
+            a = acts[rng.randrange(len(acts))]
+            san = m.os_state.action_to_string(m.os_state.current_player(), a)
+            sans.append(san)
+            m.apply_san(san)
+            if m.env.done() or m.os_state.is_terminal():
+                break
+        else:
+            return sans
+
+
 def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims: int,
-             our_sims: int, uct_c: float, opening_plies: int, seed: int, device: str,
+             our_sims: int, uct_c: float, opening_sans: list[str], seed: int, device: str,
              verbose: bool) -> float:
     """Returns our score for one game (1 win / 0.5 draw / 0 loss)."""
     p1, p2 = ("human", "az") if our_player == 0 else ("az", "human")
@@ -200,25 +217,31 @@ def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims
         # bot) — with it the match is no longer net-vs-net.
         "--solve=false",
         "--num_games", "1", "--quiet=false", "--seed", str(seed),
+        # positional args = forced initial actions (their game_example applies them before
+        # play and announces them as "forced action" lines, which the loop below ignores)
+        *opening_sans,
     ]
     proc = subprocess.Popen(
         cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True, bufsize=1
     )
     assert proc.stdin is not None and proc.stderr is not None
     mirror = Mirror()
-    rng = random.Random(seed * 7919 + our_player)
-    ply = 0
+    for san in opening_sans:  # replay the forced opening into all three mirrors
+        mirror.apply_san(san)
+    ply = len(opening_sans)
     pending_id: int | None = None  # their id we submitted, awaiting its echo
 
     def submit() -> None:
         nonlocal pending_id
-        action = our_move(mirror.env, net, our_sims, uct_c, ply, opening_plies, rng, device)
+        action = our_move(mirror.env, net, our_sims, uct_c, device)
         pending_id = mirror.their_id(action)
         proc.stdin.write(f"{pending_id}\n")
         proc.stdin.flush()
 
     try:
-        if our_player == 0:  # their HumanBot blocks on stdin before any announcement
+        if mirror.env.active_agents()[0] == our_player:
+            # we move first at the opening exit: their HumanBot blocks on stdin before any
+            # announcement
             submit()
         for line in proc.stderr:
             m = CHOSE.search(line)
@@ -258,7 +281,8 @@ def main() -> None:
     ap.add_argument("--sims", type=int, default=64, help="their az bot's simulations")
     ap.add_argument("--our-sims", type=int, default=None, help="our side's simulations (default: same)")
     ap.add_argument("--uct-c", type=float, default=2.0)
-    ap.add_argument("--opening-plies", type=int, default=8)
+    ap.add_argument("--opening-plies", type=int, default=6,
+                    help="forced uniform-random opening length; each opening is played twice")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--width", type=int, default=None, help="default: the checkpoint dir's config.json")
@@ -278,19 +302,24 @@ def main() -> None:
     net.eval()
     print(f"our net: SweepResnet w{width} d{depth}  params={sum(p.numel() for p in net.parameters()):,}")
 
+    rng = random.Random(args.seed)
+    openings = [make_opening(args.opening_plies, rng) for _ in range((args.games + 1) // 2)]
+
     score = 0.0
     wins = draws = 0
     for g in range(args.games):
+        opening = openings[g // 2]
         s = play_one(
             net, args.os_path, args.os_checkpoint, our_player=g % 2,
             sims=args.sims, our_sims=args.our_sims or args.sims, uct_c=args.uct_c,
-            opening_plies=args.opening_plies, seed=args.seed + g, device=args.device,
+            opening_sans=opening, seed=args.seed + g, device=args.device,
             verbose=args.verbose,
         )
         score += s
         wins += s == 1.0
         draws += s == 0.5
-        print(f"  game {g + 1:3d}  as P{g % 2}: {'W' if s == 1.0 else 'D' if s == 0.5 else 'L'}", flush=True)
+        print(f"  game {g + 1:3d}  opening {g // 2 + 1:2d} as P{g % 2}: "
+              f"{'W' if s == 1.0 else 'D' if s == 0.5 else 'L'}  [{' '.join(opening)}]", flush=True)
     n = args.games
     print(
         f"chess head-to-head (reinfors net vs open_spiel net, {args.sims} sims both): "
