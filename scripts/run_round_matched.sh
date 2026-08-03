@@ -29,9 +29,11 @@ rm -rf "$OS_OUT"
   --max_steps=0 > "${OS_OUT}.stdout" 2>&1 &
 OS_PID=$!
 sleep "$SECS"
-kill -INT "$OS_PID" 2>/dev/null || true       # graceful: their StopToken saves and exits
-for _ in $(seq 1 60); do kill -0 "$OS_PID" 2>/dev/null || break; sleep 5; done
-kill -TERM "$OS_PID" 2>/dev/null || true
+# HARD wall-clock stop (2026-08-03): SIGINT + grace let actors DRAIN in-flight games,
+# giving this side extra collection minutes beyond the nominal budget — unfair in any
+# equal-wall-clock protocol. SIGKILL at T; both sides checkpoint periodically, so the h2h
+# artifact is "the last checkpoint written before T" — symmetric across stacks.
+kill -9 "$OS_PID" 2>/dev/null || true
 wait "$OS_PID" 2>/dev/null || true
 echo "=== openspiel done ==="
 

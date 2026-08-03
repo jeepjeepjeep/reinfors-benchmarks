@@ -58,9 +58,9 @@ for device in $DEVICES; do
         t1=$(date +%s.%N); r1=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2)
         sleep "$LEG_SECONDS"
         t2=$(date +%s.%N); r2=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2)
-        kill -INT "$pid" 2>/dev/null || true
-        for _ in $(seq 1 30); do kill -0 "$pid" 2>/dev/null || break; sleep 2; done
-        kill -TERM "$pid" 2>/dev/null || true
+        # HARD stop: no SIGINT/grace — their graceful path keeps generating rows while
+        # draining in-flight games (the source of the inflation this script once had).
+        kill -9 "$pid" 2>/dev/null || true
         wait "$pid" 2>/dev/null || true
         # Primary metric: the instrumented evaluator's cumulative counters on stdout
         # ("[inst] req=.. hits=.. fwd=.. rows=.."): rows/leg = net rows/s, the same metric as
