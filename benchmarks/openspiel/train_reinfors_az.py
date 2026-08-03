@@ -77,7 +77,7 @@ def main() -> None:
     # topology knobs
     ap.add_argument("--n-games", type=int, default=8, help="parallel games (their --actors)")
     ap.add_argument("--collect-size", type=int, default=512, help="records per stream batch")
-    ap.add_argument("--depth", default="none", help="stream depth: int | none")
+    ap.add_argument("--stream-depth", default="none", help="stream depth: int | none")
     ap.add_argument("--infer-cache", type=int, default=0, help="engine infer-cache entries (0 = off)")
     ap.add_argument("--checkpoint-every", type=float, default=60.0, help="seconds between checkpoints")
     # net architecture — MUST match the OpenSpiel side's --nn_width/--nn_depth (the round
@@ -143,7 +143,7 @@ def main() -> None:
         return logits.cpu().numpy(), values.cpu().numpy()
 
 
-    depth = None if str(args.depth).lower() in ("none", "inf") else int(args.depth)
+    depth = None if str(args.stream_depth).lower() in ("none", "inf") else int(args.stream_depth)
     log = (out / "learner.jsonl").open("w")
     t0 = time.perf_counter()
     deadline = t0 + args.minutes * 60.0
