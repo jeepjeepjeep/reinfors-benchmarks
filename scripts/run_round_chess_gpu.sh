@@ -41,7 +41,7 @@ trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 
 echo "=== openspiel: chess ${MINUTES}m actors=${OS_ACTORS} batch=${OS_BATCH} w${WIDTH} d${DEPTH} -> ${OS_OUT} ==="
 rm -rf "$OS_OUT"
-taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
   --actors="$OS_ACTORS" --evaluators=0 --devices=/cuda:0 \
   --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
   --temperature=1 --temperature_drop=10 \

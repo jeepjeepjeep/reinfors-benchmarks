@@ -17,6 +17,7 @@ checkpoint files.
 import argparse
 import copy
 import json
+import os
 import sys
 import threading
 import time
@@ -86,9 +87,16 @@ def main() -> None:
     ap.add_argument("--depth", type=int, default=1)
     args = ap.parse_args()
 
+    if rf.core_build_profile() != "release" and not os.environ.get("REINFORS_ALLOW_DEBUG"):
+        sys.exit("reinfors is a DEBUG build — numbers would be garbage. "
+                 "maturin develop --release, or REINFORS_ALLOW_DEBUG=1 for wiring tests.")
+
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    (out / "config.json").write_text(json.dumps(vars(args), indent=2))
+    versions = {"reinfors": rf.core_version(), "reinfors_profile": rf.core_build_profile(),
+                "torch": torch.__version__}
+    (out / "config.json").write_text(json.dumps(vars(args) | versions, indent=2))
+    print(f"versions: {versions}")
     seed_all()
     torch.manual_seed(args.seed)
 

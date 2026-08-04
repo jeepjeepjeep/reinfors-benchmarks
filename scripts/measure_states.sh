@@ -33,7 +33,7 @@ for entry in $ACTORS; do
   out="$OUT_ROOT/$tag"
   echo "=== $tag (${WARMUP}s warmup + ${WINDOW}s window) ==="
   rm -rf "$out"
-  taskset -c "$CORES" "$BIN" --game="$GAME" --path="$out" \
+  OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c "$CORES" "$BIN" --game="$GAME" --path="$out" \
     --actors="$actors" --evaluators=0 --devices=/cuda:0 \
     --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
     --temperature=1 --temperature_drop=10 \
