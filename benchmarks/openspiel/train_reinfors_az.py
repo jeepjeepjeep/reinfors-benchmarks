@@ -37,23 +37,25 @@ class ReplayBuffer:
     def __init__(self, capacity: int, dim: int, actions: int, seed: int) -> None:
         self.obs = np.zeros((capacity, dim), dtype=np.float32)
         self.pi = np.zeros((capacity, actions), dtype=np.float64)
+        self.legal = np.zeros((capacity, actions), dtype=bool)
         self.z = np.zeros(capacity, dtype=np.float64)
         self.capacity = capacity
         self.size = 0
         self.head = 0
         self.rng = np.random.default_rng(seed)
 
-    def push(self, obs: np.ndarray, pi: np.ndarray, z: np.ndarray) -> None:
+    def push(self, obs: np.ndarray, pi: np.ndarray, z: np.ndarray, legal: np.ndarray) -> None:
         for i in range(obs.shape[0]):
             self.obs[self.head] = obs[i]
             self.pi[self.head] = pi[i]
+            self.legal[self.head] = legal[i]
             self.z[self.head] = z[i]
             self.head = (self.head + 1) % self.capacity
             self.size = min(self.size + 1, self.capacity)
 
-    def sample(self, n: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def sample(self, n: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         idx = self.rng.integers(0, self.size, size=n)
-        return self.obs[idx], self.pi[idx], self.z[idx]
+        return self.obs[idx], self.pi[idx], self.z[idx], self.legal[idx]
 
 
 def main() -> None:
@@ -117,7 +119,14 @@ def main() -> None:
     n_params = sum(p.numel() for p in net.parameters())
     print(f"net: SweepResnet w{args.width} d{args.depth} head={head_actions} params={n_params:,}")
     # value head participates here (unlike the review benchmark where it was discarded)
-    optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    # Weight decay mirrors their manual L2 term (model.cc: skip any param whose NAME contains
+    # "bias" — so BN gammas, named "weight", DO decay). Adam's coupled weight_decay adds
+    # wd*w to the grad, the exact gradient of their wd*Σw²/2 loss term.
+    decay = [q for name, q in net.named_parameters() if "bias" not in name]
+    no_decay = [q for name, q in net.named_parameters() if "bias" in name]
+    optimizer = torch.optim.Adam(
+        [{"params": decay, "weight_decay": args.weight_decay},
+         {"params": no_decay, "weight_decay": 0.0}], lr=args.lr)
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
 
     engine = rf.Engine(
@@ -173,7 +182,11 @@ def main() -> None:
                 collector_net.load_state_dict(net.state_dict())
             engine.weights_updated()  # cache contract: entries from the old weights must not serve
             obs, pi, z = batch.obs, batch.policy_targets, batch.value_targets
-            buffer.push(obs, pi, z)
+            counts = np.diff(batch.legal_offsets)
+            rows = np.repeat(np.arange(obs.shape[0]), counts)
+            legal = np.zeros((obs.shape[0], actions), dtype=bool)
+            legal[rows, batch.legal_ids] = True
+            buffer.push(obs, pi, z, legal)
             states += obs.shape[0]
             # engine-side net telemetry: rows = forwards (no cache), calls = pooled batches
             infer_calls += batch.telemetry["infer_calls"]
@@ -187,13 +200,18 @@ def main() -> None:
             debt += args.reuse * obs.shape[0]
             while debt >= args.batch_size and time.perf_counter() < deadline:
                 debt -= args.batch_size
-                bo, bp, bz = buffer.sample(args.batch_size)
+                bo, bp, bz, bl = buffer.sample(args.batch_size)
                 x = torch.from_numpy(bo).reshape(-1, c, h, w).to(args.device)
                 target_pi = torch.from_numpy(bp).float().to(args.device)
-                if head_actions != actions:  # pad pi with zeros over the dead head slots
+                mask = torch.from_numpy(bl).to(args.device)
+                if head_actions != actions:  # pad pi/mask with zeros over the dead head slots
                     target_pi = torch.nn.functional.pad(target_pi, (0, head_actions - actions))
+                    mask = torch.nn.functional.pad(mask, (0, head_actions - actions))
                 target_z = torch.from_numpy(bz).float().to(args.device)
                 logits, values = net.heads(x)
+                # their loss exactly: illegal logits to -(1<<16) before log_softmax (model.cc
+                # masks in forward) => softmax support = legal actions only
+                logits = logits.masked_fill(~mask, -(2.0 ** 16))
                 policy_loss = -(target_pi * torch.log_softmax(logits, dim=-1)).sum(-1).mean()
                 value_loss = torch.nn.functional.mse_loss(values, target_z)
                 optimizer.zero_grad()

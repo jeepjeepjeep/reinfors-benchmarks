@@ -4,7 +4,8 @@
 #   - operating point: w256 d8 resnet (AZResnetReplica <-> their --nn_width/--nn_depth), CUDA
 #   - each side its own best parallelism: OS_ACTORS (from the states/s measurement — set it
 #     explicitly below), reinfors n_games=64
-#   - infer cache 32768 BOTH sides (capacity probe: chess saturates ~32k; 262k wastes ~4.3GB)
+#   - infer cache 262144 BOTH sides (their default; cache is architecture, not a matched
+#     knob — hit rate is monotone in capacity and host RAM is not a constraint here)
 #   - matched refresh cadence: one weight refresh + cache clear per replay_buffer_size/reuse
 #     = 21,845 collected states (their learner's own pacing; ours via --collect-size)
 #   - checkpoint_freq=1 (their side): at chess-w256 rates a learn step is ~15+ min apart, so

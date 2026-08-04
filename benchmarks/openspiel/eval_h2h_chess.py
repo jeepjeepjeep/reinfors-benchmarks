@@ -292,6 +292,8 @@ def main() -> None:
     ap.add_argument("--depth", type=int, default=None)
     ap.add_argument("--verbose", action="store_true", help="print every ply")
     args = ap.parse_args()
+    if args.games % 2:
+        ap.error("--games must be even: every opening is played once per color")
 
     cfg_path = Path(args.rf_checkpoint).parent / "config.json"
     cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
