@@ -8,6 +8,11 @@
 #   CORES=0-3 WIDTH=256 DEPTH=8 NGAMES="64 128" MINUTES=20 bash scripts/measure_states_rf.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# SMT resets to ON every boot; measurements/rounds are defined at SMT-off, cores 0-3.
+if [[ -r /sys/devices/system/cpu/smt/active && "$(cat /sys/devices/system/cpu/smt/active)" != "0" ]]; then
+  echo "SMT is ON — condition mismatch. Fix: sudo bash -c 'echo off > /sys/devices/system/cpu/smt/control'" >&2
+  exit 1
+fi
 PY=.venv23/bin/python
 CORES="${CORES:-0-3}"
 WIDTH="${WIDTH:-256}"

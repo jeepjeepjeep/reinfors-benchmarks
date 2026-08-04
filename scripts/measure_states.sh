@@ -11,6 +11,11 @@
 #   CORES=0-3 GAME=chess WIDTH=256 DEPTH=8 ACTORS="16 32 64 64:32" bash scripts/measure_states.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# SMT resets to ON every boot; measurements/rounds are defined at SMT-off, cores 0-3.
+if [[ -r /sys/devices/system/cpu/smt/active && "$(cat /sys/devices/system/cpu/smt/active)" != "0" ]]; then
+  echo "SMT is ON — condition mismatch. Fix: sudo bash -c 'echo off > /sys/devices/system/cpu/smt/control'" >&2
+  exit 1
+fi
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 CORES="${CORES:-0-3}"
 GAME="${GAME:-chess}"

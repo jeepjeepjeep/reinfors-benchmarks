@@ -18,6 +18,11 @@
 #   MINUTES=120 OS_ACTORS=32 bash scripts/run_round_chess_gpu.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# SMT resets to ON every boot; measurements/rounds are defined at SMT-off, cores 0-3.
+if [[ -r /sys/devices/system/cpu/smt/active && "$(cat /sys/devices/system/cpu/smt/active)" != "0" ]]; then
+  echo "SMT is ON — condition mismatch. Fix: sudo bash -c 'echo off > /sys/devices/system/cpu/smt/control'" >&2
+  exit 1
+fi
 MINUTES="${MINUTES:-120}"
 OS_ACTORS="${OS_ACTORS:?set OS_ACTORS from the states/s measurement}"
 OS_BATCH="${OS_BATCH:-$OS_ACTORS}"  # decoupled if the measurement picked e.g. 64:32
