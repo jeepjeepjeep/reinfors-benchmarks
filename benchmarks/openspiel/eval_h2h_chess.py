@@ -43,6 +43,7 @@ import sys
 from pathlib import Path
 
 import chess as pychess
+import chess.pgn as pychess_pgn
 import numpy as np
 import pyspiel
 import torch
@@ -203,6 +204,21 @@ def make_opening(plies: int, rng: random.Random) -> list[str]:
             return sans
 
 
+def write_pgn(board: pychess.Board, our_white: bool, score: float, game_no: int,
+              opening_no: int, path: str) -> None:
+    """Append the finished game (full move stack incl. the forced opening) as PGN."""
+    game = pychess_pgn.Game.from_board(board)
+    game.headers["Event"] = "reinfors vs open_spiel h2h"
+    game.headers["Round"] = str(game_no)
+    game.headers["White"] = "reinfors" if our_white else "open_spiel"
+    game.headers["Black"] = "open_spiel" if our_white else "reinfors"
+    white_score = score if our_white else 1.0 - score
+    game.headers["Result"] = {1.0: "1-0", 0.5: "1/2-1/2", 0.0: "0-1"}[white_score]
+    game.headers["Annotator"] = f"opening {opening_no} (forced 6 plies)"
+    with open(path, "a") as f:
+        f.write(str(game) + "\n\n")
+
+
 def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_white: bool, sims: int,
              our_sims: int, uct_c: float, opening_sans: list[str], seed: int, device: str,
              az_device: str, verbose: bool) -> float:
@@ -273,6 +289,7 @@ def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_white: bool, sims
             r = RETURNS.search(line)
             if r:
                 ours = float(r.group(1 + their_us))
+                play_one.last_board = mirror.board  # full move stack for PGN export
                 return 1.0 if ours > 0 else (0.5 if ours == 0 else 0.0)
         raise RuntimeError("game ended without a Returns line")
     finally:
@@ -298,6 +315,8 @@ def main() -> None:
     ap.add_argument("--width", type=int, default=None, help="default: the checkpoint dir's config.json")
     ap.add_argument("--depth", type=int, default=None)
     ap.add_argument("--verbose", action="store_true", help="print every ply")
+    ap.add_argument("--pgn", default="results/h2h_games.pgn",
+                    help='append every game as PGN here ("" to disable)')
     args = ap.parse_args()
     if args.games % 2:
         ap.error("--games must be even: every opening is played once per color")
@@ -328,6 +347,8 @@ def main() -> None:
             opening_sans=opening, seed=args.seed + g, device=args.device,
             az_device=args.az_device, verbose=args.verbose,
         )
+        if args.pgn:
+            write_pgn(play_one.last_board, our_white, s, g + 1, g // 2 + 1, args.pgn)
         score += s
         wins += s == 1.0
         draws += s == 0.5
