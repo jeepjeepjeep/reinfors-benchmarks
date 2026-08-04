@@ -1,0 +1,22 @@
+diff --git a/open_spiel/examples/alpha_zero_torch_game_example.cc b/open_spiel/examples/alpha_zero_torch_game_example.cc
+index c9fd150f..7bfd4485 100644
+--- a/open_spiel/examples/alpha_zero_torch_game_example.cc
++++ b/open_spiel/examples/alpha_zero_torch_game_example.cc
+@@ -47,6 +47,8 @@ ABSL_FLAG(int, max_memory_mb, 1000,
+           "The maximum memory used before cutting the search short.");
+ ABSL_FLAG(int, az_checkpoint, -1, "Checkpoint of AZ model.");
+ ABSL_FLAG(int, az_batch_size, 1, "Batch size of AZ inference.");
++ABSL_FLAG(std::string, az_device, "/cpu:0",
++          "Device for AZ inference (e.g. /cuda:0).");
+ ABSL_FLAG(int, az_threads, 1, "Number of threads to run for AZ inference.");
+ ABSL_FLAG(int, az_cache_size, 16384, "Cache size of AZ algorithm.");
+ ABSL_FLAG(int, az_cache_shards, 1, "Cache shards of AZ algorithm.");
+@@ -198,7 +200,7 @@ int main(int argc, char **argv) {
+   open_spiel::algorithms::torch_az::DeviceManager device_manager;
+   device_manager.AddDevice(open_spiel::algorithms::torch_az::VPNetModel(
+       *game, absl::GetFlag(FLAGS_az_path), absl::GetFlag(FLAGS_az_graph_def),
+-      "/cpu:0"));
++      absl::GetFlag(FLAGS_az_device)));
+   device_manager.Get(0, 0)->LoadCheckpoint(absl::GetFlag(FLAGS_az_checkpoint));
+   auto az_evaluator =
+       std::make_shared<open_spiel::algorithms::torch_az::VPNetEvaluator>(

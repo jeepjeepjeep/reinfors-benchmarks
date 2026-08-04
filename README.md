@@ -3,6 +3,15 @@
 Systems benchmarks comparing [reinfors](../reinfors) against peer RL frameworks. Kept out of the
 reinfors repo so reinfors takes no benchmark-only dependencies (OpenSpiel, etc.).
 
+> **⚠ CORRECTIONS (2026-08-03).** Two classes of results below are retracted; sections are
+> individually marked. (1) All pre-2026-08 rounds ran against a **broken OpenSpiel** — its
+> C++ AZ GPU path shipped a staging bug (fixed upstream Oct 2025) and could not be built from
+> master; conclusions like "reinfors 1.85× states/s, 0.86 h2h" describe a crippled opponent
+> and are **not valid**. (2) All OpenSpiel throughput numbers from the phase-0 GPU sweeps
+> were **inflated 18–31%** by a harness bug (SIGINT drain + nominal-time denominator, fixed
+> in PR #1). Corrected, like-for-like results are in the final section; every retained
+> number there is measured under the hard-kill + interior-window protocol.
+
 ## What is (and isn't) being measured
 
 These are **systems benchmarks**: self-play data-generation throughput at a matched computational
@@ -240,6 +249,10 @@ Python in the loop — is cheap when calls are pooled; the costs that matter liv
 formation, per-call plumbing, and redundant forwards.
 
 
+> **⚠ RETRACTED (see banner):** the rounds below ran against pre-fix OpenSpiel (staging-bugged
+> GPU path era, CPU-only builds). Kept for methodology archaeology only; none of the
+> cross-stack conclusions (throughput or strength) may be cited.
+
 ## AlphaZero training comparison — quick round (2026-07-24, Apple silicon)
 
 Like-for-like AZ training: connect4, matched search knobs (64 sims, c_puct 2.0, noise 0.25/0.3,
@@ -397,6 +410,9 @@ Protocol on the box: one process at a time, pinned to the same physical-core set
 the libtorch kernel generation of the OpenSpiel build. The head-to-head rounds (connect4
 calibration, then chess) run at the operating point Phase 0 selects.
 
+> **⚠ OpenSpiel numbers below inflated 18–31% (drain artifact, PR #1) — corrected table in
+> the final section. reinfors-side numbers were internally timed and stand.**
+
 ### Phase 0 results — 2026-07-31, g5.2xlarge (4 cores SMT-off, A10G), chess, 64 sims, cache OFF
 
 reinfors: release build, torch 2.3.0+cu121, AZ engine legs (20s+, medians of 3 where noted).
@@ -430,6 +446,10 @@ Net rows/s, chess depth-8, CUDA (each column = batch: reinfors n_games / their a
   w128 d8. Before the rounds: repeat legs for medians + the learner-contention check
   (SGD shares the A10G with collection).
 
+> **⚠ Partially retracted:** the "OpenSpiel at 96% of ceiling" framing rested on the
+> drain-inflated 14.6k; see the corrected section. The F==B null result and the residual
+> decomposition (reinfors-side, internally timed) stand.
+
 ### Phase 0 addendum — overlap hypothesis refuted; the gap is the callback path (2026-07-31)
 
 Two-engine experiment (threaded engines sharing the net — script-level collect_async
@@ -445,3 +465,67 @@ efficiency, not scheduling. Prime suspect in ours: the infer contract's float64 
 (fp32->fp64 conversion + double-width D2H of the 64x4674 policy every call) + numpy/pyo3
 plumbing. Roadmap implication: f32 infer outputs / slimmer callback (~up to +25-30% at this
 shape) is the cheap fix; collect_async is NOT motivated by this workload (<=8% here).
+
+
+## CORRECTED results — 2026-08-03, hard-kill + interior-window protocol (PR #1)
+
+The drain artifact: sweep legs stopped OpenSpiel with SIGINT + grace; its actors kept
+generating rows while draining in-flight games, and the summary divided total rows by the
+NOMINAL leg time (reinfors legs were internally timed — an asymmetric bias in OpenSpiel's
+favor, 18–31% depending on config). Discovered when their single inference thread logged
+135.8s of busy time inside a "120s" leg. All numbers below: same box (g5.2xlarge, A10G, SMT
+off, cores 0-3), same session, chess d8, 64 sims, cache off (SEE CAVEAT BELOW — this
+condition invalidates cross-stack reads of the table), 120s measured windows both sides,
+matched grid. reinfors = f32-contract build (PR #136); OpenSpiel = master 112b7770
+with restored build glue.
+
+| batch (rf n_games / os actors) | reinfors rows/s | openspiel rows/s | Δ |
+|---|---|---|---|
+| w128, 32  | 11,294 | **11,977** | OS +6% |
+| w128, 64  | **19,341** | 18,027 | RF +7% |
+| w128, 128 | **26,755** | 20,694 | RF +29% |
+| w256, 32  | **10,952** | 9,288  | RF +18% |
+| w256, 64  | **12,367** | 10,231 | RF +21% |
+| w256, 128 | **11,620** | 11,316 | RF +3% (~tie) |
+
+Each side at its own best config: w128 RF 26,755 vs OS 20,694 (**+29%**); w256 RF 12,367 vs
+OS 11,316 (**+9%**) — and reinfors does this on ~1 busy core against their 4.
+
+> **CACHE-OFF CAVEAT (2026-08-03, second correction layer): the cross-stack cells above are
+> NOT comparable as useful search throughput.** OpenSpiel's MCTS calls `Prior()` at expansion
+> and `Evaluate()` at the leaf — two separate `Inference()` requests on the SAME state
+> (mcts.cc:282/373); its LRU cache is the mechanism that merges the pair into one forward.
+> With `--inference_cache=0` a "row" is therefore ~half a search node for OpenSpiel and one
+> full node for reinfors (single both-heads infer contract) — the units differ per stack, so
+> no cache-off rows/s comparison across stacks measures relative AZ capability, in either
+> direction. What survives: within-stack deltas (f32 A/C/B/F arms, boundary probe, the
+> batch-128 kernel regression) and the drain-protocol findings. The decision-relevant
+> cross-stack metric is round-true states/s — cache ON both sides, each side its own
+> best capacity (262144 both as it happens: their default, and for reinfors hit rate is
+> monotone in capacity — 13.6% @32k -> 14.1% @262k — with the ~4.3GB of dense entries in
+> host RAM the box doesn't need elsewhere) — measured by scripts/measure_states.sh +
+> scripts/measure_states_rf.sh.
+
+Every cell is explained:
+- **w128 b32 (their one win, +6%)**: the latency-bound cell where async overlap genuinely
+  pays — reinfors' lockstep exposes a ~7% serial CPU gap there; their actors hide it.
+- **w256 b128 curvature**: reinfors regresses n64→n128 (−6.0%) because the batch-128 kernels
+  themselves regress (65.5 → 70.0 µs/row measured; A10G sweet spot is batch 64) and reinfors
+  delivers full 127.5-row batches. OpenSpiel "scales" at a128 only because its deadline
+  batcher never reaches the penalized batch size (~57/64 fill even at a64).
+- **plies vs rows**: their completed-game production collapses with actor count (w256:
+  9,101 plies at a32 → 1,330 at a128) — rows/s overstates their TRAINING-relevant rate;
+  states/s per config is measured separately before the round (scripts/measure_states.sh).
+
+**Boundary probe (nn-boundary-probe, tch/Rust-native inference, same session):** a fully
+Rust pipeline (zero Python) equals the Python-callback path within noise (~12.1k rows/s
+both; per-call 5.26–5.35 ms = 4.84–4.96 infer + 0.41–0.48 engine). The pooled Python
+boundary costs ~14 µs/call — unobservable at a ±80 µs noise floor. The pure-forward ceiling
+is identical for tch and Python torch (15,250 vs 15,210 rows/s: same kernels). Conclusion:
+the boundary is not a lever; reinfors' engine (0.42 ms/call; 168k rows/s with a no-op net)
+is not the bottleneck; the forward is ~92% of wall at the operating point.
+
+**Protocol going forward** (all encoded in scripts): hard SIGKILL at the deadline on both
+stacks (time budgets by termination, not cooperation; h2h artifact = last periodic
+checkpoint before T), interior-window throughput measurement, no-orphan EXIT traps,
+/cuda:0 device strings, infer cache 32768 for chess (saturation-measured).
