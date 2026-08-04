@@ -30,7 +30,7 @@ Smoke test (untrained checkpoints, REQUIRED before the round — validates annou
 HumanBot numeric input, castling ids, draw handling):
 
   uv run python benchmarks/openspiel/eval_h2h_chess.py results/rf_smoke/ckpt_60s.pt \\
-      results/os_smoke --os-checkpoint 0 --games 2 --sims 8 --device cuda
+      results/os_smoke --os-checkpoint 0 --games 2 --sims 8 --device cuda --az-device /cuda:0
 """
 
 import argparse
@@ -205,7 +205,7 @@ def make_opening(plies: int, rng: random.Random) -> list[str]:
 
 def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims: int,
              our_sims: int, uct_c: float, opening_sans: list[str], seed: int, device: str,
-             verbose: bool) -> float:
+             az_device: str, verbose: bool) -> float:
     """Returns our score for one game (1 win / 0.5 draw / 0 loss)."""
     p1, p2 = ("human", "az") if our_player == 0 else ("az", "human")
     cmd = [
@@ -217,6 +217,7 @@ def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims
         # bot) — with it the match is no longer net-vs-net.
         "--solve=false",
         "--num_games", "1", "--quiet=false", "--seed", str(seed),
+        "--az_device", az_device,
         # positional args = forced initial actions (their game_example applies them before
         # play and announces them as "forced action" lines, which the loop below ignores)
         *opening_sans,
@@ -284,7 +285,9 @@ def main() -> None:
     ap.add_argument("--opening-plies", type=int, default=6,
                     help="forced uniform-random opening length; each opening is played twice")
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--device", default="cpu")
+    ap.add_argument("--device", default="cpu", help="our side's torch device")
+    ap.add_argument("--az-device", default="/cpu:0",
+                    help='their side (patched flag, their notation: "/cuda:0"); on the box pass both cuda')
     ap.add_argument("--width", type=int, default=None, help="default: the checkpoint dir's config.json")
     ap.add_argument("--depth", type=int, default=None)
     ap.add_argument("--verbose", action="store_true", help="print every ply")
@@ -313,7 +316,7 @@ def main() -> None:
             net, args.os_path, args.os_checkpoint, our_player=g % 2,
             sims=args.sims, our_sims=args.our_sims or args.sims, uct_c=args.uct_c,
             opening_sans=opening, seed=args.seed + g, device=args.device,
-            verbose=args.verbose,
+            az_device=args.az_device, verbose=args.verbose,
         )
         score += s
         wins += s == 1.0

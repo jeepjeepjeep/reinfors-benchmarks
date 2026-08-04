@@ -75,6 +75,12 @@ if git apply --check ../../scripts/instrument_vpevaluator.patch 2>/dev/null; the
   git apply ../../scripts/instrument_vpevaluator.patch
 fi
 
+# --az_device flag for the h2h bridge (their example hardcodes /cpu:0; example driver only,
+# algorithm code untouched — w256 batch-1 chess on CPU makes the 50-game h2h take hours).
+if git apply --check ../../scripts/az_device_game_example.patch 2>/dev/null; then
+  git apply ../../scripts/az_device_game_example.patch
+fi
+
 # fetches abseil/json/... plus (with the flags above) libtorch and libnop; cached + resumable
 ./install.sh
 
