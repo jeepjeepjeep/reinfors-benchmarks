@@ -236,9 +236,13 @@ def main() -> None:
                     )
                     + "\n"
                 )
-            if time.perf_counter() - t0 >= next_ckpt:
-                torch.save(net.state_dict(), out / f"ckpt_{int(next_ckpt)}s.pt")
-                next_ckpt += args.checkpoint_every
+            elapsed = time.perf_counter() - t0
+            if elapsed >= next_ckpt:
+                # label with ACTUAL elapsed time — the check only runs once per collect batch
+                # (~133s at chess collect-size), so the next_ckpt counter lags wall-clock and
+                # its labels would drift to ~half of real time over a long round
+                torch.save(net.state_dict(), out / f"ckpt_{int(elapsed)}s.pt")
+                next_ckpt = elapsed + args.checkpoint_every
     torch.save(net.state_dict(), out / "ckpt_final.pt")
     log.close()
     wall = time.perf_counter() - t0
