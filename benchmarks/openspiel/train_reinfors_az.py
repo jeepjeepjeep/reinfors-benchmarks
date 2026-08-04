@@ -230,6 +230,8 @@ def main() -> None:
                             "infer_calls": infer_calls,
                             "infer_rows": infer_rows,
                             "infer_seconds": infer_seconds,
+                            "cache_hits": cache_hits,
+                            "cache_lookups": cache_lookups,
                         }
                     )
                     + "\n"
