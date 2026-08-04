@@ -203,11 +203,18 @@ def make_opening(plies: int, rng: random.Random) -> list[str]:
             return sans
 
 
-def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims: int,
+def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_white: bool, sims: int,
              our_sims: int, uct_c: float, opening_sans: list[str], seed: int, device: str,
              az_device: str, verbose: bool) -> float:
-    """Returns our score for one game (1 win / 0.5 draw / 0 loss)."""
-    p1, p2 = ("human", "az") if our_player == 0 else ("az", "human")
+    """Returns our score for one game (1 win / 0.5 draw / 0 loss).
+
+    Player-index conventions DIFFER between the stacks (smoke-test discovery): open_spiel
+    chess maps BLACK to player 0 and WHITE to player 1 (chess.h ColorToPlayer), while
+    reinfors maps WHITE to agent 0. Both are tracked explicitly below; --player1 drives
+    their player 0 = black."""
+    their_us = 1 if our_white else 0  # their index: white=1, black=0
+    rf_us = 0 if our_white else 1     # rf index:    white=0, black=1
+    p1, p2 = ("az", "human") if our_white else ("human", "az")
     cmd = [
         str(BIN), "--game", "chess",
         "--player1", p1, "--player2", p2,
@@ -240,7 +247,7 @@ def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims
         proc.stdin.flush()
 
     try:
-        if mirror.env.active_agents()[0] == our_player:
+        if mirror.env.active_agents()[0] == rf_us:
             # we move first at the opening exit: their HumanBot blocks on stdin before any
             # announcement
             submit()
@@ -248,7 +255,7 @@ def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims
             m = CHOSE.search(line)
             if m:
                 player, san = int(m.group(1)), m.group(2)
-                if player == our_player:
+                if player == their_us:
                     echoed = mirror.os_action_from_san(san)
                     if echoed != pending_id:
                         raise RuntimeError(
@@ -260,12 +267,12 @@ def play_one(net: SweepResnet, os_path: str, os_ckpt: int, our_player: int, sims
                 ply += 1
                 if verbose:
                     print(f"    ply {ply:3d} P{player} {san}", flush=True)
-                if not mirror.env.done() and mirror.env.active_agents()[0] == our_player:
+                if not mirror.env.done() and mirror.env.active_agents()[0] == rf_us:
                     submit()
                 continue
             r = RETURNS.search(line)
             if r:
-                ours = float(r.group(1 + our_player))
+                ours = float(r.group(1 + their_us))
                 return 1.0 if ours > 0 else (0.5 if ours == 0 else 0.0)
         raise RuntimeError("game ended without a Returns line")
     finally:
@@ -314,8 +321,9 @@ def main() -> None:
     wins = draws = 0
     for g in range(args.games):
         opening = openings[g // 2]
+        our_white = g % 2 == 0
         s = play_one(
-            net, args.os_path, args.os_checkpoint, our_player=g % 2,
+            net, args.os_path, args.os_checkpoint, our_white=our_white,
             sims=args.sims, our_sims=args.our_sims or args.sims, uct_c=args.uct_c,
             opening_sans=opening, seed=args.seed + g, device=args.device,
             az_device=args.az_device, verbose=args.verbose,
@@ -323,7 +331,7 @@ def main() -> None:
         score += s
         wins += s == 1.0
         draws += s == 0.5
-        print(f"  game {g + 1:3d}  opening {g // 2 + 1:2d} as P{g % 2}: "
+        print(f"  game {g + 1:3d}  opening {g // 2 + 1:2d} as {'white' if our_white else 'black'}: "
               f"{'W' if s == 1.0 else 'D' if s == 0.5 else 'L'}  [{' '.join(opening)}]", flush=True)
     n = args.games
     print(
