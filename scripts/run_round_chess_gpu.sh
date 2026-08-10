@@ -28,6 +28,9 @@ OS_ACTORS="${OS_ACTORS:?set OS_ACTORS from the states/s measurement}"
 OS_BATCH="${OS_BATCH:-$OS_ACTORS}"  # decoupled if the measurement picked e.g. 64:32
 RF_NGAMES="${RF_NGAMES:-64}"
 RF_NGROUPS="${RF_NGROUPS:-1}"
+# reinfors leg seed (their trainer has no seed surface: every OpenSpiel run is a fresh
+# draw by design). The seed lands in BOTH output names so reruns never clobber artifacts.
+ROUND_SEED="${ROUND_SEED:-0}"
 case "$RF_NGROUPS" in 1|2) ;; *) echo "RF_NGROUPS must be 1 or 2 (got $RF_NGROUPS)" >&2; exit 1 ;; esac
 for v in OS_ACTORS OS_BATCH RF_NGAMES; do
   case "${!v}" in ''|*[!0-9]*|0) echo "$v must be a positive integer (got '${!v}')" >&2; exit 1 ;; esac
@@ -47,13 +50,13 @@ RF_CACHE=262144
 SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 PY=.venv23/bin/python
-OS_OUT="results/round_chess_os_${MINUTES}m_a${OS_ACTORS}_b${OS_BATCH}"
-RF_OUT="results/round_chess_rf_${MINUTES}m_n${RF_NGAMES}_g${RF_NGROUPS}"
+OS_OUT="results/round_chess_os_${MINUTES}m_a${OS_ACTORS}_b${OS_BATCH}_s${ROUND_SEED}"
+RF_OUT="results/round_chess_rf_${MINUTES}m_n${RF_NGAMES}_g${RF_NGROUPS}_s${ROUND_SEED}"
 
 ACTIVE_PID=""
 trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 
-echo "=== round plan: ${MINUTES}m/side, w${WIDTH} d${DEPTH} — openspiel actors=${OS_ACTORS} batch=${OS_BATCH} -> ${OS_OUT} | reinfors n_games=${RF_NGAMES} n_groups=${RF_NGROUPS} -> ${RF_OUT} ==="
+echo "=== round plan: ${MINUTES}m/side, w${WIDTH} d${DEPTH}, seed ${ROUND_SEED} — openspiel actors=${OS_ACTORS} batch=${OS_BATCH} -> ${OS_OUT} | reinfors n_games=${RF_NGAMES} n_groups=${RF_NGROUPS} -> ${RF_OUT} ==="
 echo "=== openspiel leg starting ==="
 rm -rf "$OS_OUT"
 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
@@ -79,7 +82,7 @@ echo "=== reinfors: chess ${MINUTES}m n_games=${RF_NGAMES} n_groups=${RF_NGROUPS
 rm -rf "$RF_OUT"
 taskset -c 0-3 $PY benchmarks/openspiel/train_reinfors_az.py \
   --minutes "$MINUTES" --out "$RF_OUT" --device cuda --game chess \
-  --seed 0 --n-games "$RF_NGAMES" --n-groups "$RF_NGROUPS" --sims 64 --c-puct 2.0 \
+  --seed "$ROUND_SEED" --n-games "$RF_NGAMES" --n-groups "$RF_NGROUPS" --sims 64 --c-puct 2.0 \
   --width $WIDTH --depth $DEPTH \
   --infer-cache $RF_CACHE --collect-size 21845 --checkpoint-every 60 \
   > "${RF_OUT}.stdout" 2>&1 &
