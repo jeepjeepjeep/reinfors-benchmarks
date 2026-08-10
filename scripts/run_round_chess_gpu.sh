@@ -27,6 +27,7 @@ MINUTES="${MINUTES:-120}"
 OS_ACTORS="${OS_ACTORS:?set OS_ACTORS from the states/s measurement}"
 OS_BATCH="${OS_BATCH:-$OS_ACTORS}"  # decoupled if the measurement picked e.g. 64:32
 RF_NGAMES="${RF_NGAMES:-64}"
+RF_NGROUPS="${RF_NGROUPS:-1}"
 WIDTH=256
 DEPTH=8
 # Cache is ARCHITECTURE, not a matched knob: their evaluator issues Prior+Evaluate as two
@@ -40,7 +41,7 @@ SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 PY=.venv23/bin/python
 OS_OUT="results/round_chess_os_${MINUTES}m_a${OS_ACTORS}_b${OS_BATCH}"
-RF_OUT="results/round_chess_rf_${MINUTES}m_n${RF_NGAMES}"
+RF_OUT="results/round_chess_rf_${MINUTES}m_n${RF_NGAMES}_g${RF_NGROUPS}"
 
 ACTIVE_PID=""
 trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
@@ -66,11 +67,11 @@ ACTIVE_PID=""
 echo "=== openspiel done (hard deadline); checkpoints: ==="
 ls -t "$OS_OUT"/checkpoint-* 2>/dev/null | head -3 || echo "WARNING: no checkpoints found"
 
-echo "=== reinfors: chess ${MINUTES}m n_games=${RF_NGAMES} -> ${RF_OUT} ==="
+echo "=== reinfors: chess ${MINUTES}m n_games=${RF_NGAMES} n_groups=${RF_NGROUPS} -> ${RF_OUT} ==="
 rm -rf "$RF_OUT"
 taskset -c 0-3 $PY benchmarks/openspiel/train_reinfors_az.py \
   --minutes "$MINUTES" --out "$RF_OUT" --device cuda --game chess \
-  --seed 0 --n-games "$RF_NGAMES" --sims 64 --c-puct 2.0 \
+  --seed 0 --n-games "$RF_NGAMES" --n-groups "$RF_NGROUPS" --sims 64 --c-puct 2.0 \
   --width $WIDTH --depth $DEPTH \
   --infer-cache $RF_CACHE --collect-size 21845 --checkpoint-every 60 \
   > "${RF_OUT}.stdout" 2>&1 &
