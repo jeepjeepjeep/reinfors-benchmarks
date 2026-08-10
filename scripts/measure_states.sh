@@ -51,12 +51,14 @@ for entry in $ACTORS; do
   pid=$!; ACTIVE_PID=$pid
   sleep "$WARMUP"
   t1=$(date +"%Y-%m-%d %H:%M:%S")
-  r1=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
-  f1=$(grep -o "fwd=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
+  i1=$(grep "\[inst\]" "${out}.stdout" 2>/dev/null | tail -1 || true)
+  r1=$(echo "$i1" | grep -o "rows=[0-9]*" | cut -d= -f2 || true)
+  f1=$(echo "$i1" | grep -o "fwd=[0-9]*" | cut -d= -f2 || true)
   sleep "$WINDOW"
   t2=$(date +"%Y-%m-%d %H:%M:%S")
-  r2=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
-  f2=$(grep -o "fwd=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
+  i2=$(grep "\[inst\]" "${out}.stdout" 2>/dev/null | tail -1 || true)
+  r2=$(echo "$i2" | grep -o "rows=[0-9]*" | cut -d= -f2 || true)
+  f2=$(echo "$i2" | grep -o "fwd=[0-9]*" | cut -d= -f2 || true)
   kill -9 "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   ACTIVE_PID=""

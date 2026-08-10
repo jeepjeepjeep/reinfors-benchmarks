@@ -66,7 +66,7 @@ dr = last["infer_rows"] - first["infer_rows"]
 dc = last["infer_calls"] - first["infer_calls"]
 dstep = last["steps"] - first["steps"]
 print(f"{tag}  states/s={ds / dt:7.1f}  net_rows/s={dr / dt:8.1f}  "
-      f"rows/call={dr / max(dc, 1):6.1f}  learn_steps={dstep}  "
+      f"rows/call={(dr / dc) if dc > 0 else float('nan'):6.1f}  learn_steps={dstep}  "
       f"(window {first['wall']:.0f}s..{last['wall']:.0f}s)")
 PYEOF
 done
