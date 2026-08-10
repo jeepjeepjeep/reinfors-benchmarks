@@ -51,17 +51,21 @@ for entry in $ACTORS; do
   pid=$!; ACTIVE_PID=$pid
   sleep "$WARMUP"
   t1=$(date +"%Y-%m-%d %H:%M:%S")
-  r1=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
+  i1=$(grep "\[inst\]" "${out}.stdout" 2>/dev/null | tail -1 || true)
+  r1=$(echo "$i1" | grep -o "rows=[0-9]*" | cut -d= -f2 || true)
+  f1=$(echo "$i1" | grep -o "fwd=[0-9]*" | cut -d= -f2 || true)
   sleep "$WINDOW"
   t2=$(date +"%Y-%m-%d %H:%M:%S")
-  r2=$(grep -o "rows=[0-9]*" "${out}.stdout" 2>/dev/null | tail -1 | cut -d= -f2 || true)
+  i2=$(grep "\[inst\]" "${out}.stdout" 2>/dev/null | tail -1 || true)
+  r2=$(echo "$i2" | grep -o "rows=[0-9]*" | cut -d= -f2 || true)
+  f2=$(echo "$i2" | grep -o "fwd=[0-9]*" | cut -d= -f2 || true)
   kill -9 "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   ACTIVE_PID=""
-  python3 - "$out" "$t1" "$t2" "$WINDOW" "${r1:-0}" "${r2:-0}" <<'PYEOF'
+  python3 - "$out" "$t1" "$t2" "$WINDOW" "${r1:-0}" "${r2:-0}" "${f1:-0}" "${f2:-0}" <<'PYEOF'
 import sys, glob
 from datetime import datetime
-out, t1s, t2s, window, r1, r2 = sys.argv[1:7]
+out, t1s, t2s, window, r1, r2, f1, f2 = sys.argv[1:9]
 t1 = datetime.strptime(t1s, "%Y-%m-%d %H:%M:%S")
 t2 = datetime.strptime(t2s, "%Y-%m-%d %H:%M:%S")
 states = games = steps = 0
@@ -88,6 +92,7 @@ for f in glob.glob(f"{out}/log-actor*"):
             states += len(line.split("Actions:")[1].split())
 w = float(window)
 rows_s = (int(r2) - int(r1)) / w if int(r2) > int(r1) else float("nan")
-print(f"{out.split('/')[-1]}  states/s={states / w:7.1f}  (games={games}, avg_len={states / max(games, 1):.0f})  rows/s={rows_s:8.1f}  learn_steps={steps}  rows_per_state={rows_s / max(states / w, 1e-9):.0f}")
+rows_call = (int(r2) - int(r1)) / (int(f2) - int(f1)) if int(f2) > int(f1) else float("nan")
+print(f"{out.split('/')[-1]}  states/s={states / w:7.1f}  (games={games}, avg_len={states / max(games, 1):.0f})  rows/s={rows_s:8.1f}  rows/call={rows_call:6.1f}  learn_steps={steps}  rows_per_state={rows_s / max(states / w, 1e-9):.0f}")
 PYEOF
 done
