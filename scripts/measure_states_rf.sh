@@ -18,6 +18,7 @@ CORES="${CORES:-0-3}"
 WIDTH="${WIDTH:-256}"
 DEPTH="${DEPTH:-8}"
 NGAMES="${NGAMES:-64 128}"
+NGROUPS="${NGROUPS:-1}"
 CACHE="${CACHE:-262144}"
 MINUTES="${MINUTES:-20}"
 WARMUP="${WARMUP:-300}"
@@ -27,13 +28,13 @@ ACTIVE_PID=""
 trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 
 for n in $NGAMES; do
-  tag="chess_w${WIDTH}_d${DEPTH}_rf_n${n}"
+  tag="chess_w${WIDTH}_d${DEPTH}_rf_n${n}_g${NGROUPS}"
   out="$OUT_ROOT/$tag"
   echo "=== $tag (${WARMUP}s warmup, kill at ${MINUTES}m) ==="
   rm -rf "$out"
   taskset -c "$CORES" "$PY" benchmarks/openspiel/train_reinfors_az.py \
     --minutes $((MINUTES + 10)) --device cuda --game chess --out "$out" \
-    --seed 0 --n-games "$n" --sims 64 --c-puct 2.0 \
+    --seed 0 --n-games "$n" --n-groups "$NGROUPS" --sims 64 --c-puct 2.0 \
     --width "$WIDTH" --depth "$DEPTH" \
     --infer-cache "$CACHE" --collect-size 21845 --checkpoint-every 60 \
     > "${out}.stdout" 2>&1 &
