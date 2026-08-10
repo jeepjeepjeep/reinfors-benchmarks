@@ -79,6 +79,9 @@ def main() -> None:
     ap.add_argument("--reuse", type=float, default=3.0, help="their replay_buffer_reuse")
     # topology knobs
     ap.add_argument("--n-games", type=int, default=8, help="parallel games (their --actors)")
+    ap.add_argument("--n-groups", type=int, default=1,
+                    help="2 = double-buffered collect (size n-games as groups x 64 to keep "
+                    "each group at the A10G batch-64 sweet spot)")
     ap.add_argument("--collect-size", type=int, default=512, help="records per stream batch")
     ap.add_argument("--stream-depth", default="none", help="stream depth: int | none")
     ap.add_argument("--infer-cache", type=int, default=0, help="engine infer-cache entries (0 = off)")
@@ -143,6 +146,7 @@ def main() -> None:
         n_games=args.n_games,
         seed=args.seed,
         infer_cache=args.infer_cache,
+        n_groups=args.n_groups,
     )
 
     collector_net = copy.deepcopy(net)
