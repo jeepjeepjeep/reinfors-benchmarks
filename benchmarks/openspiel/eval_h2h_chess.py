@@ -205,8 +205,10 @@ def make_opening(plies: int, rng: random.Random) -> list[str]:
 
 
 def write_pgn(board: pychess.Board, our_white: bool, score: float, game_no: int,
-              opening_no: int, path: str) -> None:
-    """Append the finished game (full move stack incl. the forced opening) as PGN."""
+              opening_no: int, forced_plies: int, run_meta: dict[str, str], path: str) -> None:
+    """Append the finished game (full move stack incl. the forced opening) as PGN. The default
+    file accumulates runs, so every game carries the run metadata that distinguishes
+    experiments (checkpoints, sims, seed) plus its own opening index and forced-plies count."""
     game = pychess_pgn.Game.from_board(board)
     game.headers["Event"] = "reinfors vs open_spiel h2h"
     game.headers["Round"] = str(game_no)
@@ -214,7 +216,9 @@ def write_pgn(board: pychess.Board, our_white: bool, score: float, game_no: int,
     game.headers["Black"] = "open_spiel" if our_white else "reinfors"
     white_score = score if our_white else 1.0 - score
     game.headers["Result"] = {1.0: "1-0", 0.5: "1/2-1/2", 0.0: "0-1"}[white_score]
-    game.headers["Annotator"] = f"opening {opening_no} (forced 6 plies)"
+    game.headers["Opening"] = f"index {opening_no}, forced {forced_plies} plies"
+    for k, v in run_meta.items():
+        game.headers[k] = v
     with open(path, "a") as f:
         f.write(str(game) + "\n\n")
 
@@ -321,6 +325,12 @@ def main() -> None:
     if args.games % 2:
         ap.error("--games must be even: every opening is played once per color")
 
+    if args.pgn:
+        # fail BEFORE any (expensive) game: create the parent and prove the file is appendable
+        Path(args.pgn).parent.mkdir(parents=True, exist_ok=True)
+        with open(args.pgn, "a"):
+            pass
+
     cfg_path = Path(args.rf_checkpoint).parent / "config.json"
     cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
     width = args.width if args.width is not None else cfg.get("width", 32)
@@ -332,6 +342,15 @@ def main() -> None:
     net.load_state_dict(torch.load(args.rf_checkpoint, map_location=args.device))
     net.eval()
     print(f"our net: SweepResnet w{width} d{depth}  params={sum(p.numel() for p in net.parameters()):,}")
+
+    run_meta = {
+        "RFCheckpoint": args.rf_checkpoint,
+        "OSPath": args.os_path,
+        "OSCheckpoint": str(args.os_checkpoint),
+        "TheirSims": str(args.sims),
+        "OurSims": str(args.our_sims or args.sims),
+        "MatchSeed": str(args.seed),
+    }
 
     rng = random.Random(args.seed)
     openings = [make_opening(args.opening_plies, rng) for _ in range((args.games + 1) // 2)]
@@ -348,7 +367,8 @@ def main() -> None:
             az_device=args.az_device, verbose=args.verbose,
         )
         if args.pgn:
-            write_pgn(play_one.last_board, our_white, s, g + 1, g // 2 + 1, args.pgn)
+            write_pgn(play_one.last_board, our_white, s, g + 1, g // 2 + 1, len(opening),
+                      run_meta, args.pgn)
         score += s
         wins += s == 1.0
         draws += s == 0.5
