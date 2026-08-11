@@ -31,15 +31,18 @@ for n in $NGAMES; do
   tag="chess_w${WIDTH}_d${DEPTH}_rf_n${n}_g${NGROUPS}"
   out="$OUT_ROOT/$tag"
   echo "=== $tag (${WARMUP}s warmup, kill at ${MINUTES}m) ==="
-  rm -rf "$out"
+  if [ -e "$out" ]; then
+    echo "refusing to overwrite $out — move it aside or pick a new OUT_ROOT" >&2
+    exit 1
+  fi
   mkdir -p "$out"
-  python3 benchmarks/openspiel/manifest.py --out "$out" run_kind=measure_cell tag="$tag" >/dev/null
-  taskset -c "$CORES" "$PY" benchmarks/openspiel/train_reinfors_az.py \
-    --minutes $((MINUTES + 10)) --device cuda --game chess --out "$out" \
-    --seed 0 --n-games "$n" --n-groups "$NGROUPS" --sims 64 --c-puct 2.0 \
-    --width "$WIDTH" --depth "$DEPTH" \
-    --infer-cache "$CACHE" --collect-size 21845 --checkpoint-every 60 \
-    > "${out}.stdout" 2>&1 &
+  CMD="taskset -c $CORES $PY benchmarks/openspiel/train_reinfors_az.py \
+--minutes $((MINUTES + 10)) --device cuda --game chess --out $out \
+--seed 0 --n-games $n --n-groups $NGROUPS --sims 64 --c-puct 2.0 \
+--width $WIDTH --depth $DEPTH --infer-cache $CACHE --collect-size 21845 --checkpoint-every 60"
+  python3 benchmarks/openspiel/manifest.py --out "$out" --command "$CMD" \
+    run_kind=measure_cell tag="$tag" completed=false >/dev/null
+  $CMD > "${out}.stdout" 2>&1 &
   pid=$!; ACTIVE_PID=$pid
   sleep $((MINUTES * 60))
   kill -9 "$pid" 2>/dev/null || true
@@ -61,7 +64,7 @@ for line in open(f"{out}/learner.jsonl", errors="ignore"):
 tag = out.split("/")[-1]
 if first is None or last is first:
     print(f"{tag}  FAILED-NO-INTERIOR-SAMPLES (learner.jsonl had <2 rows in [{lo:.0f}s, {hi:.0f}s])")
-    sys.exit(0)
+    sys.exit(2)
 dt = last["wall"] - first["wall"]
 ds = last["states"] - first["states"]
 dr = last["infer_rows"] - first["infer_rows"]
@@ -71,4 +74,10 @@ print(f"{tag}  states/s={ds / dt:7.1f}  net_rows/s={dr / dt:8.1f}  "
       f"rows/call={(dr / dc) if dc > 0 else float('nan'):6.1f}  learn_steps={dstep}  "
       f"(window {first['wall']:.0f}s..{last['wall']:.0f}s)")
 PYEOF
+  reduce_rc=$?
+  if [ "$reduce_rc" -ne 0 ]; then
+    python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='no-interior-window', intended_deadline_kill=True)"
+    exit "$reduce_rc"
+  fi
+  python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='deadline', intended_deadline_kill=True, output_sha256={'learner.jsonl': manifest.sha256('$out/learner.jsonl')})"
 done

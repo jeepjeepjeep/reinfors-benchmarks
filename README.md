@@ -26,11 +26,21 @@ pages.
 
 Requires a local reinfors checkout as a sibling directory.
 
-**Canonical env: `.venv23` (torch 2.3.0 — the libtorch generation OpenSpiel's C++ AZ
-pins; never mix kernel generations across the stacks).**
+Two environments with distinct roles:
+
+- **`.venv23` — the canonical measurement env.** Built from pinned requirements
+  (`requirements-venv23.txt`; torch 2.3.0 is the load-bearing pin — the libtorch
+  generation OpenSpiel's C++ AZ links against; never mix kernel generations across the
+  stacks). Every published number runs here, and
+  `benchmarks/openspiel/preflight.py` refuses measurement runs elsewhere.
+- **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch). For
+  linting and the harness test suites only; never for measurement.
 
 ```bash
-# reinfors release wheel into the canonical env
+# canonical measurement env from pinned requirements
+bash scripts/make_venv23.sh
+
+# reinfors release wheel into it
 cd ../reinfors
 VIRTUAL_ENV=../reinfors-benchmarks/.venv23 uvx maturin develop --release -m crates/reinfors-py/Cargo.toml
 cd ../reinfors-benchmarks

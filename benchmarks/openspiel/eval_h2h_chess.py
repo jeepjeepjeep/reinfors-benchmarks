@@ -50,6 +50,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import reinfors as rf
+import manifest as shared_manifest
 from common import SweepResnet
 
 BIN = (
@@ -494,7 +495,10 @@ def main() -> None:
     )
     game_seeds = itertools.count(args.seed)
     done_counter = itertools.count(1)
-    factory = lambda: TheirBot(args, next(game_seeds), done_counter, args.games)
+
+    def factory():
+        return TheirBot(args, next(game_seeds), done_counter, args.games)
+
 
     arena = rf.Arena(
         game,
@@ -565,6 +569,8 @@ def main() -> None:
         Path(args.manifest).parent.mkdir(parents=True, exist_ok=True)
         manifest = {
             "protocol": "v1",
+            "environment": shared_manifest.collect(),
+            "command": " ".join([sys.executable, *sys.argv]),
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
             "wall_seconds": round(time.time() - started, 1),
             "rf_checkpoint": args.rf_checkpoint,

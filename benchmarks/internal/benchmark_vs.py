@@ -64,6 +64,8 @@ from typing import Any
 import numpy as np
 import reinfors as rf
 
+import results
+
 
 def _throughput(work: Any, repeats: int) -> float:
     work()  # untimed warm-up (compiles JAX, primes caches)
@@ -433,11 +435,17 @@ def _table(
         print(fmt(r))
 
 
+_SINK: Any = None
+
+
 def _cell(backend: Any, label: str, fn: Any) -> str:
     """One measured table cell, isolated: a backend failure (e.g. an API drift) becomes an 'ERR' cell +
     a one-line note, never a crash that takes the whole comparison down."""
     try:
-        return f"{fn():,.0f}"
+        rate = fn()
+        if _SINK is not None:
+            _SINK.record(backend=backend.name, label=label, rate=rate)
+        return f"{rate:,.0f}"
     except Exception as e:  # a benchmark cell must never propagate a backend's error
         print(
             f"  ! {backend.name} {label} failed: {type(e).__name__}: {str(e).splitlines()[0][:100]}"
@@ -572,6 +580,13 @@ def _track_c(active: list[Any], args: argparse.Namespace) -> None:
 
 
 def run(args: argparse.Namespace) -> None:
+    global _SINK
+    _SINK = results.Sink(
+        args.out,
+        run_kind="internal_benchmark",
+        harness="benchmark_vs.py",
+        config=vars(args),
+    )
     _warn_if_not_release()
     print(
         f"host: {platform.platform()} | {platform.processor() or 'cpu'} x{os.cpu_count()}"
@@ -585,6 +600,7 @@ def run(args: argparse.Namespace) -> None:
     _track_a(active, args)
     _track_b(active, args)
     _track_c(active, args)
+    _SINK.write()
 
 
 def main() -> None:
@@ -602,6 +618,7 @@ def main() -> None:
         action="store_true",
         help="tiny/fast run to shake out the optional backends",
     )
+    p.add_argument("--out", default="", help="write manifest + JSONL result rows here")
     run(p.parse_args())
 
 

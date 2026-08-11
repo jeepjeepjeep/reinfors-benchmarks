@@ -43,6 +43,8 @@ from typing import Any
 import numpy as np
 import reinfors as rf
 
+import results
+
 _N_HEADS = 4
 Infer = Callable[[np.ndarray], np.ndarray]
 
@@ -231,6 +233,12 @@ def _warn_if_not_release() -> None:
 
 def run(args: argparse.Namespace) -> None:
     _warn_if_not_release()
+    sink = results.Sink(
+        args.out,
+        run_kind="internal_benchmark",
+        harness="benchmark.py",
+        config=vars(args),
+    )
     cores = os.cpu_count() or 1
     n_games = args.n_games or max(1, cores - 2)
     scaling = [
@@ -249,24 +257,32 @@ def run(args: argparse.Namespace) -> None:
         name: str, mode: str, hidden: int, n: int = n_games, budget: int = args.records
     ) -> str:
         grid = GAMES[name].grid
-        return _fmt(
-            bench_collect(
-                name,
-                grid=grid,
-                mode=mode,
-                n_games=n,
-                records=budget,
-                repeats=args.repeats,
-                hidden=hidden,
-            )
+        rate = bench_collect(
+            name,
+            grid=grid,
+            mode=mode,
+            n_games=n,
+            records=budget,
+            repeats=args.repeats,
+            hidden=hidden,
         )
+        sink.record(
+            kind="collect",
+            game=name,
+            mode=mode,
+            hidden=hidden,
+            n_games=n,
+            records=budget,
+            records_per_sec=rate,
+        )
+        return _fmt(rate)
 
     def steps(name: str) -> str:
-        return _fmt(
-            bench_env_steps(
-                name, grid=GAMES[name].grid, steps=args.steps, repeats=args.repeats
-            )
+        rate = bench_env_steps(
+            name, grid=GAMES[name].grid, steps=args.steps, repeats=args.repeats
         )
+        sink.record(kind="env_steps", game=name, ticks_per_sec=rate)
+        return _fmt(rate)
 
     _table(
         "Data generation — snake records/sec across inference cost (higher is better)",
@@ -304,6 +320,14 @@ def run(args: argparse.Namespace) -> None:
             hidden=0,
         )
         base = base or rate
+        sink.record(
+            kind="scaling",
+            game="snake",
+            mode="search",
+            n_games=n,
+            records=scale_per_game * n,
+            records_per_sec=rate,
+        )
         rows.append((str(n), _fmt(rate), f"{rate / base:.2f}x"))
     _table(
         "Parallel scaling — snake, search, zeros infer (records/sec vs n_games)",
@@ -318,6 +342,7 @@ def run(args: argparse.Namespace) -> None:
         ("game", "ticks/sec"),
         [(name, steps(name)) for name in GAMES],
     )
+    sink.write()
 
 
 def main() -> None:
@@ -345,6 +370,7 @@ def main() -> None:
     p.add_argument(
         "--quick", action="store_true", help="tiny/fast run for a smoke check"
     )
+    p.add_argument("--out", default="", help="write manifest + JSONL result rows here")
     args = p.parse_args()
     if args.quick:
         args.records, args.steps, args.repeats = 64, 2_000, 1

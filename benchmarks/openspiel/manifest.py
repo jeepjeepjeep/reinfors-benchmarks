@@ -1,15 +1,17 @@
 """Run-manifest collection: every measurement records what produced it.
 
-`collect()` gathers source identity (both repositories), environment, and isolation
-state; callers add run-specific fields and write the result next to the run's output.
-Also invocable as a CLI for shell harnesses:
+`collect()` gathers source identity for both repositories, environment, and isolation
+state. The benchmark COMMAND must be supplied by the caller (`command=[...]`); this
+module never guesses it. Shell harnesses invoke the CLI with the real command string:
 
-    python benchmarks/openspiel/manifest.py --out <run_dir> key=value ...
+    python benchmarks/openspiel/manifest.py --out <run_dir> --command "<exact command>" k=v ...
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import platform
 import subprocess
 import sys
@@ -28,7 +30,7 @@ def _git(*args: str) -> str | None:
     except OSError:
         return None
     value = out.stdout.strip()
-    return value if out.returncode == 0 and value else None
+    return value if out.returncode == 0 else None
 
 
 def _read(path: Path) -> str | None:
@@ -38,22 +40,32 @@ def _read(path: Path) -> str | None:
         return None
 
 
-def collect(**extra: Any) -> dict[str, Any]:
+def sha256(path: str | Path) -> str | None:
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def collect(command: list[str] | str | None = None, **extra: Any) -> dict[str, Any]:
+    porcelain = _git("status", "--porcelain")
     manifest: dict[str, Any] = {
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "command": sys.argv,
+        "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "command": command,
         "host": platform.node(),
         "python": platform.python_version(),
-        "benchmarks_sha": _git("rev-parse", "HEAD"),
+        "benchmarks_sha": _git("rev-parse", "HEAD") or "unknown",
         "benchmarks_tag": _git("describe", "--tags", "--exact-match"),
-        "benchmarks_dirty": bool(_git("status", "--porcelain")),
+        "benchmarks_dirty": bool(porcelain) if porcelain is not None else "unknown",
         "openspiel_pin": _read(_REPO / "open_spiel_cpp" / "PIN"),
         "smt_active": _read(Path("/sys/devices/system/cpu/smt/active")),
     }
     try:
         import reinfors as rf
 
-        manifest["reinfors"] = getattr(rf, "build_info", dict)()
+        info = getattr(rf, "build_info", dict)()
+        info["extension_sha256"] = sha256(rf._reinfors.__file__)
+        manifest["reinfors"] = info
     except ImportError:
         manifest["reinfors"] = None
     try:
@@ -68,15 +80,74 @@ def collect(**extra: Any) -> dict[str, Any]:
     return manifest
 
 
-def write(out_dir: str | Path, **extra: Any) -> Path:
+def write(
+    out_dir: str | Path, command: list[str] | str | None = None, **extra: Any
+) -> Path:
+    """Atomically write `<out_dir>/manifest.json` (refuses to clobber a finalized one)."""
     path = Path(out_dir) / "manifest.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(collect(**extra), indent=2) + "\n")
+    if path.exists():
+        try:
+            finalized = bool(json.loads(path.read_text()).get("completed"))
+        except (json.JSONDecodeError, OSError):
+            finalized = False
+        if finalized:
+            raise FileExistsError(f"{path} is a finalized manifest; refusing overwrite")
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(collect(command=command, **extra), indent=2) + "\n")
+    os.replace(tmp, path)
+    return path
+
+
+def merge(
+    out_dir: str | Path, command: list[str] | str | None = None, **fields: Any
+) -> Path:
+    """Fill manifest gaps without clobbering harness-written fields; creates if absent.
+
+    Python run surfaces call this at startup: standalone runs get a full manifest, runs
+    launched by a shell harness keep the harness's fields (its command records the real
+    taskset/env wrapper) and only gain what is missing (e.g. the parsed config)."""
+    path = Path(out_dir) / "manifest.json"
+    if path.exists():
+        data: dict[str, Any] = json.loads(path.read_text())
+    else:
+        data = collect(command=command)
+    if data.get("command") is None and command is not None:
+        data["command"] = command
+    for key, value in fields.items():
+        data.setdefault(key, value)
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, indent=2) + "\n")
+    os.replace(tmp, path)
+    return path
+
+
+def finalize(out_dir: str | Path, **fields: Any) -> Path:
+    """Atomically merge completion fields into the run's manifest."""
+    path = Path(out_dir) / "manifest.json"
+    data = json.loads(path.read_text()) if path.exists() else {}
+    data.update(fields)
+    if "completed" not in fields:
+        data["completed"] = True
+    data["finished"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, indent=2) + "\n")
+    os.replace(tmp, path)
     return path
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    assert args[0] == "--out", "usage: manifest.py --out <dir> [key=value ...]"
-    extras = dict(kv.split("=", 1) for kv in args[2:])
-    print(write(args[1], **extras))
+    assert args and args[0] == "--out", (
+        "usage: manifest.py --out <dir> [--command '<cmd>'] [key=value ...]"
+    )
+    out, rest = args[1], args[2:]
+    command = None
+    if rest[:1] == ["--command"]:
+        command, rest = rest[1], rest[2:]
+    extras: dict[str, Any] = {}
+    coerce = {"null": None, "true": True, "false": False}
+    for kv in rest:
+        key, value = kv.split("=", 1)
+        extras[key] = coerce.get(value, value)
+    print(write(out, command=command, **extras))

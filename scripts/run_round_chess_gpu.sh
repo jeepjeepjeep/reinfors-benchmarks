@@ -58,40 +58,51 @@ trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 
 echo "=== round plan: ${MINUTES}m/side, w${WIDTH} d${DEPTH}, seed ${ROUND_SEED} — openspiel actors=${OS_ACTORS} batch=${OS_BATCH} -> ${OS_OUT} | reinfors n_games=${RF_NGAMES} n_groups=${RF_NGROUPS} -> ${RF_OUT} ==="
 echo "=== openspiel leg starting ==="
-rm -rf "$OS_OUT"
+if [ -e "$OS_OUT" ]; then
+  echo "refusing to overwrite $OS_OUT — bump ROUND_SEED or move it aside" >&2
+  exit 1
+fi
 mkdir -p "$OS_OUT"
-python3 benchmarks/openspiel/manifest.py --out "$OS_OUT" run_kind=training side=openspiel actors="$OS_ACTORS" batch="$OS_BATCH" seed="$ROUND_SEED" >/dev/null
-OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
-  --actors="$OS_ACTORS" --evaluators=0 --devices=/cuda:0 \
-  --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
-  --temperature=1 --temperature_drop=10 \
-  --nn_model=resnet --nn_width=$WIDTH --nn_depth=$DEPTH \
-  --inference_batch_size="$OS_BATCH" --inference_threads=1 --inference_cache=$OS_CACHE \
-  --replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
-  --learning_rate=0.0001 --weight_decay=0.0001 \
-  --checkpoint_freq=1 --evaluation_window=100 --eval_levels=7 \
-  --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false \
-  --max_steps=0 > "${OS_OUT}.stdout" 2>&1 &
+OS_ARGS="--game=chess --path=$OS_OUT --actors=$OS_ACTORS --evaluators=0 --devices=/cuda:0 \
+--max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 --temperature=1 \
+--temperature_drop=10 --nn_model=resnet --nn_width=$WIDTH --nn_depth=$DEPTH \
+--inference_batch_size=$OS_BATCH --inference_threads=1 --inference_cache=$OS_CACHE \
+--replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
+--learning_rate=0.0001 --weight_decay=0.0001 --checkpoint_freq=1 --evaluation_window=100 \
+--eval_levels=7 --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false --max_steps=0"
+python3 benchmarks/openspiel/manifest.py --out "$OS_OUT" \
+  --command "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 $BIN $OS_ARGS" \
+  run_kind=training side=openspiel actors="$OS_ACTORS" batch="$OS_BATCH" \
+  round_label="$ROUND_SEED" openspiel_seed=null completed=false \
+  binary_sha256="$(shasum -a 256 "$BIN" 2>/dev/null | cut -d" " -f1)" >/dev/null
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 "$BIN" $OS_ARGS > "${OS_OUT}.stdout" 2>&1 &
 OS_PID=$!; ACTIVE_PID=$OS_PID
 sleep "$SECS"
 kill -9 "$OS_PID" 2>/dev/null || true
 wait "$OS_PID" 2>/dev/null || true
 ACTIVE_PID=""
+python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$OS_OUT', status='deadline', intended_deadline_kill=True)"
 echo "=== openspiel done (hard deadline); checkpoints: ==="
 ls -t "$OS_OUT"/checkpoint-* 2>/dev/null | head -3 || echo "WARNING: no checkpoints found"
 
 echo "=== reinfors: chess ${MINUTES}m n_games=${RF_NGAMES} n_groups=${RF_NGROUPS} -> ${RF_OUT} ==="
-rm -rf "$RF_OUT"
-taskset -c 0-3 $PY benchmarks/openspiel/train_reinfors_az.py \
-  --minutes "$MINUTES" --out "$RF_OUT" --device cuda --game chess \
-  --seed "$ROUND_SEED" --n-games "$RF_NGAMES" --n-groups "$RF_NGROUPS" --sims 64 --c-puct 2.0 \
-  --width $WIDTH --depth $DEPTH \
-  --infer-cache $RF_CACHE --collect-size 21845 --checkpoint-every 60 \
-  > "${RF_OUT}.stdout" 2>&1 &
+if [ -e "$RF_OUT" ]; then
+  echo "refusing to overwrite $RF_OUT — bump ROUND_SEED or move it aside" >&2
+  exit 1
+fi
+mkdir -p "$RF_OUT"
+RF_CMD="taskset -c 0-3 $PY benchmarks/openspiel/train_reinfors_az.py \
+--minutes $MINUTES --out $RF_OUT --device cuda --game chess \
+--seed $ROUND_SEED --n-games $RF_NGAMES --n-groups $RF_NGROUPS --sims 64 --c-puct 2.0 \
+--width $WIDTH --depth $DEPTH --infer-cache $RF_CACHE --collect-size 21845 --checkpoint-every 60"
+python3 benchmarks/openspiel/manifest.py --out "$RF_OUT" --command "$RF_CMD" \
+  run_kind=training side=reinfors seed="$ROUND_SEED" completed=false >/dev/null
+$RF_CMD > "${RF_OUT}.stdout" 2>&1 &
 RF_PID=$!; ACTIVE_PID=$RF_PID
 sleep "$SECS"
 kill -9 "$RF_PID" 2>/dev/null || true
 wait "$RF_PID" 2>/dev/null || true
 ACTIVE_PID=""
+python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$RF_OUT', status='deadline', intended_deadline_kill=True)"
 echo "=== reinfors done (hard deadline); checkpoints: ==="
 ls -t "$RF_OUT"/ckpt* 2>/dev/null | head -3 || echo "WARNING: no checkpoints found"

@@ -133,7 +133,12 @@ def main() -> None:
         "torch": torch.__version__,
     }
     (out / "config.json").write_text(json.dumps(vars(args) | versions, indent=2))
-    manifest.write(out, run_kind="training", config=vars(args))
+    manifest.merge(
+        out,
+        command=[sys.executable, *sys.argv],
+        run_kind="training",
+        config=vars(args),
+    )
     print(f"versions: {versions}")
     seed_all()
     torch.manual_seed(args.seed)

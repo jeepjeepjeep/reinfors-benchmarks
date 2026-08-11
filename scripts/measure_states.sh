@@ -37,19 +37,22 @@ for entry in $ACTORS; do
   [ "$batch" != "$actors" ] && tag="${tag}_b${batch}"
   out="$OUT_ROOT/$tag"
   echo "=== $tag (${WARMUP}s warmup + ${WINDOW}s window) ==="
-  rm -rf "$out"
+  if [ -e "$out" ]; then
+    echo "refusing to overwrite $out — move it aside or pick a new OUT_ROOT" >&2
+    exit 1
+  fi
   mkdir -p "$out"
-  python3 benchmarks/openspiel/manifest.py --out "$out" run_kind=measure_cell tag="$tag" >/dev/null
-  OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c "$CORES" "$BIN" --game="$GAME" --path="$out" \
-    --actors="$actors" --evaluators=0 --devices=/cuda:0 \
-    --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \
-    --temperature=1 --temperature_drop=10 \
-    --nn_model=resnet --nn_width="$WIDTH" --nn_depth="$DEPTH" \
-    --inference_batch_size="$batch" --inference_threads=1 --inference_cache="$CACHE" \
-    --replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
-    --learning_rate=0.0001 --weight_decay=0.0001 --checkpoint_freq=1 \
-    --evaluation_window=100 --eval_levels=7 --cutoff_probability=0 --cutoff_value=0.95 \
-    --explicit_learning=false --max_steps=0 > "${out}.stdout" 2>&1 &
+  OS_ARGS="--game=$GAME --path=$out --actors=$actors --evaluators=0 --devices=/cuda:0 \
+--max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 --temperature=1 \
+--temperature_drop=10 --nn_model=resnet --nn_width=$WIDTH --nn_depth=$DEPTH \
+--inference_batch_size=$batch --inference_threads=1 --inference_cache=$CACHE \
+--replay_buffer_size=65536 --replay_buffer_reuse=3 --train_batch_size=1024 \
+--learning_rate=0.0001 --weight_decay=0.0001 --checkpoint_freq=1 --evaluation_window=100 \
+--eval_levels=7 --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false --max_steps=0"
+  python3 benchmarks/openspiel/manifest.py --out "$out" \
+    --command "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c $CORES $BIN $OS_ARGS" \
+    run_kind=measure_cell tag="$tag" binary_sha256="$(shasum -a 256 "$BIN" 2>/dev/null | cut -d" " -f1)" completed=false >/dev/null
+  OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c "$CORES" "$BIN" $OS_ARGS > "${out}.stdout" 2>&1 &
   pid=$!; ACTIVE_PID=$pid
   sleep "$WARMUP"
   t1=$(date +"%Y-%m-%d %H:%M:%S")
@@ -92,9 +95,18 @@ for f in glob.glob(f"{out}/log-actor*"):
         if t1 <= ts <= t2:
             games += 1
             states += len(line.split("Actions:")[1].split())
+if states == 0:
+    print(f"{out.split('/')[-1]}  FAILED-NO-INTERIOR-SAMPLES (no completed games in the interior window)")
+    sys.exit(2)
 w = float(window)
 rows_s = (int(r2) - int(r1)) / w if int(r2) > int(r1) else float("nan")
 rows_call = (int(r2) - int(r1)) / (int(f2) - int(f1)) if int(f2) > int(f1) else float("nan")
 print(f"{out.split('/')[-1]}  states/s={states / w:7.1f}  (games={games}, avg_len={states / max(games, 1):.0f})  rows/s={rows_s:8.1f}  rows/call={rows_call:6.1f}  learn_steps={steps}  rows_per_state={rows_s / max(states / w, 1e-9):.0f}")
 PYEOF
+  reduce_rc=$?
+  if [ "$reduce_rc" -ne 0 ]; then
+    python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='no-interior-window', intended_deadline_kill=True)"
+    exit "$reduce_rc"
+  fi
+  python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='deadline', intended_deadline_kill=True)"
 done
