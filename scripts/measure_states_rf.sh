@@ -32,6 +32,8 @@ for n in $NGAMES; do
   out="$OUT_ROOT/$tag"
   echo "=== $tag (${WARMUP}s warmup, kill at ${MINUTES}m) ==="
   rm -rf "$out"
+  mkdir -p "$out"
+  python3 benchmarks/openspiel/manifest.py --out "$out" run_kind=measure_cell tag="$tag" >/dev/null
   taskset -c "$CORES" "$PY" benchmarks/openspiel/train_reinfors_az.py \
     --minutes $((MINUTES + 10)) --device cuda --game chess --out "$out" \
     --seed 0 --n-games "$n" --n-groups "$NGROUPS" --sims 64 --c-puct 2.0 \

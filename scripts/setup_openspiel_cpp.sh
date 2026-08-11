@@ -54,6 +54,7 @@ git fetch -q origin master
 # reset before switching commits so re-runs are idempotent; patches re-apply below.
 git reset --hard -q
 git checkout -q "$OPEN_SPIEL_COMMIT"
+echo "$OPEN_SPIEL_COMMIT" > ../PIN
 git checkout -q 86fe553c^ -- open_spiel/libtorch open_spiel/libnop
 
 # Dependency caches are version-pinned by the source tree, and install.sh skips existing

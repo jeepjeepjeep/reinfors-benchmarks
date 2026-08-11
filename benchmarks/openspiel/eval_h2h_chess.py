@@ -1,6 +1,6 @@
 """Chess head-to-head: the reinfors-trained net vs the open_spiel-trained net, no referee.
 
-ARENA PROTOCOL (v2 — results are NOT poolable with the pre-Arena bridge): our side plays
+PROTOCOL v1 (Arena): our side plays
 through rf.Arena + PolicyHandle.choose (the real Rust search, leaves batched across all
 concurrent games into one GPU call), and their unmodified `alpha_zero_torch_game_example`
 runs as an Arena External seat, one process per game on bounded worker lanes.
@@ -520,7 +520,7 @@ def main() -> None:
         "TheirSims": str(args.sims),
         "OurSims": str(our_sims),
         "MatchSeed": str(args.seed),
-        "Protocol": "arena-v2",
+        "Protocol": "v1",
     }
     wins = draws = 0
     for g in result.games:
@@ -556,7 +556,7 @@ def main() -> None:
         else f"sims theirs={args.sims} ours={our_sims}"
     )
     print(
-        f"chess head-to-head (reinfors net vs open_spiel net, arena-v2, {sims_note}): "
+        f"chess head-to-head (reinfors net vs open_spiel net, v1 protocol, {sims_note}): "
         f"{wins}W {draws}D {n - wins - draws}L -> score {score:.3f} "
         f"(pair stderr {stderr / 2:.3f} over {n // 2} pairs)"
     )
@@ -564,7 +564,7 @@ def main() -> None:
     if args.manifest:
         Path(args.manifest).parent.mkdir(parents=True, exist_ok=True)
         manifest = {
-            "protocol": "arena-v2",
+            "protocol": "v1",
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
             "wall_seconds": round(time.time() - started, 1),
             "rf_checkpoint": args.rf_checkpoint,

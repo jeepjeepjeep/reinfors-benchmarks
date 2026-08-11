@@ -59,6 +59,8 @@ trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
 echo "=== round plan: ${MINUTES}m/side, w${WIDTH} d${DEPTH}, seed ${ROUND_SEED} — openspiel actors=${OS_ACTORS} batch=${OS_BATCH} -> ${OS_OUT} | reinfors n_games=${RF_NGAMES} n_groups=${RF_NGROUPS} -> ${RF_OUT} ==="
 echo "=== openspiel leg starting ==="
 rm -rf "$OS_OUT"
+mkdir -p "$OS_OUT"
+python3 benchmarks/openspiel/manifest.py --out "$OS_OUT" run_kind=training side=openspiel actors="$OS_ACTORS" batch="$OS_BATCH" seed="$ROUND_SEED" >/dev/null
 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 "$BIN" --game=chess --path="$OS_OUT" \
   --actors="$OS_ACTORS" --evaluators=0 --devices=/cuda:0 \
   --max_simulations=64 --uct_c=2 --policy_alpha=0.3 --policy_epsilon=0.25 \

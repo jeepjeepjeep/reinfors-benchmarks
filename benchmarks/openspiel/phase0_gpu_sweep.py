@@ -34,6 +34,7 @@ import sys
 import time
 from pathlib import Path
 
+import manifest
 import numpy as np
 import reinfors as rf
 import torch
@@ -60,14 +61,19 @@ def device_ok(device: str) -> bool:
 def build_game(name: str):
     if name == "chess":
         game = rf.games.Chess(encoder=rf.encoders.OpenSpielChess(), max_ticks=None)
-        return game, 4674  # their head width; pi occupies 0..4671, top two dead (see ledger)
+        return (
+            game,
+            4674,
+        )  # their head width; pi occupies 0..4671, top two dead (see ledger)
     game = rf.games.Connect4()
     return game, game.action_space().n
 
 
 def bench_net(args, shape, head_actions, results) -> None:
     c, h, w = shape
-    for width, depth, device in itertools.product(args.widths, args.depths, args.devices):
+    for width, depth, device in itertools.product(
+        args.widths, args.depths, args.devices
+    ):
         if not device_ok(device):
             print(f"net    w{width} d{depth} [{device}]  SKIP (device unavailable)")
             continue
@@ -88,12 +94,21 @@ def bench_net(args, shape, head_actions, results) -> None:
                 wall = time.perf_counter() - t0
             rows_s = calls * batch / wall
             row = dict(
-                part="net", game=args.game, width=width, depth=depth, device=device,
-                batch=batch, rows_s=rows_s, us_per_row=1e6 * wall / (calls * batch),
-                calls=calls, wall=wall,
+                part="net",
+                game=args.game,
+                width=width,
+                depth=depth,
+                device=device,
+                batch=batch,
+                rows_s=rows_s,
+                us_per_row=1e6 * wall / (calls * batch),
+                calls=calls,
+                wall=wall,
             )
             results.append(row)
-            print(f"net    w{width:<4} d{depth} [{device:4}] batch {batch:<5} {rows_s:>10.0f} rows/s  {row['us_per_row']:>8.1f} us/row")
+            print(
+                f"net    w{width:<4} d{depth} [{device:4}] batch {batch:<5} {rows_s:>10.0f} rows/s  {row['us_per_row']:>8.1f} us/row"
+            )
 
 
 def bench_engine(args, game, head_actions, results) -> None:
@@ -102,7 +117,9 @@ def bench_engine(args, game, head_actions, results) -> None:
     shape = game.observation_space().shape
     c, h, w = shape
     actions = game.action_space().n
-    for width, depth, device in itertools.product(args.widths, args.depths, args.devices):
+    for width, depth, device in itertools.product(
+        args.widths, args.depths, args.devices
+    ):
         if not device_ok(device):
             print(f"engine w{width} d{depth} [{device}]  SKIP (device unavailable)")
             continue
@@ -110,7 +127,9 @@ def bench_engine(args, game, head_actions, results) -> None:
             seed_all()
             net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
 
-            noop_l = np.zeros((max(n_games * max(engines, 1) + 8, 8), actions), dtype=np.float32)
+            noop_l = np.zeros(
+                (max(n_games * max(engines, 1) + 8, 8), actions), dtype=np.float32
+            )
             noop_v = np.zeros((noop_l.shape[0],), dtype=np.float32)
 
             pin = (
@@ -140,18 +159,32 @@ def bench_engine(args, game, head_actions, results) -> None:
                         if pin is not None and n <= pin.shape[0]:
                             staging = pin[:n]
                             staging.copy_(src.reshape(n, -1))
-                            x = staging.to(device, non_blocking=True).reshape(n, c, h, w)
+                            x = staging.to(device, non_blocking=True).reshape(
+                                n, c, h, w
+                            )
                         else:
                             x = src.reshape(-1, c, h, w).to(device)
                         logits, values = net.heads(x)
-                        packed = torch.cat([logits, values.unsqueeze(1)], dim=1).cpu().numpy()
+                        packed = (
+                            torch.cat([logits, values.unsqueeze(1)], dim=1)
+                            .cpu()
+                            .numpy()
+                        )
                     return packed, packed[:, -1]
                 with torch.no_grad():
-                    x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(device)
+                    x = (
+                        torch.from_numpy(np.ascontiguousarray(obs_batch))
+                        .reshape(-1, c, h, w)
+                        .to(device)
+                    )
                     logits, values = net.heads(x)
-                if args.infer_dtype == "f32":  # native f32: the binding widens exactly (PR #136)
+                if (
+                    args.infer_dtype == "f32"
+                ):  # native f32: the binding widens exactly (PR #136)
                     return logits[:, :actions].cpu().numpy(), values.cpu().numpy()
-                return logits[:, :actions].cpu().double().numpy(), values.cpu().double().numpy()
+                return logits[
+                    :, :actions
+                ].cpu().double().numpy(), values.cpu().double().numpy()
 
             def make_engine(idx: int) -> "rf.Engine":
                 return rf.Engine(
@@ -172,9 +205,14 @@ def bench_engine(args, game, head_actions, results) -> None:
 
             engs = [make_engine(e) for e in range(engines)]
             for eng in engs:
-                eng.collect(args.warmup_records, infer)  # torch/device warmup outside the clock
+                eng.collect(
+                    args.warmup_records, infer
+                )  # torch/device warmup outside the clock
 
-            totals = [dict(rows=0, calls=0, decisions=0, records=0, net_seconds=0.0) for _ in engs]
+            totals = [
+                dict(rows=0, calls=0, decisions=0, records=0, net_seconds=0.0)
+                for _ in engs
+            ]
             deadline = time.perf_counter() + args.engine_leg_seconds
 
             def run(eng, tot) -> None:
@@ -188,7 +226,10 @@ def bench_engine(args, game, head_actions, results) -> None:
                     tot["records"] += batch.obs.shape[0]
 
             t0 = time.perf_counter()
-            threads = [threading.Thread(target=run, args=(eng, tot)) for eng, tot in zip(engs, totals)]
+            threads = [
+                threading.Thread(target=run, args=(eng, tot))
+                for eng, tot in zip(engs, totals)
+            ]
             for t in threads:
                 t.start()
             for t in threads:
@@ -197,13 +238,27 @@ def bench_engine(args, game, head_actions, results) -> None:
             rows = sum(t["rows"] for t in totals)
             calls = sum(t["calls"] for t in totals)
             decisions = sum(t["decisions"] for t in totals)
-            net_seconds = sum(t["net_seconds"] for t in totals)  # summed thread-time, > wall when overlapping
+            net_seconds = sum(
+                t["net_seconds"] for t in totals
+            )  # summed thread-time, > wall when overlapping
             row = dict(
-                part="engine", game=args.game, width=width, depth=depth, device=device,
-                n_games=n_games, engines=engines, rows_s=rows / wall, moves_s=decisions / wall,
-                achieved_batch=rows / max(calls, 1), net_share=net_seconds / wall,
-                records=sum(t["records"] for t in totals), wall=wall, sims=args.sims,
-                infer_cache=args.infer_cache, infer_dtype=args.infer_dtype, callback=args.callback,
+                part="engine",
+                game=args.game,
+                width=width,
+                depth=depth,
+                device=device,
+                n_games=n_games,
+                engines=engines,
+                rows_s=rows / wall,
+                moves_s=decisions / wall,
+                achieved_batch=rows / max(calls, 1),
+                net_share=net_seconds / wall,
+                records=sum(t["records"] for t in totals),
+                wall=wall,
+                sims=args.sims,
+                infer_cache=args.infer_cache,
+                infer_dtype=args.infer_dtype,
+                callback=args.callback,
             )
             results.append(row)
             print(
@@ -226,10 +281,18 @@ def verdict(results, args) -> None:
             cpu, cuda = by_dev.get("cpu", {}), by_dev.get("cuda", {})
             if not cpu or not cuda:
                 continue
-            crossing = [b for b in sorted(cuda) if b in cpu and cuda[b] >= args.gpu_threshold * cpu[b]]
+            crossing = [
+                b
+                for b in sorted(cuda)
+                if b in cpu and cuda[b] >= args.gpu_threshold * cpu[b]
+            ]
             at = f"{lever} >= {crossing[0]}" if crossing else "NEVER in swept range"
-            best = max((cuda[b] / cpu[b] for b in cuda if b in cpu), default=float("nan"))
-            print(f"{part:6} w{width:<4} d{depth}: cuda wins at {at}  (best ratio {best:.2f}x)")
+            best = max(
+                (cuda[b] / cpu[b] for b in cuda if b in cpu), default=float("nan")
+            )
+            print(
+                f"{part:6} w{width:<4} d{depth}: cuda wins at {at}  (best ratio {best:.2f}x)"
+            )
 
 
 def main() -> None:
@@ -239,15 +302,45 @@ def main() -> None:
     ap.add_argument("--devices", type=str, default="cpu,cuda")
     ap.add_argument("--widths", type=str, default="32,64,128")
     ap.add_argument("--depths", type=str, default="1,4")
-    ap.add_argument("--batches", type=str, default="1,8,32,128,512", help="net part: rows per forward")
-    ap.add_argument("--n-games", type=str, default="1,8,32", help="engine part: parallel games PER ENGINE")
-    ap.add_argument("--engines", type=str, default="1", help="engine part: concurrent engines (threads) sharing the net")
-    ap.add_argument("--infer-dtype", choices=["f64", "f32"], default="f64", help="callback output dtype (f32 needs the f32-contract build)")
-    ap.add_argument("--callback", choices=["legacy", "fast", "noop"], default="legacy", help="fast = inference_mode + pinned H2D + no slice + single packed D2H; noop = no-torch (residual decomposition)")
+    ap.add_argument(
+        "--batches",
+        type=str,
+        default="1,8,32,128,512",
+        help="net part: rows per forward",
+    )
+    ap.add_argument(
+        "--n-games",
+        type=str,
+        default="1,8,32",
+        help="engine part: parallel games PER ENGINE",
+    )
+    ap.add_argument(
+        "--engines",
+        type=str,
+        default="1",
+        help="engine part: concurrent engines (threads) sharing the net",
+    )
+    ap.add_argument(
+        "--infer-dtype",
+        choices=["f64", "f32"],
+        default="f64",
+        help="callback output dtype (f32 needs the f32-contract build)",
+    )
+    ap.add_argument(
+        "--callback",
+        choices=["legacy", "fast", "noop"],
+        default="legacy",
+        help="fast = inference_mode + pinned H2D + no slice + single packed D2H; noop = no-torch (residual decomposition)",
+    )
     ap.add_argument("--sims", type=int, default=64)
     ap.add_argument("--c-puct", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--infer-cache", type=int, default=0, help="0 = off; the round itself runs cache ON")
+    ap.add_argument(
+        "--infer-cache",
+        type=int,
+        default=0,
+        help="0 = off; the round itself runs cache ON",
+    )
     ap.add_argument("--net-leg-seconds", type=float, default=3.0)
     ap.add_argument("--engine-leg-seconds", type=float, default=20.0)
     ap.add_argument("--warmup-calls", type=int, default=20)
@@ -257,6 +350,11 @@ def main() -> None:
     ap.add_argument("--gpu-threshold", type=float, default=2.0)
     ap.add_argument("--out", type=str, default="", help="append result rows as jsonl")
     args = ap.parse_args()
+    manifest.write(
+        Path(args.out).parent if Path(args.out).suffix else Path(args.out),
+        run_kind="phase0_sweep",
+        config=vars(args),
+    )
     args.devices = args.devices.split(",")
     args.widths = [int(x) for x in args.widths.split(",")]
     args.depths = [int(x) for x in args.depths.split(",")]
@@ -265,15 +363,24 @@ def main() -> None:
     args.engines = [int(x) for x in args.engines.split(",")]
 
     torch.set_num_threads(args.torch_threads)
-    affinity = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else "n/a (macOS)"
+    affinity = (
+        sorted(os.sched_getaffinity(0))
+        if hasattr(os, "sched_getaffinity")
+        else "n/a (macOS)"
+    )
     header = dict(
-        game=args.game, torch=torch.__version__, build=rf._reinfors.core_build_profile(),
-        torch_threads=torch.get_num_threads(), affinity=str(affinity),
+        game=args.game,
+        torch=torch.__version__,
+        build=rf._reinfors.core_build_profile(),
+        torch_threads=torch.get_num_threads(),
+        affinity=str(affinity),
         cuda=torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
     )
     print(" ".join(f"{k}={v}" for k, v in header.items()))
     if header["build"] != "release":
-        print("WARNING: reinfors is a DEBUG build — numbers are meaningless (~10x slow)")
+        print(
+            "WARNING: reinfors is a DEBUG build — numbers are meaningless (~10x slow)"
+        )
 
     game, head_actions = build_game(args.game)
     results: list[dict] = []

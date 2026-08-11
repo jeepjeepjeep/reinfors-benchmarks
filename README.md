@@ -15,6 +15,7 @@ pages.
 
 | path | contents |
 |---|---|
+| `benchmarks/internal/` | the internal-family harness: CPU/parallel-scaling sweeps (`benchmark.py`), cross-framework connect4 tracks (`benchmark_vs.py`) |
 | `benchmarks/openspiel/` | the trainer (`train_reinfors_az.py`), head-to-head runner (`eval_h2h_chess.py`, Arena protocol) and its tests, parity checks, sweep tooling, shared config (`common.py`) |
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), measurement (`measure_states*.sh`), round orchestration (`run_round_chess_gpu.sh`), telemetry panels (`plot_round.py`) |
 | `published/` | per-run artifacts of every published number: learner telemetry, configs, logs, PGNs, provenance |

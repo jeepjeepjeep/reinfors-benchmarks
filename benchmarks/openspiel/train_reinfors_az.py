@@ -23,6 +23,7 @@ import threading
 import time
 from pathlib import Path
 
+import manifest
 import numpy as np
 import reinfors as rf
 import torch
@@ -44,7 +45,9 @@ class ReplayBuffer:
         self.head = 0
         self.rng = np.random.default_rng(seed)
 
-    def push(self, obs: np.ndarray, pi: np.ndarray, z: np.ndarray, legal: np.ndarray) -> None:
+    def push(
+        self, obs: np.ndarray, pi: np.ndarray, z: np.ndarray, legal: np.ndarray
+    ) -> None:
         for i in range(obs.shape[0]):
             self.obs[self.head] = obs[i]
             self.pi[self.head] = pi[i]
@@ -62,7 +65,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--minutes", type=float, default=3.0)
     ap.add_argument("--game", choices=["connect4", "chess"], default="connect4")
-    ap.add_argument("--out", type=str, required=True, help="output dir (jsonl + checkpoints)")
+    ap.add_argument(
+        "--out", type=str, required=True, help="output dir (jsonl + checkpoints)"
+    )
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--seed", type=int, default=0)
     # matched search knobs — set the SAME values on the open_spiel side
@@ -76,31 +81,59 @@ def main() -> None:
     ap.add_argument("--batch-size", type=int, default=2**10)
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--weight-decay", type=float, default=1e-4)
-    ap.add_argument("--reuse", type=float, default=3.0, help="their replay_buffer_reuse")
+    ap.add_argument(
+        "--reuse", type=float, default=3.0, help="their replay_buffer_reuse"
+    )
     # topology knobs
-    ap.add_argument("--n-games", type=int, default=8, help="parallel games (their --actors)")
-    ap.add_argument("--n-groups", type=int, default=1,
-                    help="2 = double-buffered collect (size n-games as groups x 64 to keep "
-                    "each group at the A10G batch-64 sweet spot)")
-    ap.add_argument("--collect-size", type=int, default=512, help="records per stream batch")
+    ap.add_argument(
+        "--n-games", type=int, default=8, help="parallel games (their --actors)"
+    )
+    ap.add_argument(
+        "--n-groups",
+        type=int,
+        default=1,
+        help="2 = double-buffered collect (size n-games as groups x 64 to keep "
+        "each group at the A10G batch-64 sweet spot)",
+    )
+    ap.add_argument(
+        "--collect-size", type=int, default=512, help="records per stream batch"
+    )
     ap.add_argument("--stream-depth", default="none", help="stream depth: int | none")
-    ap.add_argument("--infer-cache", type=int, default=0, help="engine infer-cache entries (0 = off)")
-    ap.add_argument("--checkpoint-every", type=float, default=60.0, help="seconds between checkpoints")
+    ap.add_argument(
+        "--infer-cache",
+        type=int,
+        default=0,
+        help="engine infer-cache entries (0 = off)",
+    )
+    ap.add_argument(
+        "--checkpoint-every",
+        type=float,
+        default=60.0,
+        help="seconds between checkpoints",
+    )
     # net architecture — MUST match the OpenSpiel side's --nn_width/--nn_depth (the round
     # launcher passes both sides from one env var; the printed param count is the check)
     ap.add_argument("--width", type=int, default=32)
     ap.add_argument("--depth", type=int, default=1)
     args = ap.parse_args()
 
-    if rf.core_build_profile() != "release" and not os.environ.get("REINFORS_ALLOW_DEBUG"):
-        sys.exit("reinfors is a DEBUG build — numbers would be garbage. "
-                 "maturin develop --release, or REINFORS_ALLOW_DEBUG=1 for wiring tests.")
+    if rf.core_build_profile() != "release" and not os.environ.get(
+        "REINFORS_ALLOW_DEBUG"
+    ):
+        sys.exit(
+            "reinfors is a DEBUG build — numbers would be garbage. "
+            "maturin develop --release, or REINFORS_ALLOW_DEBUG=1 for wiring tests."
+        )
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    versions = {"reinfors": rf.core_version(), "reinfors_profile": rf.core_build_profile(),
-                "torch": torch.__version__}
+    versions = {
+        "reinfors": rf.core_version(),
+        "reinfors_profile": rf.core_build_profile(),
+        "torch": torch.__version__,
+    }
     (out / "config.json").write_text(json.dumps(vars(args) | versions, indent=2))
+    manifest.write(out, run_kind="training", config=vars(args))
     print(f"versions: {versions}")
     seed_all()
     torch.manual_seed(args.seed)
@@ -118,9 +151,13 @@ def main() -> None:
     obs_c, obs_h, obs_w = game.observation_space().shape
     dim = int(np.prod(game.observation_space().shape))
     actions = game.action_space().n
-    net = SweepResnet(obs_c, obs_h, obs_w, head_actions, args.width, args.depth).to(args.device)
+    net = SweepResnet(obs_c, obs_h, obs_w, head_actions, args.width, args.depth).to(
+        args.device
+    )
     n_params = sum(p.numel() for p in net.parameters())
-    print(f"net: SweepResnet w{args.width} d{args.depth} head={head_actions} params={n_params:,}")
+    print(
+        f"net: SweepResnet w{args.width} d{args.depth} head={head_actions} params={n_params:,}"
+    )
     # value head participates here (unlike the review benchmark where it was discarded)
     # Weight decay mirrors their manual L2 term (model.cc: skip any param whose NAME contains
     # "bias" — so BN gammas, named "weight", DO decay). Adam's coupled weight_decay adds
@@ -128,8 +165,12 @@ def main() -> None:
     decay = [q for name, q in net.named_parameters() if "bias" not in name]
     no_decay = [q for name, q in net.named_parameters() if "bias" in name]
     optimizer = torch.optim.Adam(
-        [{"params": decay, "weight_decay": args.weight_decay},
-         {"params": no_decay, "weight_decay": 0.0}], lr=args.lr)
+        [
+            {"params": decay, "weight_decay": args.weight_decay},
+            {"params": no_decay, "weight_decay": 0.0},
+        ],
+        lr=args.lr,
+    )
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
 
     engine = rf.Engine(
@@ -156,15 +197,22 @@ def main() -> None:
 
     def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         with sync_lock, torch.inference_mode():
-            x = torch.from_numpy(np.ascontiguousarray(obs_batch)).reshape(-1, c, h, w).to(args.device)
+            x = (
+                torch.from_numpy(np.ascontiguousarray(obs_batch))
+                .reshape(-1, c, h, w)
+                .to(args.device)
+            )
             logits, values = collector_net.heads(x)
         # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE — the
         # binding accepts width >= A and ignores the tail (a pre-transfer slice costs a
         # device-side gather). This is the measured operating-point path.
         return logits.cpu().numpy(), values.cpu().numpy()
 
-
-    depth = None if str(args.stream_depth).lower() in ("none", "inf") else int(args.stream_depth)
+    depth = (
+        None
+        if str(args.stream_depth).lower() in ("none", "inf")
+        else int(args.stream_depth)
+    )
     log = (out / "learner.jsonl").open("w")
     t0 = time.perf_counter()
     deadline = t0 + args.minutes * 60.0
@@ -208,15 +256,21 @@ def main() -> None:
                 x = torch.from_numpy(bo).reshape(-1, c, h, w).to(args.device)
                 target_pi = torch.from_numpy(bp).float().to(args.device)
                 mask = torch.from_numpy(bl).to(args.device)
-                if head_actions != actions:  # pad pi/mask with zeros over the dead head slots
-                    target_pi = torch.nn.functional.pad(target_pi, (0, head_actions - actions))
+                if (
+                    head_actions != actions
+                ):  # pad pi/mask with zeros over the dead head slots
+                    target_pi = torch.nn.functional.pad(
+                        target_pi, (0, head_actions - actions)
+                    )
                     mask = torch.nn.functional.pad(mask, (0, head_actions - actions))
                 target_z = torch.from_numpy(bz).float().to(args.device)
                 logits, values = net.heads(x)
                 # their loss exactly: illegal logits to -(1<<16) before log_softmax (model.cc
                 # masks in forward) => softmax support = legal actions only
-                logits = logits.masked_fill(~mask, -(2.0 ** 16))
-                policy_loss = -(target_pi * torch.log_softmax(logits, dim=-1)).sum(-1).mean()
+                logits = logits.masked_fill(~mask, -(2.0**16))
+                policy_loss = (
+                    -(target_pi * torch.log_softmax(logits, dim=-1)).sum(-1).mean()
+                )
                 value_loss = torch.nn.functional.mse_loss(values, target_z)
                 optimizer.zero_grad()
                 (policy_loss + value_loss).backward()
@@ -261,7 +315,9 @@ def main() -> None:
             f"net share {infer_seconds / wall * 100:.0f}%"
         )
         if cache_lookups:
-            print(f"  cache: {cache_hits}/{cache_lookups} hits ({cache_hits / cache_lookups * 100:.0f}%)")
+            print(
+                f"  cache: {cache_hits}/{cache_lookups} hits ({cache_hits / cache_lookups * 100:.0f}%)"
+            )
 
 
 if __name__ == "__main__":
