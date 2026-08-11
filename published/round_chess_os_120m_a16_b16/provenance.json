@@ -1,0 +1,14 @@
+{
+  "instance": "AWS g5.2xlarge (1x A10G 24GB, 4 physical cores, SMT off, cores 0-3)",
+  "openspiel_pin": "112b7770",
+  "torch": "2.3.0+cu121 (python and libtorch)",
+  "sha_note": "reconstructed from run timestamps against branch history (runs predate the manifest tooling)",
+  "side": "openspiel",
+  "seed": 0,
+  "date": "2026-08-10",
+  "role": "matched-round training leg (16 actors, inference batch 16; supersedes the 2026-08-04 leg whose artifacts were overwritten on disk)",
+  "reinfors_sha": null,
+  "companion_sha": "804e034",
+  "command": "run_round_chess_gpu.sh OpenSpiel leg: alpha_zero_torch_game_example-based trainer, a16/b16, --solve=false, cache 262144, hard SIGKILL at 7200s",
+  "omitted": "per-actor logs and replay buffers (bulk, non-load-bearing); checkpoints attach as release assets"
+}

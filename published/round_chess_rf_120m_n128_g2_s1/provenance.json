@@ -1,0 +1,14 @@
+{
+  "instance": "AWS g5.2xlarge (1x A10G 24GB, 4 physical cores, SMT off, cores 0-3)",
+  "openspiel_pin": "112b7770",
+  "torch": "2.3.0+cu121 (python and libtorch)",
+  "sha_note": "reconstructed from run timestamps against branch history (runs predate the manifest tooling)",
+  "side": "reinfors",
+  "seed": 1,
+  "date": "2026-08-11",
+  "role": "seed-replicate training leg at the selected operating point (v2 grouped scheduler, first production round)",
+  "reinfors_sha": "9f3d7880",
+  "companion_sha": "7ed1120",
+  "command": "timeout --signal=KILL 7200 taskset -c 0-3 .venv23/bin/python benchmarks/openspiel/train_reinfors_az.py --minutes 130 --out results/round_chess_rf_120m_n128_g2_s1 --device cuda --game chess --seed 1 --n-games 128 --n-groups 2 --sims 64 --c-puct 2.0 --width 256 --depth 8 --infer-cache 262144 --collect-size 21845 --checkpoint-every 60",
+  "omitted": "per-actor logs and replay buffers (bulk, non-load-bearing); checkpoints attach as release assets"
+}

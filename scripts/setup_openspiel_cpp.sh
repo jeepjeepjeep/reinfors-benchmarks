@@ -70,7 +70,7 @@ if [[ -d open_spiel/abseil-cpp ]] && ! git -C open_spiel/abseil-cpp describe --t
 fi
 
 # benchmark instrumentation: request/cache/forward counters in VPNetEvaluator ([inst] stderr
-# lines, parsed by decompose_sequential.py). Idempotent.
+# lines, parsed by the measurement scripts). Idempotent.
 if git apply --check ../../scripts/instrument_vpevaluator.patch 2>/dev/null; then
   git apply ../../scripts/instrument_vpevaluator.patch
 fi

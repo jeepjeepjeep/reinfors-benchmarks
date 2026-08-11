@@ -1,0 +1,338 @@
+[2026-08-10 20:15:53.430] learner started
+[2026-08-10 20:15:53.430] Running the learner on device 0: /cuda:0
+[2026-08-10 20:18:37.787] Step: 1
+[2026-08-10 20:18:37.787] Collected 21905 states from 104 games, 97.6 states/s; 6.1 states/(s*actor), game length: 210.6
+[2026-08-10 20:18:37.787] Queue size: 0. Buffer size: 21905. States seen: 21905
+[2026-08-10 20:18:44.016] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:18:44.016] Losses: policy: 2.9502, value: 0.3894, l2: 0.3703, sum: 3.7099
+[2026-08-10 20:18:44.016] Cache size: 262144/262144: 100.0%, hits: 673750, misses: 1264733, hit rate: 34.757%
+[2026-08-10 20:18:44.097] 
+[2026-08-10 20:21:26.017] Step: 2
+[2026-08-10 20:21:26.017] Collected 21949 states from 123 games, 130.5 states/s; 8.2 states/(s*actor), game length: 178.4
+[2026-08-10 20:21:26.017] Queue size: 0. Buffer size: 43854. States seen: 43854
+[2026-08-10 20:21:37.854] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:21:37.854] Losses: policy: 2.9930, value: 0.4106, l2: 0.3634, sum: 3.7671
+[2026-08-10 20:21:37.854] Cache size: 262144/262144: 100.0%, hits: 615385, misses: 1217082, hit rate: 33.582%
+[2026-08-10 20:21:37.931] 
+[2026-08-10 20:24:22.977] Step: 3
+[2026-08-10 20:24:22.978] Collected 21906 states from 120 games, 123.8 states/s; 7.7 states/(s*actor), game length: 182.6
+[2026-08-10 20:24:22.978] Queue size: 2. Buffer size: 65536. States seen: 65760
+[2026-08-10 20:24:41.327] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:24:41.328] Losses: policy: 2.9758, value: 0.2996, l2: 0.3530, sum: 3.6285
+[2026-08-10 20:24:41.328] Cache size: 262144/262144: 100.0%, hits: 710398, misses: 1249062, hit rate: 36.255%
+[2026-08-10 20:24:41.404] 
+[2026-08-10 20:27:04.779] Step: 4
+[2026-08-10 20:27:04.779] Collected 22172 states from 116 games, 137.0 states/s; 8.6 states/(s*actor), game length: 191.1
+[2026-08-10 20:27:04.779] Queue size: 7. Buffer size: 65536. States seen: 87932
+[2026-08-10 20:27:23.275] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:27:23.275] Losses: policy: 2.9662, value: 0.2468, l2: 0.3424, sum: 3.5554
+[2026-08-10 20:27:23.275] Cache size: 262144/262144: 100.0%, hits: 658162, misses: 1086989, hit rate: 37.714%
+[2026-08-10 20:27:23.352] 
+[2026-08-10 20:29:26.382] Step: 5
+[2026-08-10 20:29:26.382] Collected 21921 states from 115 games, 154.8 states/s; 9.7 states/(s*actor), game length: 190.6
+[2026-08-10 20:29:26.382] Queue size: 2. Buffer size: 65536. States seen: 109853
+[2026-08-10 20:29:44.841] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:29:44.841] Losses: policy: 2.8982, value: 0.1642, l2: 0.3336, sum: 3.3960
+[2026-08-10 20:29:44.841] Cache size: 262144/262144: 100.0%, hits: 834719, misses: 922506, hit rate: 47.502%
+[2026-08-10 20:29:44.916] 
+[2026-08-10 20:31:58.807] Step: 6
+[2026-08-10 20:31:58.807] Collected 22052 states from 110 games, 144.7 states/s; 9.0 states/(s*actor), game length: 200.5
+[2026-08-10 20:31:58.807] Queue size: 4. Buffer size: 65536. States seen: 131905
+[2026-08-10 20:32:17.262] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:32:17.263] Losses: policy: 2.8174, value: 0.1437, l2: 0.3262, sum: 3.2872
+[2026-08-10 20:32:17.263] Cache size: 262144/262144: 100.0%, hits: 851925, misses: 1003547, hit rate: 45.914%
+[2026-08-10 20:32:17.337] 
+[2026-08-10 20:34:26.645] Step: 7
+[2026-08-10 20:34:26.645] Collected 22063 states from 110 games, 149.2 states/s; 9.3 states/(s*actor), game length: 200.6
+[2026-08-10 20:34:26.645] Queue size: 4. Buffer size: 65536. States seen: 153968
+[2026-08-10 20:34:45.116] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:34:45.117] Losses: policy: 2.7455, value: 0.1331, l2: 0.3199, sum: 3.1985
+[2026-08-10 20:34:45.117] Cache size: 262144/262144: 100.0%, hits: 835017, misses: 964742, hit rate: 46.396%
+[2026-08-10 20:34:45.193] 
+[2026-08-10 20:36:54.434] Step: 8
+[2026-08-10 20:36:54.434] Collected 22083 states from 108 games, 149.4 states/s; 9.3 states/(s*actor), game length: 204.5
+[2026-08-10 20:36:54.434] Queue size: 5. Buffer size: 65536. States seen: 176051
+[2026-08-10 20:37:12.875] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:37:12.875] Losses: policy: 2.7089, value: 0.1265, l2: 0.3146, sum: 3.1500
+[2026-08-10 20:37:12.875] Cache size: 262144/262144: 100.0%, hits: 757235, misses: 973192, hit rate: 43.760%
+[2026-08-10 20:37:12.952] 
+[2026-08-10 20:39:22.571] Step: 9
+[2026-08-10 20:39:22.571] Collected 21972 states from 106 games, 148.3 states/s; 9.3 states/(s*actor), game length: 207.3
+[2026-08-10 20:39:22.571] Queue size: 6. Buffer size: 65536. States seen: 198023
+[2026-08-10 20:39:41.008] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:39:41.008] Losses: policy: 2.7039, value: 0.1297, l2: 0.3100, sum: 3.1435
+[2026-08-10 20:39:41.008] Cache size: 262144/262144: 100.0%, hits: 748125, misses: 973570, hit rate: 43.453%
+[2026-08-10 20:39:41.085] 
+[2026-08-10 20:41:48.138] Step: 10
+[2026-08-10 20:41:48.138] Collected 21914 states from 129 games, 150.5 states/s; 9.4 states/(s*actor), game length: 169.9
+[2026-08-10 20:41:48.138] Queue size: 5. Buffer size: 65536. States seen: 219937
+[2026-08-10 20:42:06.565] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:42:06.565] Losses: policy: 2.7342, value: 0.1147, l2: 0.3059, sum: 3.1549
+[2026-08-10 20:42:06.565] Cache size: 262144/262144: 100.0%, hits: 853308, misses: 942276, hit rate: 47.523%
+[2026-08-10 20:42:06.641] 
+[2026-08-10 20:44:08.387] Step: 11
+[2026-08-10 20:44:08.387] Collected 22012 states from 135 games, 156.9 states/s; 9.8 states/(s*actor), game length: 163.1
+[2026-08-10 20:44:08.387] Queue size: 10. Buffer size: 65536. States seen: 241949
+[2026-08-10 20:44:26.907] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:44:26.908] Losses: policy: 2.7489, value: 0.1032, l2: 0.3022, sum: 3.1543
+[2026-08-10 20:44:26.908] Cache size: 262144/262144: 100.0%, hits: 825759, misses: 898033, hit rate: 47.904%
+[2026-08-10 20:44:26.980] 
+[2026-08-10 20:46:41.761] Step: 12
+[2026-08-10 20:46:41.761] Collected 21858 states from 117 games, 142.5 states/s; 8.9 states/(s*actor), game length: 186.8
+[2026-08-10 20:46:41.761] Queue size: 6. Buffer size: 65536. States seen: 263807
+[2026-08-10 20:47:00.268] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:47:00.269] Losses: policy: 2.7399, value: 0.1055, l2: 0.2990, sum: 3.1443
+[2026-08-10 20:47:00.269] Cache size: 262144/262144: 100.0%, hits: 836899, misses: 1008682, hit rate: 45.346%
+[2026-08-10 20:47:00.347] 
+[2026-08-10 20:49:04.509] Step: 13
+[2026-08-10 20:49:04.509] Collected 22029 states from 113 games, 154.3 states/s; 9.6 states/(s*actor), game length: 194.9
+[2026-08-10 20:49:04.509] Queue size: 6. Buffer size: 65536. States seen: 285836
+[2026-08-10 20:49:22.996] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:49:22.997] Losses: policy: 2.7293, value: 0.1039, l2: 0.2961, sum: 3.1293
+[2026-08-10 20:49:22.997] Cache size: 262144/262144: 100.0%, hits: 816846, misses: 918846, hit rate: 47.062%
+[2026-08-10 20:49:23.073] 
+[2026-08-10 20:51:34.709] Step: 14
+[2026-08-10 20:51:34.709] Collected 21886 states from 127 games, 145.7 states/s; 9.1 states/(s*actor), game length: 172.3
+[2026-08-10 20:51:34.709] Queue size: 8. Buffer size: 65536. States seen: 307722
+[2026-08-10 20:51:53.213] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:51:53.214] Losses: policy: 2.7244, value: 0.1065, l2: 0.2935, sum: 3.1244
+[2026-08-10 20:51:53.214] Cache size: 262144/262144: 100.0%, hits: 833131, misses: 977402, hit rate: 46.016%
+[2026-08-10 20:51:53.287] 
+[2026-08-10 20:53:51.149] Step: 15
+[2026-08-10 20:53:51.149] Collected 21899 states from 123 games, 160.5 states/s; 10.0 states/(s*actor), game length: 178.0
+[2026-08-10 20:53:51.149] Queue size: 6. Buffer size: 65536. States seen: 329621
+[2026-08-10 20:54:09.716] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:54:09.716] Losses: policy: 2.7249, value: 0.1004, l2: 0.2910, sum: 3.1163
+[2026-08-10 20:54:09.716] Cache size: 262144/262144: 100.0%, hits: 799455, misses: 875952, hit rate: 47.717%
+[2026-08-10 20:54:09.795] 
+[2026-08-10 20:56:16.416] Step: 16
+[2026-08-10 20:56:16.416] Collected 21866 states from 115 games, 150.5 states/s; 9.4 states/(s*actor), game length: 190.1
+[2026-08-10 20:56:16.416] Queue size: 2. Buffer size: 65536. States seen: 351487
+[2026-08-10 20:56:34.950] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:56:34.950] Losses: policy: 2.7365, value: 0.0983, l2: 0.2887, sum: 3.1234
+[2026-08-10 20:56:34.950] Cache size: 262144/262144: 100.0%, hits: 864260, misses: 930888, hit rate: 48.144%
+[2026-08-10 20:56:35.027] 
+[2026-08-10 20:58:35.747] Step: 17
+[2026-08-10 20:58:35.747] Collected 22015 states from 121 games, 158.0 states/s; 9.9 states/(s*actor), game length: 181.9
+[2026-08-10 20:58:35.747] Queue size: 2. Buffer size: 65536. States seen: 373502
+[2026-08-10 20:58:54.234] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 20:58:54.234] Losses: policy: 2.7344, value: 0.0878, l2: 0.2866, sum: 3.1088
+[2026-08-10 20:58:54.234] Cache size: 262144/262144: 100.0%, hits: 900169, misses: 879116, hit rate: 50.592%
+[2026-08-10 20:58:54.312] 
+[2026-08-10 21:00:57.458] Step: 18
+[2026-08-10 21:00:57.458] Collected 21853 states from 118 games, 154.2 states/s; 9.6 states/(s*actor), game length: 185.2
+[2026-08-10 21:00:57.458] Queue size: 7. Buffer size: 65536. States seen: 395355
+[2026-08-10 21:01:16.019] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:01:16.020] Losses: policy: 2.7430, value: 0.0775, l2: 0.2845, sum: 3.1049
+[2026-08-10 21:01:16.020] Cache size: 262144/262144: 100.0%, hits: 798368, misses: 915753, hit rate: 46.576%
+[2026-08-10 21:01:16.096] 
+[2026-08-10 21:03:28.668] Step: 19
+[2026-08-10 21:03:28.668] Collected 21915 states from 122 games, 144.9 states/s; 9.1 states/(s*actor), game length: 179.6
+[2026-08-10 21:03:28.668] Queue size: 8. Buffer size: 65536. States seen: 417270
+[2026-08-10 21:03:47.116] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:03:47.116] Losses: policy: 2.7662, value: 0.0856, l2: 0.2824, sum: 3.1342
+[2026-08-10 21:03:47.116] Cache size: 262144/262144: 100.0%, hits: 794300, misses: 992155, hit rate: 44.462%
+[2026-08-10 21:03:47.192] 
+[2026-08-10 21:05:59.031] Step: 20
+[2026-08-10 21:05:59.031] Collected 21862 states from 136 games, 145.4 states/s; 9.1 states/(s*actor), game length: 160.8
+[2026-08-10 21:05:59.031] Queue size: 6. Buffer size: 65536. States seen: 439132
+[2026-08-10 21:06:17.563] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:06:17.564] Losses: policy: 2.7902, value: 0.0973, l2: 0.2805, sum: 3.1679
+[2026-08-10 21:06:17.564] Cache size: 262144/262144: 100.0%, hits: 763598, misses: 986728, hit rate: 43.626%
+[2026-08-10 21:06:17.646] 
+[2026-08-10 21:08:27.428] Step: 21
+[2026-08-10 21:08:27.428] Collected 21862 states from 125 games, 147.3 states/s; 9.2 states/(s*actor), game length: 174.9
+[2026-08-10 21:08:27.428] Queue size: 10. Buffer size: 65536. States seen: 460994
+[2026-08-10 21:08:45.722] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:08:45.723] Losses: policy: 2.7969, value: 0.0895, l2: 0.2786, sum: 3.1650
+[2026-08-10 21:08:45.723] Cache size: 262144/262144: 100.0%, hits: 793427, misses: 963789, hit rate: 45.153%
+[2026-08-10 21:08:45.796] 
+[2026-08-10 21:10:55.254] Step: 22
+[2026-08-10 21:10:55.254] Collected 22147 states from 117 games, 149.8 states/s; 9.4 states/(s*actor), game length: 189.3
+[2026-08-10 21:10:55.254] Queue size: 5. Buffer size: 65536. States seen: 483141
+[2026-08-10 21:11:13.809] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:11:13.810] Losses: policy: 2.7822, value: 0.0854, l2: 0.2767, sum: 3.1444
+[2026-08-10 21:11:13.810] Cache size: 262144/262144: 100.0%, hits: 807635, misses: 969528, hit rate: 45.445%
+[2026-08-10 21:11:13.886] 
+[2026-08-10 21:13:29.862] Step: 23
+[2026-08-10 21:13:29.862] Collected 21945 states from 133 games, 141.9 states/s; 8.9 states/(s*actor), game length: 165.0
+[2026-08-10 21:13:29.862] Queue size: 9. Buffer size: 65536. States seen: 505086
+[2026-08-10 21:13:48.408] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:13:48.408] Losses: policy: 2.7861, value: 0.1144, l2: 0.2750, sum: 3.1755
+[2026-08-10 21:13:48.408] Cache size: 262144/262144: 100.0%, hits: 731431, misses: 1017334, hit rate: 41.826%
+[2026-08-10 21:13:48.483] 
+[2026-08-10 21:15:50.630] Step: 24
+[2026-08-10 21:15:50.630] Collected 22044 states from 148 games, 156.6 states/s; 9.8 states/(s*actor), game length: 148.9
+[2026-08-10 21:15:50.630] Queue size: 7. Buffer size: 65536. States seen: 527130
+[2026-08-10 21:16:08.857] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:16:08.857] Losses: policy: 2.7702, value: 0.1007, l2: 0.2734, sum: 3.1443
+[2026-08-10 21:16:08.857] Cache size: 262144/262144: 100.0%, hits: 846975, misses: 901045, hit rate: 48.453%
+[2026-08-10 21:16:08.929] 
+[2026-08-10 21:18:23.986] Step: 25
+[2026-08-10 21:18:23.986] Collected 21973 states from 147 games, 143.3 states/s; 9.0 states/(s*actor), game length: 149.5
+[2026-08-10 21:18:23.986] Queue size: 4. Buffer size: 65536. States seen: 549103
+[2026-08-10 21:18:42.529] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:18:42.530] Losses: policy: 2.7899, value: 0.1004, l2: 0.2718, sum: 3.1621
+[2026-08-10 21:18:42.530] Cache size: 262144/262144: 100.0%, hits: 877986, misses: 1002941, hit rate: 46.678%
+[2026-08-10 21:18:42.605] 
+[2026-08-10 21:20:44.532] Step: 26
+[2026-08-10 21:20:44.533] Collected 22095 states from 112 games, 157.2 states/s; 9.8 states/(s*actor), game length: 197.3
+[2026-08-10 21:20:44.533] Queue size: 5. Buffer size: 65536. States seen: 571198
+[2026-08-10 21:21:03.082] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:21:03.083] Losses: policy: 2.7414, value: 0.0688, l2: 0.2702, sum: 3.0805
+[2026-08-10 21:21:03.083] Cache size: 262144/262144: 100.0%, hits: 842389, misses: 902826, hit rate: 48.268%
+[2026-08-10 21:21:03.155] 
+[2026-08-10 21:23:17.750] Step: 27
+[2026-08-10 21:23:17.750] Collected 21872 states from 113 games, 142.8 states/s; 8.9 states/(s*actor), game length: 193.6
+[2026-08-10 21:23:17.750] Queue size: 4. Buffer size: 65536. States seen: 593070
+[2026-08-10 21:23:36.030] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:23:36.030] Losses: policy: 2.7404, value: 0.0697, l2: 0.2687, sum: 3.0788
+[2026-08-10 21:23:36.030] Cache size: 262144/262144: 100.0%, hits: 705278, misses: 1005616, hit rate: 41.223%
+[2026-08-10 21:23:36.103] 
+[2026-08-10 21:25:53.286] Step: 28
+[2026-08-10 21:25:53.286] Collected 21883 states from 144 games, 140.7 states/s; 8.8 states/(s*actor), game length: 152.0
+[2026-08-10 21:25:53.286] Queue size: 3. Buffer size: 65536. States seen: 614953
+[2026-08-10 21:26:11.836] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:26:11.836] Losses: policy: 2.7615, value: 0.1026, l2: 0.2671, sum: 3.1312
+[2026-08-10 21:26:11.836] Cache size: 262144/262144: 100.0%, hits: 776133, misses: 1018612, hit rate: 43.245%
+[2026-08-10 21:26:11.908] 
+[2026-08-10 21:28:24.812] Step: 29
+[2026-08-10 21:28:24.812] Collected 21960 states from 120 games, 144.9 states/s; 9.1 states/(s*actor), game length: 183.0
+[2026-08-10 21:28:24.812] Queue size: 8. Buffer size: 65536. States seen: 636913
+[2026-08-10 21:28:43.071] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:28:43.071] Losses: policy: 2.7996, value: 0.0854, l2: 0.2655, sum: 3.1505
+[2026-08-10 21:28:43.071] Cache size: 262144/262144: 100.0%, hits: 752964, misses: 992175, hit rate: 43.146%
+[2026-08-10 21:28:43.151] 
+[2026-08-10 21:30:56.228] Step: 30
+[2026-08-10 21:30:56.228] Collected 22022 states from 114 games, 145.4 states/s; 9.1 states/(s*actor), game length: 193.2
+[2026-08-10 21:30:56.228] Queue size: 3. Buffer size: 65536. States seen: 658935
+[2026-08-10 21:31:14.839] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:31:14.840] Losses: policy: 2.8062, value: 0.0816, l2: 0.2638, sum: 3.1516
+[2026-08-10 21:31:14.840] Cache size: 262144/262144: 100.0%, hits: 749670, misses: 995020, hit rate: 42.969%
+[2026-08-10 21:31:14.916] 
+[2026-08-10 21:33:24.401] Step: 31
+[2026-08-10 21:33:24.401] Collected 22140 states from 123 games, 149.4 states/s; 9.3 states/(s*actor), game length: 180.0
+[2026-08-10 21:33:24.401] Queue size: 7. Buffer size: 65536. States seen: 681075
+[2026-08-10 21:33:42.964] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:33:42.965] Losses: policy: 2.7606, value: 0.0800, l2: 0.2622, sum: 3.1028
+[2026-08-10 21:33:42.965] Cache size: 262144/262144: 100.0%, hits: 815592, misses: 961037, hit rate: 45.907%
+[2026-08-10 21:33:43.039] 
+[2026-08-10 21:35:56.166] Step: 32
+[2026-08-10 21:35:56.166] Collected 22063 states from 120 games, 145.4 states/s; 9.1 states/(s*actor), game length: 183.9
+[2026-08-10 21:35:56.166] Queue size: 6. Buffer size: 65536. States seen: 703138
+[2026-08-10 21:36:14.732] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:36:14.733] Losses: policy: 2.7451, value: 0.0715, l2: 0.2608, sum: 3.0774
+[2026-08-10 21:36:14.733] Cache size: 262144/262144: 100.0%, hits: 821985, misses: 997055, hit rate: 45.188%
+[2026-08-10 21:36:14.812] 
+[2026-08-10 21:38:27.322] Step: 33
+[2026-08-10 21:38:27.322] Collected 22021 states from 129 games, 145.7 states/s; 9.1 states/(s*actor), game length: 170.7
+[2026-08-10 21:38:27.322] Queue size: 11. Buffer size: 65536. States seen: 725159
+[2026-08-10 21:38:45.899] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:38:45.900] Losses: policy: 2.7420, value: 0.0751, l2: 0.2593, sum: 3.0764
+[2026-08-10 21:38:45.900] Cache size: 262144/262144: 100.0%, hits: 756209, misses: 994013, hit rate: 43.206%
+[2026-08-10 21:38:45.986] 
+[2026-08-10 21:40:56.208] Step: 34
+[2026-08-10 21:40:56.208] Collected 21891 states from 130 games, 147.0 states/s; 9.2 states/(s*actor), game length: 168.4
+[2026-08-10 21:40:56.208] Queue size: 7. Buffer size: 65536. States seen: 747050
+[2026-08-10 21:41:14.471] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:41:14.471] Losses: policy: 2.7491, value: 0.0809, l2: 0.2578, sum: 3.0878
+[2026-08-10 21:41:14.471] Cache size: 262144/262144: 100.0%, hits: 805978, misses: 965970, hit rate: 45.485%
+[2026-08-10 21:41:14.545] 
+[2026-08-10 21:43:21.511] Step: 35
+[2026-08-10 21:43:21.511] Collected 21883 states from 119 games, 150.6 states/s; 9.4 states/(s*actor), game length: 183.9
+[2026-08-10 21:43:21.511] Queue size: 7. Buffer size: 65536. States seen: 768933
+[2026-08-10 21:43:40.060] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:43:40.061] Losses: policy: 2.7602, value: 0.0829, l2: 0.2564, sum: 3.0994
+[2026-08-10 21:43:40.061] Cache size: 262144/262144: 100.0%, hits: 787204, misses: 947223, hit rate: 45.387%
+[2026-08-10 21:43:40.137] 
+[2026-08-10 21:45:55.481] Step: 36
+[2026-08-10 21:45:55.481] Collected 22029 states from 127 games, 143.1 states/s; 8.9 states/(s*actor), game length: 173.5
+[2026-08-10 21:45:55.481] Queue size: 9. Buffer size: 65536. States seen: 790962
+[2026-08-10 21:46:14.023] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:46:14.024] Losses: policy: 2.7386, value: 0.0849, l2: 0.2549, sum: 3.0785
+[2026-08-10 21:46:14.024] Cache size: 262144/262144: 100.0%, hits: 813250, misses: 1009312, hit rate: 44.621%
+[2026-08-10 21:46:14.096] 
+[2026-08-10 21:48:26.634] Step: 37
+[2026-08-10 21:48:26.634] Collected 22043 states from 114 games, 145.8 states/s; 9.1 states/(s*actor), game length: 193.4
+[2026-08-10 21:48:26.634] Queue size: 5. Buffer size: 65536. States seen: 813005
+[2026-08-10 21:48:45.196] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:48:45.197] Losses: policy: 2.7694, value: 0.0871, l2: 0.2536, sum: 3.1102
+[2026-08-10 21:48:45.197] Cache size: 262144/262144: 100.0%, hits: 619471, misses: 1004553, hit rate: 38.144%
+[2026-08-10 21:48:45.270] 
+[2026-08-10 21:51:01.892] Step: 38
+[2026-08-10 21:51:01.892] Collected 21914 states from 130 games, 141.1 states/s; 8.8 states/(s*actor), game length: 168.6
+[2026-08-10 21:51:01.892] Queue size: 5. Buffer size: 65536. States seen: 834919
+[2026-08-10 21:51:20.459] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:51:20.459] Losses: policy: 2.7923, value: 0.0991, l2: 0.2522, sum: 3.1437
+[2026-08-10 21:51:20.459] Cache size: 262144/262144: 100.0%, hits: 826449, misses: 1015569, hit rate: 44.866%
+[2026-08-10 21:51:20.536] 
+[2026-08-10 21:53:23.790] Step: 39
+[2026-08-10 21:53:23.790] Collected 21975 states from 112 games, 154.9 states/s; 9.7 states/(s*actor), game length: 196.2
+[2026-08-10 21:53:23.790] Queue size: 8. Buffer size: 65536. States seen: 856894
+[2026-08-10 21:53:42.300] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:53:42.300] Losses: policy: 2.8084, value: 0.0786, l2: 0.2510, sum: 3.1380
+[2026-08-10 21:53:42.300] Cache size: 262144/262144: 100.0%, hits: 893283, misses: 906840, hit rate: 49.623%
+[2026-08-10 21:53:42.370] 
+[2026-08-10 21:55:56.583] Step: 40
+[2026-08-10 21:55:56.583] Collected 21936 states from 125 games, 143.6 states/s; 9.0 states/(s*actor), game length: 175.5
+[2026-08-10 21:55:56.583] Queue size: 6. Buffer size: 65536. States seen: 878830
+[2026-08-10 21:56:15.235] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:56:15.236] Losses: policy: 2.7899, value: 0.0774, l2: 0.2497, sum: 3.1170
+[2026-08-10 21:56:15.236] Cache size: 262144/262144: 100.0%, hits: 759077, misses: 1001814, hit rate: 43.108%
+[2026-08-10 21:56:15.308] 
+[2026-08-10 21:58:14.221] Step: 41
+[2026-08-10 21:58:14.221] Collected 21908 states from 118 games, 159.2 states/s; 9.9 states/(s*actor), game length: 185.7
+[2026-08-10 21:58:14.221] Queue size: 7. Buffer size: 65536. States seen: 900738
+[2026-08-10 21:58:32.495] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 21:58:32.496] Losses: policy: 2.7404, value: 0.0625, l2: 0.2484, sum: 3.0512
+[2026-08-10 21:58:32.496] Cache size: 262144/262144: 100.0%, hits: 759842, misses: 890736, hit rate: 46.035%
+[2026-08-10 21:58:32.568] 
+[2026-08-10 22:00:55.600] Step: 42
+[2026-08-10 22:00:55.600] Collected 22108 states from 125 games, 137.0 states/s; 8.6 states/(s*actor), game length: 176.9
+[2026-08-10 22:00:55.600] Queue size: 6. Buffer size: 65536. States seen: 922846
+[2026-08-10 22:01:14.223] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:01:14.223] Losses: policy: 2.7654, value: 0.0930, l2: 0.2471, sum: 3.1055
+[2026-08-10 22:01:14.223] Cache size: 262144/262144: 100.0%, hits: 783639, misses: 1068445, hit rate: 42.311%
+[2026-08-10 22:01:14.304] 
+[2026-08-10 22:03:20.584] Step: 43
+[2026-08-10 22:03:20.584] Collected 21911 states from 134 games, 151.1 states/s; 9.4 states/(s*actor), game length: 163.5
+[2026-08-10 22:03:20.584] Queue size: 4. Buffer size: 65536. States seen: 944757
+[2026-08-10 22:03:39.169] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:03:39.169] Losses: policy: 2.7526, value: 0.0748, l2: 0.2459, sum: 3.0733
+[2026-08-10 22:03:39.169] Cache size: 262144/262144: 100.0%, hits: 783879, misses: 942116, hit rate: 45.416%
+[2026-08-10 22:03:39.250] 
+[2026-08-10 22:05:44.180] Step: 44
+[2026-08-10 22:05:44.180] Collected 22145 states from 116 games, 154.2 states/s; 9.6 states/(s*actor), game length: 190.9
+[2026-08-10 22:05:44.180] Queue size: 4. Buffer size: 65536. States seen: 966902
+[2026-08-10 22:06:02.700] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:06:02.701] Losses: policy: 2.7624, value: 0.0764, l2: 0.2446, sum: 3.0835
+[2026-08-10 22:06:02.701] Cache size: 262144/262144: 100.0%, hits: 825391, misses: 923504, hit rate: 47.195%
+[2026-08-10 22:06:02.780] 
+[2026-08-10 22:08:19.156] Step: 45
+[2026-08-10 22:08:19.156] Collected 22120 states from 121 games, 142.7 states/s; 8.9 states/(s*actor), game length: 182.8
+[2026-08-10 22:08:19.156] Queue size: 5. Buffer size: 65536. States seen: 989022
+[2026-08-10 22:08:37.769] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:08:37.769] Losses: policy: 2.7387, value: 0.0865, l2: 0.2434, sum: 3.0686
+[2026-08-10 22:08:37.769] Cache size: 262144/262144: 100.0%, hits: 799346, misses: 1019454, hit rate: 43.949%
+[2026-08-10 22:08:37.849] 
+[2026-08-10 22:10:41.643] Step: 46
+[2026-08-10 22:10:41.643] Collected 22035 states from 132 games, 154.6 states/s; 9.7 states/(s*actor), game length: 166.9
+[2026-08-10 22:10:41.643] Queue size: 6. Buffer size: 65536. States seen: 1011057
+[2026-08-10 22:11:00.205] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:11:00.206] Losses: policy: 2.7334, value: 0.0750, l2: 0.2422, sum: 3.0506
+[2026-08-10 22:11:00.206] Cache size: 262144/262144: 100.0%, hits: 785142, misses: 920446, hit rate: 46.034%
+[2026-08-10 22:11:00.280] 
+[2026-08-10 22:13:02.009] Step: 47
+[2026-08-10 22:13:02.010] Collected 21974 states from 132 games, 156.5 states/s; 9.8 states/(s*actor), game length: 166.5
+[2026-08-10 22:13:02.010] Queue size: 7. Buffer size: 65536. States seen: 1033031
+[2026-08-10 22:13:20.576] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:13:20.577] Losses: policy: 2.7365, value: 0.0741, l2: 0.2410, sum: 3.0516
+[2026-08-10 22:13:20.577] Cache size: 262144/262144: 100.0%, hits: 905338, misses: 898163, hit rate: 50.199%
+[2026-08-10 22:13:20.651] 
+[2026-08-10 22:15:28.921] Step: 48
+[2026-08-10 22:15:28.921] Collected 22126 states from 125 games, 150.6 states/s; 9.4 states/(s*actor), game length: 177.0
+[2026-08-10 22:15:28.921] Queue size: 5. Buffer size: 65536. States seen: 1055157
+[2026-08-10 22:15:47.198] Checkpoint saved: results/round_chess_os_120m_a16_b16/checkpoint--1
+[2026-08-10 22:15:47.198] Losses: policy: 2.7174, value: 0.0644, l2: 0.2398, sum: 3.0216
+[2026-08-10 22:15:47.198] Cache size: 262144/262144: 100.0%, hits: 833882, misses: 946119, hit rate: 46.847%
+[2026-08-10 22:15:47.278] 

@@ -1,0 +1,35 @@
+{
+  "instance": "AWS g5.2xlarge (1x A10G 24GB, 4 physical cores, SMT off, cores 0-3)",
+  "openspiel_pin": "112b7770",
+  "torch": "2.3.0+cu121 (python and libtorch)",
+  "sha_note": "reconstructed from run timestamps against branch history (runs predate the manifest tooling)",
+  "protocol": "pre-Arena bridge (companion 7ed1120 and earlier): python PUCT our side, their unmodified game_example, paired seeded openings",
+  "matches": [
+    {
+      "log": "h2h_round1.log",
+      "date": "2026-08-04",
+      "nets": "rf n64 leg vs OS 2026-08-04 leg",
+      "games": 50,
+      "result": "14W 28D 8L = 0.560 +- 0.051 (pair SE)",
+      "companion_sha": "0858bf2"
+    },
+    {
+      "log": "h2h_round2_s0.log",
+      "date": "2026-08-11",
+      "nets": "rf n128x2 s0 leg vs OS s0 leg",
+      "games": 100,
+      "result": "34W 44D 22L = 0.560 +- 0.037",
+      "companion_sha": "7ed1120"
+    },
+    {
+      "log": "h2h_s1_100games.txt",
+      "date": "2026-08-11",
+      "nets": "rf n128x2 s1 leg vs OS s1 leg (--seed 200 openings)",
+      "games": 100,
+      "result": "26W 58D 16L = 0.550 +- 0.034",
+      "companion_sha": "7ed1120"
+    }
+  ],
+  "pooled": "250 games / 125 pairs = 0.556 +- 0.022 (pair-level SE), ~+39 Elo (95% CI +9 to +70)",
+  "pgn": "h2h_games.pgn accumulates every exported game with run metadata headers"
+}
