@@ -32,9 +32,12 @@ import argparse
 import hashlib
 import itertools
 import json
+import os
 import re
+import signal
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -54,6 +57,35 @@ BIN = (
 CHOSE = re.compile(r"Player (\d) chose action: (\S+)")
 RETURNS = re.compile(r"Returns: (-?[\d.]+),? (-?[\d.]+)")
 HEAD_ACTIONS = 4674
+
+# Every spawned engine registers here; a main-thread finally kills whatever a failed run
+# leaves behind (a lane blocked in stderr can never run close() for it).
+_LIVE_PROCS: set[subprocess.Popen] = set()
+_LIVE_LOCK = threading.Lock()
+
+
+def _sha256(path: Path) -> str | None:
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+
+
+def kill_leftover_processes() -> None:
+    with _LIVE_LOCK:
+        procs = list(_LIVE_PROCS)
+        _LIVE_PROCS.clear()
+    for proc in procs:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            continue
+    deadline = time.time() + 5
+    for proc in procs:
+        try:
+            proc.wait(timeout=max(0.1, deadline - time.time()))
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
 
 
 class Mirror:
@@ -215,7 +247,10 @@ class TheirBot:
             stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
+            start_new_session=True,
         )
+        with _LIVE_LOCK:
+            _LIVE_PROCS.add(self.proc)
 
     def _read_announcement(self) -> tuple[int, str]:
         assert self.proc is not None and self.proc.stderr is not None
@@ -263,8 +298,14 @@ class TheirBot:
             self.expect_own = None
             self.mirror.apply_san(self._san_of(rf_action))
         elif self.proc is None:
-            self.forced_sans.append(self._san_of(rf_action))
-            self.mirror.apply_san(self.forced_sans[-1])
+            # positional forced actions must exactly match THEIR ActionToString rendering
+            # (the binary rejects anything else; +/# suffixes differ between renderers)
+            their_id = self.mirror.their_id(rf_action)
+            their_san = self.mirror.os_state.action_to_string(
+                self.mirror.os_state.current_player(), their_id
+            )
+            self.forced_sans.append(their_san)
+            self.mirror.apply_san(their_san)
         else:
             san = self._san_of(rf_action)
             their_id = self.mirror.their_id(rf_action)
@@ -283,14 +324,25 @@ class TheirBot:
             self._read_returns()
 
     def close(self) -> None:
-        if self.proc is not None:
-            if self.mirror.env.done() and not self.returns_seen:
-                raise RuntimeError(
-                    "game finished but their Returns line was never seen"
-                )
-            if self.proc.stdin is not None:
-                self.proc.stdin.close()
-            self.proc.wait(timeout=30)
+        proc = self.proc
+        if proc is not None:
+            try:
+                if self.mirror.env.done() and not self.returns_seen:
+                    raise RuntimeError(
+                        "game finished but their Returns line was never seen"
+                    )
+                if proc.stdin is not None:
+                    proc.stdin.close()
+                try:
+                    code = proc.wait(timeout=30)
+                except subprocess.TimeoutExpired as e:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                    raise RuntimeError("their process refused to exit; killed") from e
+                if code != 0:
+                    raise RuntimeError(f"their process exited with code {code}")
+            finally:
+                with _LIVE_LOCK:
+                    _LIVE_PROCS.discard(proc)
         done = next(self.done_counter)
         print(f"  finished {done}/{self.total} games", flush=True)
 
@@ -423,7 +475,10 @@ def main() -> None:
         seed=args.seed,
     )
     started = time.time()
-    result = arena.play(args.games)
+    try:
+        result = arena.play(args.games)
+    finally:
+        kill_leftover_processes()
 
     run_meta = {
         "RFCheckpoint": args.rf_checkpoint,
@@ -462,8 +517,13 @@ def main() -> None:
     n = args.games
     mean, stderr = result.payoff(0)
     score = mean / 2 + 0.5
+    sims_note = (
+        f"{args.sims} sims both"
+        if our_sims == args.sims
+        else f"sims theirs={args.sims} ours={our_sims}"
+    )
     print(
-        f"chess head-to-head (reinfors net vs open_spiel net, arena-v2, {args.sims} sims both): "
+        f"chess head-to-head (reinfors net vs open_spiel net, arena-v2, {sims_note}): "
         f"{wins}W {draws}D {n - wins - draws}L -> score {score:.3f} "
         f"(pair stderr {stderr / 2:.3f} over {n // 2} pairs)"
     )
@@ -475,9 +535,7 @@ def main() -> None:
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
             "wall_seconds": round(time.time() - started, 1),
             "rf_checkpoint": args.rf_checkpoint,
-            "rf_checkpoint_sha256": hashlib.sha256(
-                Path(args.rf_checkpoint).read_bytes()
-            ).hexdigest(),
+            "rf_checkpoint_sha256": _sha256(Path(args.rf_checkpoint)),
             "os_path": args.os_path,
             "os_checkpoint": args.os_checkpoint,
             "net": {"width": width, "depth": depth},
@@ -491,9 +549,14 @@ def main() -> None:
                 "timeout": args.timeout,
             },
             "devices": {"ours": args.device, "theirs": args.az_device},
+            "os_checkpoint_sha256": _sha256(
+                Path(args.os_path) / f"checkpoint-{args.os_checkpoint}.pt"
+            ),
             "external_cmd": str(BIN),
+            "external_cmd_sha256": _sha256(BIN),
             "versions": {
                 "reinfors": getattr(rf, "__version__", "unknown"),
+                "reinfors_build_sha256": _sha256(Path(rf._reinfors.__file__)),
                 "torch": torch.__version__,
                 "pyspiel": getattr(pyspiel, "__version__", "unknown"),
             },

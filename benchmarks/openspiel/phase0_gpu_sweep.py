@@ -37,11 +37,9 @@ from pathlib import Path
 import numpy as np
 import reinfors as rf
 import torch
-from torch import nn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import SweepResnet, seed_all  # noqa: E402
-
+from common import SweepResnet, seed_all
 
 
 def sync(device: str) -> None:

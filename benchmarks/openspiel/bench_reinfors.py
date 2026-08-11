@@ -17,7 +17,7 @@ import reinfors as rf
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import SIMULATIONS, UCT_C, SEED, QNet, report, seed_all  # noqa: E402
+from common import SEED, SIMULATIONS, UCT_C, QNet, report, seed_all
 
 
 def build_engine(n_games: int) -> rf.Engine:

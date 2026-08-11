@@ -28,7 +28,7 @@ import reinfors as rf
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import SweepResnet, seed_all  # noqa: E402
+from common import SweepResnet, seed_all
 
 
 class ReplayBuffer:

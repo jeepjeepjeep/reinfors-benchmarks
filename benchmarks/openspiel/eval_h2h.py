@@ -28,8 +28,8 @@ from pathlib import Path
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import AZResnetReplica  # noqa: E402
-from eval_reinfors_az import C4, COLS, search  # noqa: E402
+from common import AZResnetReplica
+from eval_reinfors_az import C4, COLS, search
 
 BIN = Path(__file__).resolve().parents[2] / "open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_game_example"
 CHOSE = re.compile(r"Player (\d) chose action: ([xo])(\d)")

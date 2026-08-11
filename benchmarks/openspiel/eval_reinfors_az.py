@@ -22,7 +22,7 @@ import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import AZResnetReplica  # noqa: E402
+from common import AZResnetReplica
 
 ROWS, COLS = 6, 7
 
@@ -30,7 +30,7 @@ ROWS, COLS = 6, 7
 class C4:
     """Connect4, reinfors rules: cells[row*7+col], row 0 = bottom; full-column move = mover loses."""
 
-    __slots__ = ("cells", "turn", "winner", "done")
+    __slots__ = ("cells", "done", "turn", "winner")
 
     def __init__(self) -> None:
         self.cells = [0] * (ROWS * COLS)
@@ -85,13 +85,13 @@ class C4:
 
 
 class Node:
-    __slots__ = ("state", "visits", "value_sum", "children", "prior")
+    __slots__ = ("children", "prior", "state", "value_sum", "visits")
 
     def __init__(self, state: C4, prior: np.ndarray | None = None) -> None:
         self.state = state
         self.visits = [0] * COLS
         self.value_sum = [0.0] * COLS
-        self.children: list["Node | None"] = [None] * COLS
+        self.children: list[Node | None] = [None] * COLS
         self.prior = prior
 
 
