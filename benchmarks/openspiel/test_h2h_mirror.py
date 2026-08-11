@@ -4,9 +4,10 @@ Forced positional openings are only accepted by the C++ binary when they exactly
 its ActionToString rendering, so TheirBot stores pyspiel-rendered SANs. These tests prove
 that rendering round-trips through the Mirror (rf.Env + python-chess + pyspiel) for the
 move classes whose renderings diverge between libraries: castling, checks/mates, and
-promotions — plus a seeded fuzz over random lines. The binary itself is exercised by the
-box smoke test; wheel-vs-source ActionToString skew is guarded at runtime by the
-echo-desync assertion.
+promotions — plus a seeded fuzz over random lines. The echo-desync assertion only guards
+INTERACTIVE moves at runtime; forced positional openings are validated by the binary
+before any echo exists, so the env-gated binary test below is the sole guard against
+wheel-vs-source ActionToString skew in forced arguments.
 """
 
 import sys
@@ -111,15 +112,19 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
 
     mirror = Mirror()
     their_sans = [apply_their_rendering(mirror, loose) for loose in LINES[name].split()]
+    # their --player1 is player 0 = BLACK; put az on the side to move at the opening
+    # exit so its first announcement doubles as a forcing-complete marker
+    white_to_move = len(their_sans) % 2 == 0
+    p1, p2 = ("human", "az") if white_to_move else ("az", "human")
     proc = subprocess.Popen(
         [
             str(BIN),
             "--game",
             "chess",
             "--player1",
-            "az",
+            p1,
             "--player2",
-            "human",
+            p2,
             "--az_path",
             os.environ["H2H_SMOKE_OS_PATH"],
             "--az_checkpoint",
@@ -140,12 +145,45 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
         text=True,
         start_new_session=True,
     )
+    # Success requires positive evidence that every forced action was consumed — a live
+    # process may still be loading the checkpoint, which happens BEFORE forced-action
+    # processing. Markers: one forced-action line per SAN, or play reaching an
+    # announcement/Returns (both only happen after forcing completes).
+    import re as _re
+    import threading
+
+    from eval_h2h_chess import CHOSE, RETURNS
+
+    forced_marker = _re.compile(r"forced", _re.IGNORECASE)
+    lines: list[str] = []
+
+    def _reader() -> None:
+        assert proc.stderr is not None
+        for line in proc.stderr:
+            lines.append(line)
+
+    reader = threading.Thread(target=_reader, daemon=True)
+    reader.start()
+    deadline = _time.monotonic() + 180  # checkpoint load may dominate
     try:
-        _time.sleep(5)  # a rejected forced action fails fast; acceptance plays on
-        code = proc.poll()
-        if code is not None and code != 0:
-            stderr = proc.stderr.read() if proc.stderr else ""
-            raise AssertionError(f"binary rejected forced line {name}: {stderr[-500:]}")
+        while _time.monotonic() < deadline:
+            snapshot = list(lines)
+            forced_seen = sum(1 for line in snapshot if forced_marker.search(line))
+            played = any(
+                CHOSE.search(line) or RETURNS.search(line) for line in snapshot
+            )
+            if forced_seen >= len(their_sans) or played:
+                return
+            if proc.poll() is not None:
+                raise AssertionError(
+                    f"binary rejected forced line {name} (exit {proc.returncode}): "
+                    f"{''.join(snapshot)[-500:]}"
+                )
+            _time.sleep(0.5)
+        raise AssertionError(
+            f"no forced-action confirmation for {name} within the deadline: "
+            f"{''.join(lines)[-500:]}"
+        )
     finally:
         proc.kill()
         proc.wait(timeout=10)

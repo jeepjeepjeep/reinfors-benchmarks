@@ -70,23 +70,26 @@ def _sha256(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
 
 
-def _reap(proc: subprocess.Popen) -> None:
-    """Terminate, escalate to kill, and wait — the process is dead when this returns."""
+def _reap(proc: subprocess.Popen) -> bool:
+    """Terminate, escalate to kill, and wait; True only on confirmed exit."""
     try:
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
     except (ProcessLookupError, PermissionError):
         pass
     try:
         proc.wait(timeout=5)
+        return True
     except subprocess.TimeoutExpired:
-        try:
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-        except (ProcessLookupError, PermissionError):
-            pass
-        try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            pass
+        pass
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+    except (ProcessLookupError, PermissionError):
+        pass
+    try:
+        proc.wait(timeout=5)
+        return True
+    except subprocess.TimeoutExpired:
+        return proc.poll() is not None
 
 
 def kill_leftover_processes() -> None:
@@ -106,6 +109,10 @@ def kill_leftover_processes() -> None:
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
             except ProcessLookupError:
+                pass
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
                 pass
 
 
@@ -361,13 +368,14 @@ class TheirBot:
                 if code != 0:
                     raise RuntimeError(f"their process exited with code {code}")
             except BaseException:
-                _reap(proc)
+                # unregister only on confirmed exit; an unkillable process stays
+                # registered so the top-level sweep keeps trying
+                if _reap(proc):
+                    with _LIVE_LOCK:
+                        _LIVE_PROCS.discard(proc)
                 raise
-            finally:
-                # both paths above guarantee exit (clean wait or _reap), so
-                # unregistering here can never orphan a live process
-                with _LIVE_LOCK:
-                    _LIVE_PROCS.discard(proc)
+            with _LIVE_LOCK:
+                _LIVE_PROCS.discard(proc)
         done = next(self.done_counter)
         print(f"  finished {done}/{self.total} games", flush=True)
 
