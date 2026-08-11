@@ -103,7 +103,7 @@ def test_close_reaps_on_pre_wait_errors() -> None:
 @pytest.mark.parametrize("name", sorted(LINES))
 def test_forced_lines_accepted_by_the_binary(name: str) -> None:
     # the binary validates positional forced actions before any echo exists, so the
-    # echo-desync assertion cannot catch wheel-vs-source SAN skew here — this can
+    # echo-desync assertion cannot catch wheel-vs-source SAN skew here
     import os
     import subprocess
     import time as _time
@@ -154,8 +154,13 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
 
     from eval_h2h_chess import CHOSE, RETURNS
 
-    forced_marker = _re.compile(r"forced", _re.IGNORECASE)
+    forced_marker = _re.compile(r"Player \d+ forced action:")
     lines: list[str] = []
+
+    def _forcing_complete(snapshot: list[str]) -> bool:
+        forced_seen = sum(1 for line in snapshot if forced_marker.search(line))
+        played = any(CHOSE.search(line) or RETURNS.search(line) for line in snapshot)
+        return forced_seen >= len(their_sans) or played
 
     def _reader() -> None:
         assert proc.stderr is not None
@@ -168,13 +173,15 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
     try:
         while _time.monotonic() < deadline:
             snapshot = list(lines)
-            forced_seen = sum(1 for line in snapshot if forced_marker.search(line))
-            played = any(
-                CHOSE.search(line) or RETURNS.search(line) for line in snapshot
-            )
-            if forced_seen >= len(their_sans) or played:
+            if _forcing_complete(snapshot):
                 return
             if proc.poll() is not None:
+                # The process can exit after writing its final marker but before the
+                # reader thread drains stderr. Consume the closed pipe before judging.
+                reader.join(timeout=5)
+                snapshot = list(lines)
+                if _forcing_complete(snapshot):
+                    return
                 raise AssertionError(
                     f"binary rejected forced line {name} (exit {proc.returncode}): "
                     f"{''.join(snapshot)[-500:]}"
