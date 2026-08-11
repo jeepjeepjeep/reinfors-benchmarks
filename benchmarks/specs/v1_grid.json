@@ -1,0 +1,205 @@
+{
+  "session": "v1_grid",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "os_a8",
+      "argv": [
+        "bash",
+        "scripts/measure_states.sh"
+      ],
+      "deadline_seconds": 2100,
+      "env": {
+        "ACTORS": "8",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "GAME": "chess",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "WARMUP": "300",
+        "WINDOW": "1200"
+      }
+    },
+    {
+      "name": "os_a16",
+      "argv": [
+        "bash",
+        "scripts/measure_states.sh"
+      ],
+      "deadline_seconds": 2100,
+      "env": {
+        "ACTORS": "16",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "GAME": "chess",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "WARMUP": "300",
+        "WINDOW": "1200"
+      }
+    },
+    {
+      "name": "os_a32",
+      "argv": [
+        "bash",
+        "scripts/measure_states.sh"
+      ],
+      "deadline_seconds": 2100,
+      "env": {
+        "ACTORS": "32",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "GAME": "chess",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "WARMUP": "300",
+        "WINDOW": "1200"
+      }
+    },
+    {
+      "name": "os_a64",
+      "argv": [
+        "bash",
+        "scripts/measure_states.sh"
+      ],
+      "deadline_seconds": 2100,
+      "env": {
+        "ACTORS": "64",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "GAME": "chess",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "WARMUP": "300",
+        "WINDOW": "1200"
+      }
+    },
+    {
+      "name": "os_a64b32",
+      "argv": [
+        "bash",
+        "scripts/measure_states.sh"
+      ],
+      "deadline_seconds": 2100,
+      "env": {
+        "ACTORS": "64:32",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "GAME": "chess",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "WARMUP": "300",
+        "WINDOW": "1200"
+      }
+    },
+    {
+      "name": "rf_n64_g1",
+      "argv": [
+        "bash",
+        "scripts/measure_states_rf.sh"
+      ],
+      "deadline_seconds": 2400,
+      "env": {
+        "NGAMES": "64",
+        "NGROUPS": "1",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "MINUTES": "20",
+        "WARMUP": "300"
+      }
+    },
+    {
+      "name": "rf_n64_g2",
+      "argv": [
+        "bash",
+        "scripts/measure_states_rf.sh"
+      ],
+      "deadline_seconds": 2400,
+      "env": {
+        "NGAMES": "64",
+        "NGROUPS": "2",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "MINUTES": "20",
+        "WARMUP": "300"
+      }
+    },
+    {
+      "name": "rf_n128_g1",
+      "argv": [
+        "bash",
+        "scripts/measure_states_rf.sh"
+      ],
+      "deadline_seconds": 2400,
+      "env": {
+        "NGAMES": "128",
+        "NGROUPS": "1",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "MINUTES": "20",
+        "WARMUP": "300"
+      }
+    },
+    {
+      "name": "rf_n128_g2",
+      "argv": [
+        "bash",
+        "scripts/measure_states_rf.sh"
+      ],
+      "deadline_seconds": 2400,
+      "env": {
+        "NGAMES": "128",
+        "NGROUPS": "2",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "MINUTES": "20",
+        "WARMUP": "300"
+      }
+    },
+    {
+      "name": "rf_n256_g1",
+      "argv": [
+        "bash",
+        "scripts/measure_states_rf.sh"
+      ],
+      "deadline_seconds": 2400,
+      "env": {
+        "NGAMES": "256",
+        "NGROUPS": "1",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "MINUTES": "20",
+        "WARMUP": "300"
+      }
+    },
+    {
+      "name": "rf_n256_g2",
+      "argv": [
+        "bash",
+        "scripts/measure_states_rf.sh"
+      ],
+      "deadline_seconds": 2400,
+      "env": {
+        "NGAMES": "256",
+        "NGROUPS": "2",
+        "OUT_ROOT": "{run_dir}",
+        "CORES": "0-3",
+        "WIDTH": "256",
+        "DEPTH": "8",
+        "MINUTES": "20",
+        "WARMUP": "300"
+      }
+    }
+  ]
+}

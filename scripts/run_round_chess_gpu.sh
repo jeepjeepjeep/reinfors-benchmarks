@@ -50,8 +50,9 @@ RF_CACHE=262144
 SECS=$((MINUTES * 60))
 BIN=open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example
 PY=.venv23/bin/python
-OS_OUT="results/round_chess_os_${MINUTES}m_a${OS_ACTORS}_b${OS_BATCH}_s${ROUND_SEED}"
-RF_OUT="results/round_chess_rf_${MINUTES}m_n${RF_NGAMES}_g${RF_NGROUPS}_s${ROUND_SEED}"
+OUT_ROOT="${OUT_ROOT:-results}"
+OS_OUT="$OUT_ROOT/round_chess_os_${MINUTES}m_a${OS_ACTORS}_b${OS_BATCH}_s${ROUND_SEED}"
+RF_OUT="$OUT_ROOT/round_chess_rf_${MINUTES}m_n${RF_NGAMES}_g${RF_NGROUPS}_s${ROUND_SEED}"
 
 ACTIVE_PID=""
 trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
@@ -78,10 +79,32 @@ python3 benchmarks/openspiel/manifest.py --out "$OS_OUT" \
 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c 0-3 "$BIN" $OS_ARGS > "${OS_OUT}.stdout" 2>&1 &
 OS_PID=$!; ACTIVE_PID=$OS_PID
 sleep "$SECS"
-kill -9 "$OS_PID" 2>/dev/null || true
-wait "$OS_PID" 2>/dev/null || true
+if kill -0 "$OS_PID" 2>/dev/null; then
+  os_deadline=true
+  kill -9 "$OS_PID" 2>/dev/null || true
+else
+  os_deadline=false
+fi
+wait "$OS_PID" 2>/dev/null
+os_rc=$?
 ACTIVE_PID=""
-python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$OS_OUT', status='deadline', intended_deadline_kill=True)"
+if [ "$os_deadline" != true ]; then
+  echo "openspiel leg CRASHED before the deadline (exit $os_rc) — see ${OS_OUT}.stdout" >&2
+  python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$OS_OUT', status='crashed', exit_code=$os_rc, intended_deadline_kill=False)"
+  exit 1
+fi
+os_ckpt=$(ls -t "$OS_OUT"/checkpoint-* 2>/dev/null | head -1 || true)
+python3 - "$OS_OUT" "$os_rc" "$SECS" "$os_ckpt" <<'PYEOF'
+import sys
+sys.path.insert(0, "benchmarks/openspiel")
+import manifest
+out, rc, secs, ckpt = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
+hashes = {"stdout": manifest.sha256(f"{out}.stdout")}
+if ckpt:
+    hashes[ckpt.split("/")[-1]] = manifest.sha256(ckpt)
+manifest.finalize(out, status="deadline", intended_deadline_kill=True, exit_code=rc,
+                  elapsed_seconds=secs, latest_checkpoint=ckpt or None, output_sha256=hashes)
+PYEOF
 echo "=== openspiel done (hard deadline); checkpoints: ==="
 ls -t "$OS_OUT"/checkpoint-* 2>/dev/null | head -3 || echo "WARNING: no checkpoints found"
 
@@ -100,9 +123,34 @@ python3 benchmarks/openspiel/manifest.py --out "$RF_OUT" --command "$RF_CMD" \
 $RF_CMD > "${RF_OUT}.stdout" 2>&1 &
 RF_PID=$!; ACTIVE_PID=$RF_PID
 sleep "$SECS"
-kill -9 "$RF_PID" 2>/dev/null || true
-wait "$RF_PID" 2>/dev/null || true
+if kill -0 "$RF_PID" 2>/dev/null; then
+  rf_deadline=true
+  kill -9 "$RF_PID" 2>/dev/null || true
+else
+  rf_deadline=false
+fi
+wait "$RF_PID" 2>/dev/null
+rf_rc=$?
 ACTIVE_PID=""
-python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$RF_OUT', status='deadline', intended_deadline_kill=True)"
+if [ "$rf_deadline" != true ]; then
+  echo "reinfors leg CRASHED before the deadline (exit $rf_rc) — see ${RF_OUT}.stdout" >&2
+  python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$RF_OUT', status='crashed', exit_code=$rf_rc, intended_deadline_kill=False)"
+  exit 1
+fi
+rf_ckpt=$(ls -t "$RF_OUT"/ckpt* 2>/dev/null | head -1 || true)
+python3 - "$RF_OUT" "$rf_rc" "$SECS" "$rf_ckpt" <<'PYEOF'
+import sys
+sys.path.insert(0, "benchmarks/openspiel")
+import manifest
+out, rc, secs, ckpt = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
+hashes = {
+    "stdout": manifest.sha256(f"{out}.stdout"),
+    "learner.jsonl": manifest.sha256(f"{out}/learner.jsonl"),
+}
+if ckpt:
+    hashes[ckpt.split("/")[-1]] = manifest.sha256(ckpt)
+manifest.finalize(out, status="deadline", intended_deadline_kill=True, exit_code=rc,
+                  elapsed_seconds=secs, latest_checkpoint=ckpt or None, output_sha256=hashes)
+PYEOF
 echo "=== reinfors done (hard deadline); checkpoints: ==="
 ls -t "$RF_OUT"/ckpt* 2>/dev/null | head -3 || echo "WARNING: no checkpoints found"

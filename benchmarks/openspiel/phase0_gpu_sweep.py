@@ -350,11 +350,19 @@ def main() -> None:
     ap.add_argument("--gpu-threshold", type=float, default=2.0)
     ap.add_argument("--out", type=str, default="", help="append result rows as jsonl")
     args = ap.parse_args()
-    manifest_path = Path(str(args.out) + ".manifest.json")
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(
-        json.dumps(manifest.collect(run_kind="phase0_sweep", config=vars(args)), indent=2) + "\n"
-    )
+    manifest_path = None
+    if args.out:
+        if Path(args.out).exists():
+            raise SystemExit(f"refusing to overwrite {args.out} — pick a fresh --out")
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        manifest_path = str(args.out) + ".manifest.json"
+        manifest.write(
+            manifest_path,
+            command=[sys.executable, *sys.argv],
+            run_kind="phase0_sweep",
+            config=vars(args),
+            completed=False,
+        )
     args.devices = args.devices.split(",")
     args.widths = [int(x) for x in args.widths.split(",")]
     args.depths = [int(x) for x in args.depths.split(",")]
@@ -392,12 +400,17 @@ def main() -> None:
 
     if args.out:
         out = Path(args.out)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        with out.open("a") as f:
+        with out.open("x") as f:
             f.write(json.dumps(dict(header=header)) + "\n")
             for r in results:
                 f.write(json.dumps(r) + "\n")
         print(f"\nwrote {len(results)} rows -> {out}")
+        manifest.finalize(
+            manifest_path,
+            status="ok",
+            result_rows=len(results),
+            output_sha256={str(out): manifest.sha256(out)},
+        )
 
 
 if __name__ == "__main__":

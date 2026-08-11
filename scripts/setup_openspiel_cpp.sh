@@ -54,7 +54,6 @@ git fetch -q origin master
 # reset before switching commits so re-runs are idempotent; patches re-apply below.
 git reset --hard -q
 git checkout -q "$OPEN_SPIEL_COMMIT"
-echo "$OPEN_SPIEL_COMMIT" > ../PIN
 git checkout -q 86fe553c^ -- open_spiel/libtorch open_spiel/libnop
 
 # Dependency caches are version-pinned by the source tree, and install.sh skips existing
@@ -81,6 +80,17 @@ fi
 if git apply --check ../../scripts/az_device_game_example.patch 2>/dev/null; then
   git apply ../../scripts/az_device_game_example.patch
 fi
+
+# PIN records the full source identity: commit, the managed patches, and the hash of the
+# applied working-tree diff (build-glue restore + instrumentation) — preflight verifies
+# all three, so the build is reconstructable from the PIN alone.
+{
+  echo "$OPEN_SPIEL_COMMIT"
+  for pf in instrument_vpevaluator.patch az_device_game_example.patch; do
+    echo "patch $pf $(shasum -a 256 "../../scripts/$pf" | cut -d' ' -f1)"
+  done
+  echo "diff $(git diff HEAD | shasum -a 256 | cut -d' ' -f1)"
+} > ../PIN
 
 # fetches abseil/json/... plus (with the flags above) libtorch and libnop; cached + resumable
 ./install.sh

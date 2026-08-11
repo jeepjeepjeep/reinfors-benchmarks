@@ -119,7 +119,7 @@ def test_crash_fails_the_session(tmp_path: Path) -> None:
     assert m["status"] == "failed" and m["exit_code"] == 3
 
 
-def test_resume_skips_completed_reps(tmp_path: Path) -> None:
+def test_resume_blocks_on_failed_cell_until_archived(tmp_path: Path) -> None:
     spec = _spec(
         tmp_path,
         [
@@ -130,6 +130,73 @@ def test_resume_skips_completed_reps(tmp_path: Path) -> None:
     first = _run(spec)
     assert first.returncode != 0
     session = _session_dir()
-    (session / "boom" / "cycle1").rename(session / "boom" / "cycle1.failed")
+
+    # a failed attempt must never count as done: resume refuses until it is archived
+    blocked = _run(spec, "--resume", str(session))
+    assert blocked.returncode != 0
+    assert (
+        "status 'failed'" in blocked.stderr
+        and "move that directory aside" in blocked.stderr
+    )
+
+    (session / "boom" / "cycle1").rename(session / "boom" / "cycle1.attempt1")
     second = _run(spec, "--resume", str(session))
-    assert "skip a cycle 1 (completed)" in second.stdout
+    assert "skip a cycle 1 (ok)" in second.stdout
+    assert "run  boom cycle 1" in second.stdout
+
+
+def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "sub",
+                "argv": ["python3", "-c", "print('cycle={cycle} extra={extra}')"],
+                "cycles": 1,
+            },
+        ],
+    )
+    missing = _run(spec)
+    assert missing.returncode != 0 and "unresolved placeholders" in missing.stderr
+
+    ok = _run(spec, "--set", "extra=42")
+    assert ok.returncode == 0, ok.stderr
+    session = _session_dir()
+    log = (session / "sub" / "cycle1" / "stdout.log").read_text()
+    assert "cycle=1 extra=42" in log
+    m = json.loads((session / "manifest.json").read_text())
+    assert m["substitutions"] == {"extra": "42"}
+    assert m["packages"] and m["cpu_model"] is not None
+
+
+def test_unresolved_expect_tag_is_rejected(tmp_path: Path) -> None:
+    spec = tmp_path / "spec.json"
+    spec.write_text(json.dumps({"session": "t", "expect_tag": "{tag}", "cells": []}))
+    out = _run(spec)
+    assert out.returncode != 0 and "unresolved expect_tag" in out.stderr
+
+
+def test_checked_in_specs_are_well_formed() -> None:
+    specs = sorted((REPO / "benchmarks" / "specs").glob("*.json"))
+    assert specs, "no checked-in specs found"
+    known = {"session", "expect_tag", "cycles", "cells"}
+    cell_known = {
+        "name",
+        "argv",
+        "deadline_seconds",
+        "cores",
+        "env",
+        "outputs",
+        "cycles",
+    }
+    for path in specs:
+        spec = json.loads(path.read_text())
+        assert spec["session"] == path.stem  # campaign driver maps sessions <-> files
+        assert set(spec) <= known, f"{path.name}: unknown keys {set(spec) - known}"
+        names = [c["name"] for c in spec["cells"]]
+        assert len(names) == len(set(names)), f"{path.name}: duplicate cell names"
+        for cell in spec["cells"]:
+            assert set(cell) <= cell_known, (
+                f"{path.name}:{cell['name']}: unknown keys {set(cell) - cell_known}"
+            )
+            assert cell["argv"] and all(isinstance(a, str) for a in cell["argv"])

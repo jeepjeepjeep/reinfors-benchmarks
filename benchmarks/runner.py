@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -47,12 +48,14 @@ def _rep_dir(session_dir: Path, cell: dict[str, Any], cycle: int) -> Path:
     return session_dir / cell["name"] / f"cycle{cycle}"
 
 
-def _completed(rep_dir: Path) -> bool:
+def _finalized_status(rep_dir: Path) -> str | None:
+    """The finalized status of a prior attempt, or None if never finalized."""
     path = rep_dir / "manifest.json"
     try:
-        return bool(json.loads(path.read_text()).get("completed"))
+        data = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
-        return False
+        return None
+    return str(data.get("status", "unknown")) if data.get("completed") else None
 
 
 def _update_index(session_dir: Path, entry: dict[str, Any]) -> None:
@@ -70,18 +73,35 @@ def _update_index(session_dir: Path, entry: dict[str, Any]) -> None:
     os.replace(tmp, path)
 
 
-def run_cell(session_dir: Path, cell: dict[str, Any], cycle: int) -> dict[str, Any]:
+def run_cell(
+    session_dir: Path,
+    cell: dict[str, Any],
+    cycle: int,
+    sets: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    sets = sets or {}
     rep_dir = _rep_dir(session_dir, cell, cycle)
-    if rep_dir.exists() and any(rep_dir.iterdir()) and not _completed(rep_dir):
-        raise FileExistsError(
-            f"{rep_dir} exists but is not a completed run; refusing to touch it"
-        )
+    if rep_dir.exists() and any(rep_dir.iterdir()):
+        raise FileExistsError(f"{rep_dir} already holds evidence; refusing to touch it")
     rep_dir.mkdir(parents=True, exist_ok=True)
 
-    argv = [a.replace("{run_dir}", str(rep_dir)) for a in cell["argv"]]
+    def sub(value: str) -> str:
+        value = value.replace("{run_dir}", str(rep_dir)).replace("{cycle}", str(cycle))
+        for key, replacement in sets.items():
+            value = value.replace("{" + key + "}", replacement)
+        unresolved = re.findall(r"\{[a-z_]+\}", value)
+        if unresolved:
+            raise ValueError(
+                f"unresolved placeholders {unresolved} in cell {cell['name']}; "
+                f"supply them with --set key=value"
+            )
+        return value
+
+    argv = [sub(a) for a in cell["argv"]]
     if cell.get("cores"):
         argv = ["taskset", "-c", cell["cores"], *argv]
-    env = os.environ.copy() | {k: str(v) for k, v in cell.get("env", {}).items()}
+    env_overrides = {k: sub(str(v)) for k, v in cell.get("env", {}).items()}
+    env = os.environ.copy() | env_overrides
     deadline = cell.get("deadline_seconds")
 
     manifest.write(
@@ -91,7 +111,7 @@ def run_cell(session_dir: Path, cell: dict[str, Any], cycle: int) -> dict[str, A
         cell=cell["name"],
         cycle=cycle,
         deadline_seconds=deadline,
-        env_overrides=cell.get("env", {}),
+        env_overrides=env_overrides,
         completed=False,
     )
 
@@ -150,11 +170,26 @@ def main() -> int:
         help="harness testing only; never for publication runs",
     )
     ap.add_argument("--allow-host", action="store_true")
+    ap.add_argument(
+        "--set",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="fill a {key} placeholder in the spec (recorded in the session manifest)",
+    )
     args = ap.parse_args()
+    sets = dict(kv.split("=", 1) for kv in getattr(args, "set"))
     spec = json.loads(Path(args.spec).read_text())
 
+    expect_tag = spec["expect_tag"]
+    for key, value in sets.items():
+        expect_tag = expect_tag.replace("{" + key + "}", value)
+    if "{" in expect_tag:
+        print(f"unresolved expect_tag {expect_tag!r}; supply --set", file=sys.stderr)
+        return 1
+
     if not args.skip_preflight:
-        errors = preflight.check(spec["expect_tag"], allow_host=args.allow_host)
+        errors = preflight.check(expect_tag, allow_host=args.allow_host)
         for e in errors:
             print(f"PREFLIGHT FAIL: {e}", file=sys.stderr)
         if errors:
@@ -165,13 +200,24 @@ def main() -> int:
         assert session_dir.is_dir(), f"no session at {session_dir}"
     else:
         stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-        session_dir = _REPO / "runs" / f"{stamp}_{spec['session']}"
+        base = _REPO / "runs" / f"{stamp}_{spec['session']}"
+        session_dir = next(
+            d
+            for d in (
+                base,
+                *(base.with_name(f"{base.name}-{k}") for k in range(2, 100)),
+            )
+            if not d.exists()
+        )
         session_dir.mkdir(parents=True, exist_ok=False)  # unique, append-only
         manifest.write(
             session_dir,
             command=sys.argv,
+            full=True,
             run_kind="session",
             spec=spec,
+            spec_sha256=manifest.sha256(args.spec),
+            substitutions=sets,
             completed=False,
         )
 
@@ -181,11 +227,18 @@ def main() -> int:
             if cycle > cell.get("cycles", cycles):
                 continue
             rep_dir = _rep_dir(session_dir, cell, cycle)
-            if _completed(rep_dir):
-                print(f"skip {cell['name']} cycle {cycle} (completed)")
+            status = _finalized_status(rep_dir)
+            if status in ("ok", "deadline"):
+                print(f"skip {cell['name']} cycle {cycle} ({status})")
                 continue
+            if status is not None:
+                raise RuntimeError(
+                    f"{rep_dir} finished with status '{status}'; a failed attempt "
+                    f"never counts as done — move that directory aside (e.g. to "
+                    f"{rep_dir}.attempt1) to retry it"
+                )
             print(f"run  {cell['name']} cycle {cycle}", flush=True)
-            run_cell(session_dir, cell, cycle)
+            run_cell(session_dir, cell, cycle, sets)
     manifest.finalize(session_dir, status="ok")
     print(f"session complete: {session_dir}")
     return 0

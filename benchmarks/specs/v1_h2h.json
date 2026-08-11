@@ -1,0 +1,37 @@
+{
+  "session": "v1_h2h",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "h2h_100",
+      "argv": [
+        ".venv23/bin/python",
+        "benchmarks/openspiel/eval_h2h_chess.py",
+        "{rf_ckpt_{cycle}}",
+        "{os_path_{cycle}}",
+        "--os-checkpoint",
+        "{os_ckpt_{cycle}}",
+        "--games",
+        "100",
+        "--workers",
+        "4",
+        "--seed",
+        "{cycle}000",
+        "--device",
+        "cuda",
+        "--az-device",
+        "/cuda:0",
+        "--pgn",
+        "{run_dir}/games.pgn",
+        "--manifest",
+        "{run_dir}/h2h_manifest.jsonl"
+      ],
+      "deadline_seconds": 21600,
+      "cores": "0-3",
+      "outputs": [
+        "h2h_manifest.jsonl"
+      ]
+    }
+  ]
+}

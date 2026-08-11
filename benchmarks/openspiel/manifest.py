@@ -57,7 +57,9 @@ def collect(command: list[str] | str | None = None, **extra: Any) -> dict[str, A
         "benchmarks_sha": _git("rev-parse", "HEAD") or "unknown",
         "benchmarks_tag": _git("describe", "--tags", "--exact-match"),
         "benchmarks_dirty": bool(porcelain) if porcelain is not None else "unknown",
-        "openspiel_pin": _read(_REPO / "open_spiel_cpp" / "PIN"),
+        "openspiel_pin": (
+            (_read(_REPO / "open_spiel_cpp" / "PIN") or "").splitlines() or [None]
+        )[0],
         "smt_active": _read(Path("/sys/devices/system/cpu/smt/active")),
     }
     try:
@@ -80,11 +82,89 @@ def collect(command: list[str] | str | None = None, **extra: Any) -> dict[str, A
     return manifest
 
 
+_ENV_KEYS = (
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "CUDA_VISIBLE_DEVICES",
+    "PYTORCH_CUDA_ALLOC_CONF",
+    "TORCH_NUM_THREADS",
+)
+
+
+def _cpu_model() -> str | None:
+    try:
+        for line in Path("/proc/cpuinfo").read_text().splitlines():
+            if line.startswith("model name"):
+                return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    try:
+        out = subprocess.run(
+            ["sysctl", "-n", "machdep.cpu.brand_string"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        return out.stdout.strip() or None
+    except OSError:
+        return None
+
+
+def collect_full(
+    command: list[str] | str | None = None, **extra: Any
+) -> dict[str, Any]:
+    """collect() plus the once-per-session environment record: full package freeze,
+    OS/kernel, CPU model, affinity, CUDA driver/runtime, inherited thread/device env."""
+    data = collect(command=command, **extra)
+    import importlib.metadata
+
+    data["packages"] = sorted(
+        f"{d.metadata['Name']}=={d.version}" for d in importlib.metadata.distributions()
+    )
+    data["os"] = {
+        "platform": platform.platform(),
+        "kernel": platform.release(),
+        "machine": platform.machine(),
+    }
+    data["cpu_model"] = _cpu_model()
+    if hasattr(os, "sched_getaffinity"):
+        data["affinity"] = sorted(os.sched_getaffinity(0))
+    try:
+        out = subprocess.run(
+            ["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        data["cuda_driver"] = (
+            out.stdout.strip().splitlines()[0] if out.returncode == 0 else None
+        )
+    except (OSError, IndexError):
+        data["cuda_driver"] = None
+    try:
+        import torch
+
+        data["cuda_runtime"] = torch.version.cuda
+    except ImportError:
+        pass
+    data["env"] = {k: os.environ.get(k) for k in _ENV_KEYS if k in os.environ}
+    return data
+
+
+def _manifest_path(out: str | Path) -> Path:
+    """A run dir (-> <dir>/manifest.json) or an explicit *.json manifest file."""
+    path = Path(out)
+    return path if path.suffix == ".json" else path / "manifest.json"
+
+
 def write(
-    out_dir: str | Path, command: list[str] | str | None = None, **extra: Any
+    out_dir: str | Path,
+    command: list[str] | str | None = None,
+    full: bool = False,
+    **extra: Any,
 ) -> Path:
-    """Atomically write `<out_dir>/manifest.json` (refuses to clobber a finalized one)."""
-    path = Path(out_dir) / "manifest.json"
+    """Atomically write the manifest (refuses to clobber a finalized one)."""
+    path = _manifest_path(out_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         try:
@@ -94,7 +174,8 @@ def write(
         if finalized:
             raise FileExistsError(f"{path} is a finalized manifest; refusing overwrite")
     tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(collect(command=command, **extra), indent=2) + "\n")
+    gather = collect_full if full else collect
+    tmp.write_text(json.dumps(gather(command=command, **extra), indent=2) + "\n")
     os.replace(tmp, path)
     return path
 
@@ -107,7 +188,7 @@ def merge(
     Python run surfaces call this at startup: standalone runs get a full manifest, runs
     launched by a shell harness keep the harness's fields (its command records the real
     taskset/env wrapper) and only gain what is missing (e.g. the parsed config)."""
-    path = Path(out_dir) / "manifest.json"
+    path = _manifest_path(out_dir)
     if path.exists():
         data: dict[str, Any] = json.loads(path.read_text())
     else:
@@ -124,7 +205,7 @@ def merge(
 
 def finalize(out_dir: str | Path, **fields: Any) -> Path:
     """Atomically merge completion fields into the run's manifest."""
-    path = Path(out_dir) / "manifest.json"
+    path = _manifest_path(out_dir)
     data = json.loads(path.read_text()) if path.exists() else {}
     data.update(fields)
     if "completed" not in fields:

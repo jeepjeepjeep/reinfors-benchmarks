@@ -17,7 +17,8 @@ pages.
 |---|---|
 | `benchmarks/internal/` | the internal-family harness: CPU/parallel-scaling sweeps (`benchmark.py`), cross-framework connect4 tracks (`benchmark_vs.py`) |
 | `benchmarks/openspiel/` | the trainer (`train_reinfors_az.py`), head-to-head runner (`eval_h2h_chess.py`, Arena protocol) and its tests, parity checks, sweep tooling, shared config (`common.py`) |
-| `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), measurement (`measure_states*.sh`), round orchestration (`run_round_chess_gpu.sh`), telemetry panels (`plot_round.py`) |
+| `benchmarks/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `benchmarks/runner.py` |
+| `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), measurement (`measure_states*.sh`), round orchestration (`run_round_chess_gpu.sh`), campaign driver (`run_v1_campaign.sh`), telemetry panels (`plot_round.py`) |
 | `published/` | per-run artifacts of every published number: learner telemetry, configs, logs, PGNs, provenance |
 | `docs/history.md` | the full investigation log, including retained corrections and retractions |
 | `attic/` | superseded scripts, kept for the historical record |
@@ -49,7 +50,27 @@ cd ../reinfors-benchmarks
 bash scripts/setup_openspiel_cpp.sh
 ```
 
-Command templates for every measurement are in the reinfors docs
+## Running measurements
+
+Publication runs go through the experiment runner — never by invoking the harnesses
+directly. The runner enforces the freeze preflight (tagged clean builds on both repos,
+pinned torch, SMT off, GPU visible), launches every subprocess itself with the exact
+argv and environment captured, keeps run directories append-only, and finalizes a
+completion manifest (status, exit code, output hashes) for every cell:
+
+```bash
+# the whole frozen campaign, phase by phase (smoke gates first):
+TAG=<frozen tag> bash scripts/run_v1_campaign.sh
+
+# or one family:
+.venv23/bin/python benchmarks/runner.py benchmarks/specs/v1_grid.json --set tag=<frozen tag>
+```
+
+The specs under `benchmarks/specs/` are the reviewable experiment matrix: cells,
+repeats, deadlines, pinned cores. Direct shell-harness invocation remains available for
+exploration, but nothing produced that way is publishable evidence.
+
+Command templates and interpretation for every measurement are in the reinfors docs
 ([reproduction pages](https://github.com/jeepjeepjeep/reinfors/tree/main/docs/benchmarks));
 on GPU instances, mind the per-boot checklist there (SMT off, release wheel, patched
 binaries).

@@ -8,6 +8,7 @@ Every check must pass; recording bad state is not a substitute for refusing to r
 from __future__ import annotations
 
 import argparse
+import hashlib
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +16,44 @@ from pathlib import Path
 import manifest
 
 _REPO = Path(__file__).resolve().parents[2]
+
+
+def _check_openspiel_sources() -> list[str]:
+    """The PIN's patch + applied-diff records must match the checkout and the patch
+    files as they exist now — otherwise the binary is not reconstructable."""
+    errors: list[str] = []
+    lines = (_REPO / "open_spiel_cpp" / "PIN").read_text().splitlines()
+    patch_records = [ln.split() for ln in lines if ln.startswith("patch ")]
+    diff_records = [ln.split() for ln in lines if ln.startswith("diff ")]
+    if not patch_records or not diff_records:
+        errors.append(
+            "open_spiel_cpp/PIN lacks patch/diff records — re-run scripts/setup_openspiel_cpp.sh"
+        )
+        return errors
+    for _, name, recorded in patch_records:
+        current = manifest.sha256(_REPO / "scripts" / name)
+        if current != recorded:
+            errors.append(
+                f"scripts/{name} hash {str(current)[:12]} != PIN record {recorded[:12]}"
+            )
+    try:
+        diff = subprocess.run(
+            ["git", "-C", str(_REPO / "open_spiel_cpp" / "open_spiel"), "diff", "HEAD"],
+            capture_output=True,
+            timeout=30,
+        ).stdout
+    except OSError:
+        diff = None
+    if diff is None:
+        errors.append("could not compute the open_spiel checkout diff")
+    else:
+        current = hashlib.sha256(diff).hexdigest()
+        if current != diff_records[0][1]:
+            errors.append(
+                f"open_spiel applied-diff hash {current[:12]} != PIN record "
+                f"{diff_records[0][1][:12]} — checkout modifications drifted since setup"
+            )
+    return errors
 
 
 def check(expect_tag: str, allow_host: bool = False) -> list[str]:
@@ -43,6 +82,35 @@ def check(expect_tag: str, allow_host: bool = False) -> list[str]:
             )
         if not rf.get("extension_sha256"):
             errors.append("reinfors extension could not be hashed")
+        # a sibling checkout is the documented wheel source: catch a stale wheel whose
+        # baked identity no longer matches the sources it claims to be built from
+        sibling = _REPO.parent / "reinfors"
+        if sibling.is_dir() and rf.get("git_sha"):
+            try:
+                head = subprocess.run(
+                    ["git", "-C", str(sibling), "rev-parse", "HEAD"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                ).stdout.strip()
+                porcelain = subprocess.run(
+                    ["git", "-C", str(sibling), "status", "--porcelain"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                ).stdout
+            except OSError:
+                head, porcelain = "", None
+            if head and head != rf["git_sha"]:
+                errors.append(
+                    f"reinfors wheel was built from {rf['git_sha'][:12]} but the sibling "
+                    f"checkout is at {head[:12]} — rebuild the wheel"
+                )
+            if porcelain:
+                errors.append(
+                    "sibling reinfors checkout has uncommitted changes — the wheel's "
+                    "dirty flag cannot vouch for unbuilt edits"
+                )
 
     if m["benchmarks_sha"] == "unknown":
         errors.append("benchmarks repository SHA unknown")
@@ -59,6 +127,7 @@ def check(expect_tag: str, allow_host: bool = False) -> list[str]:
     if not pin:
         errors.append("open_spiel_cpp/PIN missing (run scripts/setup_openspiel_cpp.sh)")
     else:
+        errors.extend(_check_openspiel_sources())
         try:
             head = subprocess.run(
                 [

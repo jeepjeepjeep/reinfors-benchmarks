@@ -25,7 +25,7 @@ ACTORS="${ACTORS:-16 32 64 64:32}"
 CACHE="${CACHE:-262144}"  # their default; sparse entries, so their 2^18 costs ~nothing
 WARMUP="${WARMUP:-300}"
 WINDOW="${WINDOW:-1200}"
-OUT_ROOT=results/states_measure
+OUT_ROOT="${OUT_ROOT:-results/states_measure}"
 mkdir -p "$OUT_ROOT"
 ACTIVE_PID=""
 trap '[ -n "$ACTIVE_PID" ] && kill -9 "$ACTIVE_PID" 2>/dev/null || true' EXIT
@@ -51,7 +51,8 @@ for entry in $ACTORS; do
 --eval_levels=7 --cutoff_probability=0 --cutoff_value=0.95 --explicit_learning=false --max_steps=0"
   python3 benchmarks/openspiel/manifest.py --out "$out" \
     --command "OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c $CORES $BIN $OS_ARGS" \
-    run_kind=measure_cell tag="$tag" binary_sha256="$(shasum -a 256 "$BIN" 2>/dev/null | cut -d" " -f1)" completed=false >/dev/null
+    run_kind=measure_cell tag="$tag" binary_sha256="$(shasum -a 256 "$BIN" 2>/dev/null | cut -d" " -f1)" \
+    deadline_seconds=$((WARMUP + WINDOW)) completed=false >/dev/null
   OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c "$CORES" "$BIN" $OS_ARGS > "${out}.stdout" 2>&1 &
   pid=$!; ACTIVE_PID=$pid
   sleep "$WARMUP"
@@ -64,13 +65,27 @@ for entry in $ACTORS; do
   i2=$(grep "\[inst\]" "${out}.stdout" 2>/dev/null | tail -1 || true)
   r2=$(echo "$i2" | grep -o "rows=[0-9]*" | cut -d= -f2 || true)
   f2=$(echo "$i2" | grep -o "fwd=[0-9]*" | cut -d= -f2 || true)
-  kill -9 "$pid" 2>/dev/null || true
-  wait "$pid" 2>/dev/null || true
+  if kill -0 "$pid" 2>/dev/null; then
+    deadline_kill=true
+    kill -9 "$pid" 2>/dev/null || true
+  else
+    deadline_kill=false
+  fi
+  wait "$pid" 2>/dev/null
+  child_rc=$?
   ACTIVE_PID=""
-  python3 - "$out" "$t1" "$t2" "$WINDOW" "${r1:-0}" "${r2:-0}" "${f1:-0}" "${f2:-0}" <<'PYEOF'
+  if [ "$deadline_kill" != true ]; then
+    echo "$tag  CRASHED before the deadline (exit $child_rc) — see ${out}.stdout" >&2
+    python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='crashed', exit_code=$child_rc, intended_deadline_kill=False)"
+    exit 1
+  fi
+  python3 - "$out" "$t1" "$t2" "$WINDOW" "${r1:-0}" "${r2:-0}" "${f1:-0}" "${f2:-0}" "$child_rc" <<'PYEOF'
 import sys, glob
 from datetime import datetime
-out, t1s, t2s, window, r1, r2, f1, f2 = sys.argv[1:9]
+sys.path.insert(0, "benchmarks/openspiel")
+import manifest
+out, t1s, t2s, window, r1, r2, f1, f2, child_rc = sys.argv[1:10]
+hashes = {"stdout": manifest.sha256(f"{out}.stdout")}
 t1 = datetime.strptime(t1s, "%Y-%m-%d %H:%M:%S")
 t2 = datetime.strptime(t2s, "%Y-%m-%d %H:%M:%S")
 states = games = steps = 0
@@ -97,16 +112,27 @@ for f in glob.glob(f"{out}/log-actor*"):
             states += len(line.split("Actions:")[1].split())
 if states == 0:
     print(f"{out.split('/')[-1]}  FAILED-NO-INTERIOR-SAMPLES (no completed games in the interior window)")
+    manifest.finalize(out, status="no-interior-window", intended_deadline_kill=True,
+                      exit_code=int(child_rc), output_sha256=hashes)
     sys.exit(2)
 w = float(window)
-rows_s = (int(r2) - int(r1)) / w if int(r2) > int(r1) else float("nan")
-rows_call = (int(r2) - int(r1)) / (int(f2) - int(f1)) if int(f2) > int(f1) else float("nan")
-print(f"{out.split('/')[-1]}  states/s={states / w:7.1f}  (games={games}, avg_len={states / max(games, 1):.0f})  rows/s={rows_s:8.1f}  rows/call={rows_call:6.1f}  learn_steps={steps}  rows_per_state={rows_s / max(states / w, 1e-9):.0f}")
+rows_s = (int(r2) - int(r1)) / w if int(r2) > int(r1) else None
+rows_call = (int(r2) - int(r1)) / (int(f2) - int(f1)) if int(f2) > int(f1) else None
+metrics = {
+    "window": [t1s, t2s],
+    "states_per_sec": states / w,
+    "games": games,
+    "avg_game_len": states / max(games, 1),
+    "rows_per_sec": rows_s,
+    "rows_per_call": rows_call,
+    "learn_steps": steps,
+}
+manifest.finalize(out, status="deadline", intended_deadline_kill=True,
+                  exit_code=int(child_rc), metrics=metrics, output_sha256=hashes)
+rs = rows_s if rows_s is not None else float("nan")
+rc_ = rows_call if rows_call is not None else float("nan")
+print(f"{out.split('/')[-1]}  states/s={states / w:7.1f}  (games={games}, avg_len={states / max(games, 1):.0f})  rows/s={rs:8.1f}  rows/call={rc_:6.1f}  learn_steps={steps}  rows_per_state={rs / max(states / w, 1e-9):.0f}")
 PYEOF
   reduce_rc=$?
-  if [ "$reduce_rc" -ne 0 ]; then
-    python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='no-interior-window', intended_deadline_kill=True)"
-    exit "$reduce_rc"
-  fi
-  python3 -c "import sys; sys.path.insert(0, 'benchmarks/openspiel'); import manifest; manifest.finalize('$out', status='deadline', intended_deadline_kill=True)"
+  if [ "$reduce_rc" -ne 0 ]; then exit "$reduce_rc"; fi
 done
