@@ -10,7 +10,9 @@ made before their first turn are passed as positional forced actions at spawn �
 buffers every observed move and spawns lazily at its first act(), so their az bot plays
 pure argmax from the exit. After spawn, our moves are submitted to their HumanBot via
 stdin and every move (theirs AND the echo of ours) is verified against their stderr
-announcements; the echo-desync assertion guards wheel-vs-source action-id skew. Their
+announcements; the echo-desync assertion guards wheel-vs-source action-id skew for
+INTERACTIVE moves. Forced positional openings are validated by the binary itself before
+any echo exists — test_h2h_mirror.py's binary smoke covers those renderings. Their
 `Returns:` line is cross-checked against the rf.Env outcome at game end.
 
 Player-index conventions DIFFER between the stacks: open_spiel chess maps BLACK to
@@ -66,6 +68,25 @@ _LIVE_LOCK = threading.Lock()
 
 def _sha256(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+
+
+def _reap(proc: subprocess.Popen) -> None:
+    """Terminate, escalate to kill, and wait — the process is dead when this returns."""
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+    except (ProcessLookupError, PermissionError):
+        pass
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            pass
 
 
 def kill_leftover_processes() -> None:
@@ -336,11 +357,15 @@ class TheirBot:
                 try:
                     code = proc.wait(timeout=30)
                 except subprocess.TimeoutExpired as e:
-                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
                     raise RuntimeError("their process refused to exit; killed") from e
                 if code != 0:
                     raise RuntimeError(f"their process exited with code {code}")
+            except BaseException:
+                _reap(proc)
+                raise
             finally:
+                # both paths above guarantee exit (clean wait or _reap), so
+                # unregistering here can never orphan a live process
                 with _LIVE_LOCK:
                     _LIVE_PROCS.discard(proc)
         done = next(self.done_counter)
