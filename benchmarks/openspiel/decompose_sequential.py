@@ -17,12 +17,11 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from bench_reinfors import build_engine, make_infer  # noqa: E402
-from common import AZResnetReplica, ZeroNet, seed_all  # noqa: E402
+from bench_reinfors import build_engine, make_infer
+from common import AZResnetReplica, ZeroNet, seed_all
 
 NETS = {"replica": AZResnetReplica, "zero": ZeroNet}
 

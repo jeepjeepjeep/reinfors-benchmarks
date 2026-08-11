@@ -21,7 +21,7 @@ import torch
 from open_spiel.python.algorithms import mcts
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import AZResnetReplica  # noqa: E402
+from common import AZResnetReplica
 
 
 class ReinforsNetEvaluator(mcts.Evaluator):

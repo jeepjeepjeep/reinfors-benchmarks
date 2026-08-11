@@ -18,7 +18,14 @@ import torch
 from open_spiel.python.algorithms import mcts
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import SIMULATIONS, UCT_C, SEED, PriorValueNet, report, seed_all  # noqa: E402
+from common import (
+    SEED,
+    SIMULATIONS,
+    UCT_C,
+    PriorValueNet,
+    report,
+    seed_all,
+)
 
 
 class TorchEvaluator(mcts.Evaluator):
