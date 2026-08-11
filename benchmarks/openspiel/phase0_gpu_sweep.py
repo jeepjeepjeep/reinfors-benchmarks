@@ -350,10 +350,10 @@ def main() -> None:
     ap.add_argument("--gpu-threshold", type=float, default=2.0)
     ap.add_argument("--out", type=str, default="", help="append result rows as jsonl")
     args = ap.parse_args()
-    manifest.write(
-        Path(args.out).parent if Path(args.out).suffix else Path(args.out),
-        run_kind="phase0_sweep",
-        config=vars(args),
+    manifest_path = Path(str(args.out) + ".manifest.json")
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(manifest.collect(run_kind="phase0_sweep", config=vars(args)), indent=2) + "\n"
     )
     args.devices = args.devices.split(",")
     args.widths = [int(x) for x in args.widths.split(",")]
