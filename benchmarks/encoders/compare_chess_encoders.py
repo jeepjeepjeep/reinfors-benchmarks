@@ -50,9 +50,7 @@ class ChessAzNet(nn.Module):
 
 
 def encoder_of(name: str) -> object:
-    return {"minimal": rf.encoders.MinimalChess, "relative": rf.encoders.RelativeChess}[
-        name
-    ]()
+    return {"minimal": rf.encoders.MinimalChess, "relative": rf.encoders.RelativeChess}[name]()
 
 
 def make_infer(net: ChessAzNet):
@@ -73,9 +71,7 @@ def train(args: argparse.Namespace) -> None:
     engine = rf.Engine(
         rf.games.Chess(max_ticks=args.max_ticks, encoder=encoder_of(args.encoder)),
         rf.Reward(),  # game defaults: win/loss/draw = 1/-1/0
-        rf.policies.AlphaZero(
-            num_simulations=args.sims, c_puct=2.0, temperature=1.0, temperature_drop=16
-        ),
+        rf.policies.AlphaZero(num_simulations=args.sims, c_puct=2.0, temperature=1.0, temperature_drop=16),
         rf.learners.AlphaZero(gamma=1.0),
         n_games=args.n_games,
         seed=args.seed,
@@ -116,9 +112,7 @@ def train(args: argparse.Namespace) -> None:
             "value_loss": round(vloss / nb, 4),
             "ep_len": round(float(np.mean([n for _, n, _ in eps])), 1) if eps else None,
             # Authoritative cache metrics (Evaluator globals) — the hit-rate measurement.
-            "cache_hit_rate": round(t["cache_hits"] / t["cache_lookups"], 4)
-            if t.get("cache_lookups")
-            else None,
+            "cache_hit_rate": round(t["cache_hits"] / t["cache_lookups"], 4) if t.get("cache_lookups") else None,
             "cache_lookups": t.get("cache_lookups"),
             "infer_rows": t.get("infer_rows"),
             "infer_calls": t.get("infer_calls"),
@@ -129,10 +123,7 @@ def train(args: argparse.Namespace) -> None:
         log.write(json.dumps(row) + "\n")
         log.flush()
         print(row, flush=True)
-    torch.save(
-        {"net": net.state_dict(), "encoder": args.encoder, "width": args.width},
-        out / "final.pt",
-    )
+    torch.save({"net": net.state_dict(), "encoder": args.encoder, "width": args.width}, out / "final.pt")
     print(f"saved {out}/final.pt after {it} iters", flush=True)
 
 
@@ -157,13 +148,7 @@ def h2h(args: argparse.Namespace) -> None:
     for g in range(args.games):
         white = g % 2  # alternate colors; index into `nets`
         envs = [
-            rf.Env(
-                rf.games.Chess(
-                    max_ticks=args.max_ticks, encoder=encoder_of(nets[i][1])
-                ),
-                rf.Reward(),
-                seed=g,
-            )
+            rf.Env(rf.games.Chess(max_ticks=args.max_ticks, encoder=encoder_of(nets[i][1])), rf.Reward(), seed=g)
             for i in range(2)
         ]
         for e in envs:
@@ -193,10 +178,7 @@ def h2h(args: argparse.Namespace) -> None:
         else:
             score[0] += 0.5
             score[1] += 0.5
-        print(
-            f"game {g + 1}/{args.games}: score A={score[0]:.1f} B={score[1]:.1f}",
-            flush=True,
-        )
+        print(f"game {g + 1}/{args.games}: score A={score[0]:.1f} B={score[1]:.1f}", flush=True)
     n = args.games
     print(
         f"FINAL (policy-head probe, search-free)  A({args.a})={score[0]}/{n}  "
@@ -206,9 +188,7 @@ def h2h(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     tr = sub.add_parser("train")
     tr.add_argument("--encoder", choices=["minimal", "relative"], required=True)

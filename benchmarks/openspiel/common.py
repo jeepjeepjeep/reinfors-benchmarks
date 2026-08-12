@@ -100,12 +100,8 @@ class Meter:
         self.net_rows += rows
 
 
-def report(
-    label: str, wall: float, moves: int, evals: int, net_seconds: float, extra: str = ""
-) -> dict:
-    row = dict(
-        label=label, wall=wall, moves=moves, evals=evals, net_seconds=net_seconds
-    )
+def report(label: str, wall: float, moves: int, evals: int, net_seconds: float, extra: str = "") -> dict:
+    row = dict(label=label, wall=wall, moves=moves, evals=evals, net_seconds=net_seconds)
     print(
         f"{label:44s} {evals / wall:>9.0f} evals/s {moves / wall:>7.1f} moves/s"
         f"  net {net_seconds / wall * 100:5.1f}% of wall  ({evals / max(moves, 1):.1f} evals/move){extra}"
@@ -124,9 +120,7 @@ class SweepResnet(nn.Module):
     directly onto their side of the head-to-head. Structure per AZResnetReplica (input conv+BN,
     `depth` residual blocks, both heads; BN eps/momentum match model.cc)."""
 
-    def __init__(
-        self, in_channels: int, h: int, w: int, n_actions: int, width: int, depth: int
-    ) -> None:
+    def __init__(self, in_channels: int, h: int, w: int, n_actions: int, width: int, depth: int) -> None:
         super().__init__()
         self.in_channels, self.h, self.w, self.n_actions = in_channels, h, w, n_actions
         bn = dict(eps=0.001, momentum=0.01)
@@ -170,13 +164,7 @@ class AZResnetReplica(nn.Module):
     logits returned as the Q output, with the same masking op). Used to remove net architecture
     as a variable in the sequential decomposition. BN eps/momentum match their model.cc."""
 
-    def __init__(
-        self,
-        in_channels: int,
-        h: int = 6,
-        w: int = 7,
-        n_actions: int = CONNECT4_ACTIONS,
-    ) -> None:
+    def __init__(self, in_channels: int, h: int = 6, w: int = 7, n_actions: int = CONNECT4_ACTIONS) -> None:
         super().__init__()
         self.in_channels = in_channels
         self.n_actions = n_actions

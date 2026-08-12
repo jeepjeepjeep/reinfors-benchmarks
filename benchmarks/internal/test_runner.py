@@ -42,6 +42,8 @@ def _clean_runs():
 
     for d in (REPO / "runs").glob("*_t"):
         shutil.rmtree(d)
+    for d in (REPO / "runs").glob("*_t-*"):
+        shutil.rmtree(d)
 
 
 def test_cells_run_interleaved_with_manifests_and_hashes(tmp_path: Path) -> None:
