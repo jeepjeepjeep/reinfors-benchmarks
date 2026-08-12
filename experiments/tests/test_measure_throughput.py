@@ -75,11 +75,14 @@ def test_os_sampler_reads_their_learner_counters(tmp_path: Path) -> None:
     # states/games/steps MUST come from their learner.jsonl (its counters see every
     # actor); log-actor files are NEVER a source — their binary caps them at 20
     # actors, the undercount behind the retracted pre-V1 grid numbers
+    # the REAL emission order of instrument_vpevaluator.patch: fwd before rows
     (tmp_path / "child.log").write_text(
-        "noise\n[inst] rows=100 fwd=10\n[inst] rows=250 fwd=25\n"
+        "noise\n"
+        "[inst] req=1000 hits=400 fwd=10 rows=100 fwd_ms=12.8 eval=0 prior=0\n"
+        "[inst] req=2000 hits=800 fwd=25 rows=250 fwd_ms=32.1 eval=0 prior=0\n"
     )
     (tmp_path / "learner.jsonl").write_text(
-        json.dumps({"total_states": 3, "total_trajectories": 1, "step": 1}) + "\n"
+        json.dumps({"total_states": 1024, "total_trajectories": 1, "step": 1}) + "\n"
     )
     # a stray log-actor file must have no effect on the counts
     (tmp_path / "log-actor-0.txt").write_text(
@@ -90,20 +93,22 @@ def test_os_sampler_reads_their_learner_counters(tmp_path: Path) -> None:
     # second poll: only NEW lines read (incremental offsets, cumulative counters)
     with open(tmp_path / "learner.jsonl", "a") as f:
         f.write(
-            json.dumps({"total_states": 5, "total_trajectories": 2, "step": 2}) + "\n"
+            json.dumps({"total_states": 3072, "total_trajectories": 2, "step": 2})
+            + "\n"
         )
     sampler.sample(20.0)
     sampler.close()
     rows = [json.loads(x) for x in open(tmp_path / "telemetry.jsonl")]
     assert rows[0] == {
         "wall": 10.0,
-        "states": 3,
+        "states": 1024,
         "games": 1,
         "infer_rows": 250,
         "infer_calls": 25,
+        # their step = a sweep of min(total_states, buffer)//1024 minibatches
         "steps": 1,
     }
-    assert rows[1]["states"] == 5 and rows[1]["games"] == 2
+    assert rows[1]["states"] == 3072 and rows[1]["steps"] == 1 + 3
 
 
 def test_child_argv_carries_the_matched_protocol() -> None:
@@ -245,7 +250,7 @@ def test_harness_end_to_end_os_sampler(tmp_path: Path, monkeypatch) -> None:
             out = Path(sys.argv[1])
             learner = open(out / "learner.jsonl", "a")
             for i in range(1, 200):
-                print(f"[inst] rows={i * 100} fwd={i * 10}", flush=True)
+                print(f"[inst] req={i * 200} hits=0 fwd={i * 10} rows={i * 100} fwd_ms=0.1", flush=True)
                 learner.write(json.dumps({"total_states": i * 3,
                                           "total_trajectories": i,
                                           "step": i}) + "\\n")

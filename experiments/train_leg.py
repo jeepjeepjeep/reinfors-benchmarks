@@ -60,20 +60,46 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def latest_checkpoint(out: Path, side: str) -> tuple[str | None, int | None]:
-    """(newest checkpoint path, os checkpoint number) — number is None for rf."""
+def verify_checkpoint(path: str | Path, side: str) -> bool:
+    """The deadline kill can tear a mid-write checkpoint; only one that LOADS counts
+    as complete. rf checkpoints are torch state_dicts; theirs are libtorch archives."""
+    import torch
+
+    try:
+        if side == "rf":
+            torch.load(path, map_location="cpu")
+        else:
+            torch.jit.load(str(path), map_location="cpu")
+        return True
+    except Exception:
+        return False
+
+
+def latest_checkpoint(out: Path, side: str) -> tuple[str | None, int | None, list[str]]:
+    """(newest COMPLETE checkpoint, os checkpoint number, torn candidates skipped).
+    Walks newest -> oldest, load-verifying each candidate."""
     if side == "rf":
-        ckpts = sorted(out.glob("ckpt*"), key=lambda p: p.stat().st_mtime)
-        return (str(ckpts[-1]), None) if ckpts else (None, None)
-    numbered = [
-        (int(m.group(1)), p)
-        for p in out.glob("checkpoint-*.pt")
-        if (m := _OS_CKPT.search(p.name))
-    ]
-    if not numbered:
-        return None, None
-    number, path = max(numbered)
-    return str(path), number
+        candidates = [
+            (None, p)
+            for p in sorted(
+                out.glob("ckpt*"), key=lambda p: p.stat().st_mtime, reverse=True
+            )
+        ]
+    else:
+        candidates = sorted(
+            (
+                (int(m.group(1)), p)
+                for p in out.glob("checkpoint-*.pt")
+                if (m := _OS_CKPT.search(p.name))
+            ),
+            reverse=True,
+        )
+    skipped: list[str] = []
+    for number, path in candidates:
+        if verify_checkpoint(path, side):
+            return str(path), number, skipped
+        skipped.append(path.name)
+    return None, None, skipped
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -138,7 +164,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    ckpt, ckpt_number = latest_checkpoint(out, args.side)
+    ckpt, ckpt_number, torn = latest_checkpoint(out, args.side)
     if ckpt and args.side == "rf":
         # stable alias so downstream configs reference a knowable path (their side
         # cannot get one: the os loader takes a directory + checkpoint NUMBER and
@@ -159,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
         child_exit_code=proc.returncode,
         latest_checkpoint=ckpt,
         checkpoint_number=ckpt_number,
+        torn_checkpoints=torn,
         model="model.pt" if ckpt and args.side == "rf" else None,
         output_sha256=hashes,
     )

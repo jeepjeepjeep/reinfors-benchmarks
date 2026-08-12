@@ -19,6 +19,7 @@ def _fake_trainer(tmp_path: Path, body: str) -> None:
 
 
 def test_leg_records_the_newest_checkpoint(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(train, "verify_checkpoint", lambda p, s: True)
     fake = _fake_trainer(
         tmp_path,
         "import sys, time\n"
@@ -73,6 +74,7 @@ def test_leg_records_the_newest_checkpoint(tmp_path: Path, monkeypatch) -> None:
 def test_os_leg_samples_telemetry_and_numbers_the_checkpoint(
     tmp_path: Path, monkeypatch
 ) -> None:
+    monkeypatch.setattr(train, "verify_checkpoint", lambda p, s: True)
     fake = _fake_trainer(
         tmp_path,
         "import sys, time\n"
@@ -83,7 +85,7 @@ def test_os_leg_samples_telemetry_and_numbers_the_checkpoint(
         "import json\n"
         "learner = open(out / 'learner.jsonl', 'a')\n"
         "for i in range(1, 200):\n"
-        "    print(f'[inst] rows={i * 10} fwd={i}', flush=True)\n"
+        "    print(f'[inst] req={i * 20} hits=0 fwd={i} rows={i * 10} fwd_ms=0.1', flush=True)\n"
         "    learner.write(json.dumps({'total_states': i * 2,"
         " 'total_trajectories': i, 'step': i}) + '\\n')\n"
         "    learner.flush()\n"
@@ -178,3 +180,63 @@ def test_seed_is_rf_only() -> None:
         )
     args = train.parse_args(["--side", "rf", "--n-games", "8", "--out", "x"])
     assert args.seed == 0  # rf default
+
+
+def test_verify_checkpoint_rejects_torn_files(tmp_path: Path) -> None:
+    import torch
+
+    good_rf = tmp_path / "ckpt_60s.pt"
+    torch.save({"w": torch.zeros(3)}, good_rf)
+    assert train.verify_checkpoint(good_rf, "rf")
+    torn = tmp_path / "ckpt_120s.pt"
+    torn.write_bytes(good_rf.read_bytes()[: good_rf.stat().st_size // 2])
+    assert not train.verify_checkpoint(torn, "rf")
+
+    good_os = tmp_path / "checkpoint-3.pt"
+    torch.jit.save(torch.jit.script(torch.nn.Linear(2, 2)), str(good_os))
+    assert train.verify_checkpoint(good_os, "os")
+    torn_os = tmp_path / "checkpoint-4.pt"
+    torn_os.write_bytes(good_os.read_bytes()[: good_os.stat().st_size // 2])
+    assert not train.verify_checkpoint(torn_os, "os")
+
+
+def test_torn_newest_checkpoint_is_skipped(tmp_path: Path, monkeypatch) -> None:
+    fake = _fake_trainer(
+        tmp_path,
+        "import sys, time\n"
+        "out = sys.argv[sys.argv.index('--out') + 1]\n"
+        "open(out + '/telemetry.jsonl', 'w').write('{}\\n')\n"
+        "open(out + '/ckpt_60s.pt', 'w').write('complete')\n"
+        "time.sleep(0.3)\n"
+        "open(out + '/ckpt_120s.pt', 'w').write('torn')\n"
+        "time.sleep(600)\n",
+    )
+    monkeypatch.setattr(
+        protocol,
+        "rf_train_argv",
+        lambda out, *a, **k: [sys.executable, str(fake), "--out", str(out)],
+    )
+    # the newest candidate fails load-verification; the leg must fall back
+    monkeypatch.setattr(
+        train, "verify_checkpoint", lambda p, side: Path(p).read_text() == "complete"
+    )
+    out = tmp_path / "training"
+    rc = train.main(
+        [
+            "--side",
+            "rf",
+            "--n-games",
+            "8",
+            "--minutes",
+            "0.02",
+            "--out",
+            str(out),
+            "--poll-seconds",
+            "0.1",
+        ]
+    )
+    assert rc == 0
+    m = json.loads((out / "manifest.json").read_text())
+    assert m["latest_checkpoint"].endswith("ckpt_60s.pt")
+    assert m["torn_checkpoints"] == ["ckpt_120s.pt"]
+    assert (out / "model.pt").read_text() == "complete"

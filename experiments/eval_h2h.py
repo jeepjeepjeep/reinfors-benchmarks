@@ -52,6 +52,7 @@ import pyspiel
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
+import numpy as np
 import reinfors as rf
 import manifest
 import protocol
@@ -399,6 +400,24 @@ def replay_for_pgn(actions: list[int]):
     return board, sans
 
 
+def make_infer(net, device, shape):
+    """Callback for PolicyHandle.choose: pooled obs arrive flat (rows, obs_dim) per
+    the inference contract and must be reshaped NCHW before the conv trunk."""
+    c, h, w = shape
+
+    def infer(obs, n=None):
+        with torch.inference_mode():
+            x = (
+                torch.from_numpy(np.ascontiguousarray(obs))
+                .reshape(-1, c, h, w)
+                .to(device)
+            )
+            logits, values = net.heads(x)
+        return logits.cpu().numpy(), values.cpu().numpy()
+
+    return infer
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -505,10 +524,7 @@ def main() -> None:
         f"our net: SweepResnet w{width} d{depth}  params={sum(p.numel() for p in net.parameters()):,}"
     )
 
-    def infer(obs, n=None):
-        with torch.inference_mode():
-            logits, values = net.heads(torch.from_numpy(obs).to(args.device))
-        return logits.cpu().numpy(), values.cpu().numpy()
+    infer = make_infer(net, args.device, (c, h, w))
 
     our_sims = args.our_sims or args.sims
     policy = rf.policies.AlphaZero(

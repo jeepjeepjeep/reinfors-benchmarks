@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import manifest
+import protocol
 
 _REPO = Path(__file__).resolve().parents[2]
 
@@ -52,6 +53,22 @@ def _check_openspiel_sources() -> list[str]:
             errors.append(
                 f"open_spiel applied-diff hash {current[:12]} != PIN record "
                 f"{diff_records[0][1][:12]} — checkout modifications drifted since setup"
+            )
+    # the executables actually run must be the ones this source state built
+    bin_records = [ln.split() for ln in lines if ln.startswith("bin ")]
+    if not bin_records:
+        errors.append(
+            "open_spiel_cpp/PIN lacks binary records — re-run scripts/setup_openspiel_cpp.sh"
+        )
+    for _, name, recorded in bin_records:
+        path = protocol.OS_TRAIN_BIN.parent / name
+        current = manifest.sha256(path)
+        if current is None:
+            errors.append(f"{name} missing — re-run scripts/setup_openspiel_cpp.sh")
+        elif current != recorded:
+            errors.append(
+                f"{name} hash {current[:12]} != PIN record {recorded[:12]} — "
+                f"stale binary from an earlier build"
             )
     return errors
 

@@ -51,3 +51,43 @@ def test_out_dir_lifecycle_and_overwrite_refusal(tmp_path: Path) -> None:
 
     second = _run(out)
     assert second.returncode != 0 and "refusing to overwrite" in second.stderr
+
+
+def test_engine_mode_runs_both_dtype_arms(tmp_path: Path) -> None:
+    # the f32/f64 A/B is only real if the fast callback actually honors the flag;
+    # exercise both arms end-to-end on a tiny cpu engine leg
+    for dtype in ("f64", "f32"):
+        out = tmp_path / f"arm_{dtype}"
+        r = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--mode",
+                "engine",
+                "--game",
+                "connect4",
+                "--devices",
+                "cpu",
+                "--widths",
+                "8",
+                "--depths",
+                "1",
+                "--n-games",
+                "2",
+                "--engine-leg-seconds",
+                "0.2",
+                "--sims",
+                "2",
+                "--callback",
+                "fast",
+                "--infer-dtype",
+                dtype,
+                "--out",
+                str(out),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        assert r.returncode == 0, r.stderr
+        rows = [json.loads(x) for x in open(out / "rows.jsonl")]
+        assert len(rows) >= 2  # header + the engine cell

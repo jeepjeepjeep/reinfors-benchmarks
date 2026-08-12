@@ -194,3 +194,21 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
     finally:
         proc.kill()
         proc.wait(timeout=10)
+
+
+def test_infer_reshapes_flat_observations_for_the_conv_trunk() -> None:
+    # PolicyHandle.choose delivers flat (rows, obs_dim) batches; the callback must
+    # reshape NCHW or the conv trunk rejects them ("Expected 3D or 4D input")
+    import reinfors as rf
+    from eval_h2h import HEAD_ACTIONS, make_infer
+    from common import SweepResnet
+
+    game = rf.games.Chess(encoder=rf.encoders.OpenSpielChess(), max_ticks=None)
+    c, h, w = game.observation_space().shape
+    net = SweepResnet(c, h, w, HEAD_ACTIONS, 8, 1).eval()
+    infer = make_infer(net, "cpu", (c, h, w))
+
+    env = rf.Env(game, rf.Reward(win=1.0, loss=-1.0))
+    policy = rf.policies.AlphaZero(num_simulations=2, temperature=0.0, noise=None)
+    actions = policy.choose([env], infer, seed=0, gamma=1.0)
+    assert len(actions) == 1

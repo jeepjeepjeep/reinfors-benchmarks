@@ -171,11 +171,12 @@ def bench_engine(args, game, head_actions, results) -> None:
                         else:
                             x = src.reshape(-1, c, h, w).to(device)
                         logits, values = net.heads(x)
-                        packed = (
-                            torch.cat([logits, values.unsqueeze(1)], dim=1)
-                            .cpu()
-                            .numpy()
-                        )
+                        out = torch.cat([logits, values.unsqueeze(1)], dim=1)
+                        if args.infer_dtype == "f64":
+                            # the A/B's f64 arm: device-side widen + double-width
+                            # D2H — the pre-f32-contract cost profile
+                            out = out.double()
+                        packed = out.cpu().numpy()
                     return packed, packed[:, -1]
                 with torch.no_grad():
                     x = (

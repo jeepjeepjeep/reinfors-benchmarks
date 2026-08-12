@@ -15,7 +15,7 @@ from pathlib import Path
 
 import protocol
 
-_INST = re.compile(r"\[inst\].*?rows=(\d+).*?fwd=(\d+)")
+_INST_FIELDS = re.compile(r"(\w+)=([\d.]+)")
 
 
 def refuse_smt() -> None:
@@ -97,9 +97,11 @@ class OsSampler:
 
     def sample(self, wall: float) -> None:
         for line in self._new_lines(self.out / "child.log"):
-            m = _INST.search(line)
-            if m:  # cumulative already; latest wins
-                self.rows, self.calls = int(m.group(1)), int(m.group(2))
+            if "[inst]" not in line:
+                continue
+            fields = dict(_INST_FIELDS.findall(line))  # order-independent
+            if "rows" in fields and "fwd" in fields:  # cumulative; latest wins
+                self.rows, self.calls = int(fields["rows"]), int(fields["fwd"])
         for line in self._new_lines(self.out / "learner.jsonl"):
             try:
                 d = json.loads(line)
@@ -107,7 +109,14 @@ class OsSampler:
                 continue
             self.states = d.get("total_states", self.states)
             self.games = d.get("total_trajectories", self.games)
-            self.steps = d.get("step", self.steps)
+            # their "step" is one learner-loop iteration = a sweep of
+            # buffer/train_batch minibatches (alpha_zero.cc Learn loop). Convert to
+            # optimizer-minibatch units so `steps` means the same on both sides
+            # (rf counts minibatches directly).
+            if "total_states" in d and "step" in d:
+                self.steps += (
+                    min(d["total_states"], protocol.BUFFER_SIZE) // protocol.TRAIN_BATCH
+                )
         row = {
             "wall": round(wall, 3),
             "states": self.states,
