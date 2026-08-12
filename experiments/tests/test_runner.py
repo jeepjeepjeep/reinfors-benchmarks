@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -160,14 +161,14 @@ def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> No
     missing = _run(spec)
     assert missing.returncode != 0 and "unresolved placeholders" in missing.stderr
 
-    ok = _run(spec, "--resume", "--set", "extra=42")
+    shutil.rmtree(_session_dir())  # differing substitutions may not resume a session
+    ok = _run(spec, "--set", "extra=42")
     assert ok.returncode == 0, ok.stderr
     session = _session_dir()
     log = (session / "sub" / "cycle1" / "stdout.log").read_text()
     assert "cycle=1 extra=42" in log
     m = json.loads((session / "manifest.json").read_text())
-    assert m["substitutions"] == {}  # the original (failed) invocation had no --set
-    assert m["resumes"][0]["substitutions"] == {"extra": "42"}
+    assert m["substitutions"] == {"extra": "42"}
     assert m["packages"] and m["cpu_model"] is not None
 
 
@@ -214,11 +215,48 @@ def test_cycle_composed_placeholders(tmp_path: Path) -> None:
     missing = _run(spec)
     assert missing.returncode != 0 and "{ckpt_1}" in missing.stderr
 
-    ok = _run(spec, "--resume", "--set", "ckpt_1=/tmp/model.pt")
+    shutil.rmtree(_session_dir())
+    ok = _run(spec, "--set", "ckpt_1=/tmp/model.pt")
     assert ok.returncode == 0, ok.stderr
     session = _session_dir()
     log = (session / "composed" / "cycle1" / "stdout.log").read_text()
     assert "/tmp/model.pt" in log
+
+
+def test_resume_refuses_changed_spec_or_substitutions(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [{"name": "a", "argv": [sys.executable, "-c", "print('ok')"], "cycles": 1}],
+    )
+    first = _run(spec)
+    assert first.returncode == 0, first.stderr
+
+    changed = _run(spec, "--resume", "--set", "surprise=1")
+    assert changed.returncode != 0 and "substitutions differ" in changed.stderr
+
+    spec.write_text(spec.read_text().replace('"cycles": 2', '"cycles": 3'))
+    edited = _run(spec, "--resume")
+    assert edited.returncode != 0 and "spec has changed" in edited.stderr
+
+
+def test_missing_required_output_fails_the_cell(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "forgetful",
+                "argv": [sys.executable, "-c", "print('exit 0, wrote nothing')"],
+                "outputs": ["result.jsonl"],
+                "cycles": 1,
+            },
+        ],
+    )
+    out = _run(spec)
+    assert out.returncode != 0 and "missing required outputs" in out.stderr
+    m = json.loads(
+        (_session_dir() / "forgetful" / "cycle1" / "manifest.json").read_text()
+    )
+    assert m["status"] == "failed" and m["missing_outputs"] == ["result.jsonl"]
 
 
 def test_unresolved_expect_tag_is_rejected(tmp_path: Path) -> None:

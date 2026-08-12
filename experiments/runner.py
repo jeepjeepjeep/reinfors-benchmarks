@@ -146,18 +146,23 @@ def run_cell(
     elapsed = time.monotonic() - started
 
     outputs = {rel: manifest.sha256(rep_dir / rel) for rel in cell.get("outputs", [])}
+    missing = sorted(rel for rel, digest in outputs.items() if digest is None)
     if intended_kill:
         status = "hung"
-    elif proc.returncode == 0:
-        status = "ok"
-    else:
+    elif proc.returncode != 0:
         status = "failed"
+    elif missing:
+        # a clean exit without its required outputs is a failure, not a success
+        status = "failed"
+    else:
+        status = "ok"
     manifest.finalize(
         rep_dir,
         exit_code=proc.returncode,
         intended_deadline_kill=intended_kill,
         elapsed_seconds=round(elapsed, 1),
         output_sha256=outputs,
+        missing_outputs=missing,
         status=status,
     )
     entry = {
@@ -169,8 +174,13 @@ def run_cell(
     }
     _update_index(session_dir, entry)
     if status == "failed":
+        detail = (
+            f"missing required outputs {missing}"
+            if missing
+            else f"exit {proc.returncode}"
+        )
         raise RuntimeError(
-            f"cell {cell['name']} cycle {cycle} failed (exit {proc.returncode}); "
+            f"cell {cell['name']} cycle {cycle} failed ({detail}); "
             f"see {rep_dir}/stderr.log"
         )
     if status == "hung":
@@ -223,10 +233,27 @@ def main() -> int:
     session_dir = _REPO / "runs" / spec["session"]
     if args.resume:
         assert session_dir.is_dir(), f"no session at {session_dir}"
-        # a resume may carry different substitutions than the original invocation;
-        # every invocation that touched the session must be on record
         path = session_dir / "manifest.json"
         data = json.loads(path.read_text())
+        # a session is ONE experiment definition: a resume must present the same
+        # spec and the same substitutions, or it is a different campaign — start a
+        # fresh session (or archive this one) instead of mixing definitions
+        spec_sha = manifest.sha256(args.spec)
+        if data.get("spec_sha256") not in (None, spec_sha):
+            print(
+                f"spec has changed since this session started "
+                f"({data['spec_sha256'][:12]} -> {spec_sha[:12]}); "
+                f"start a fresh session",
+                file=sys.stderr,
+            )
+            return 1
+        if data.get("substitutions", {}) != sets:
+            print(
+                f"substitutions differ from the original invocation "
+                f"({data.get('substitutions')} -> {sets}); start a fresh session",
+                file=sys.stderr,
+            )
+            return 1
         data.setdefault("resumes", []).append(
             {"command": sys.argv, "substitutions": sets}
         )

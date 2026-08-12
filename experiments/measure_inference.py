@@ -138,11 +138,22 @@ def bench_engine(args, game, head_actions, results) -> None:
             )
             noop_v = np.zeros((noop_l.shape[0],), dtype=np.float32)
 
-            pin = (
-                torch.empty((n_games * max(engines, 1), c * h * w), pin_memory=True)
-                if args.callback == "fast" and device.startswith("cuda")
+            # per-THREAD pinned staging: with --engines > 1 the callback runs
+            # concurrently from several engine threads, and a shared buffer would be
+            # a data race between one thread's H2D and another's staging copy
+            pin_cap = n_games * max(engines, 1)
+            pin_tls = (
+                threading.local()
+                if (args.callback == "fast" and device.startswith("cuda"))
                 else None
             )
+
+            def pinned_staging() -> "torch.Tensor":
+                buf = getattr(pin_tls, "buf", None)
+                if buf is None:
+                    buf = torch.empty((pin_cap, c * h * w), pin_memory=True)
+                    pin_tls.buf = buf
+                return buf
 
             def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
                 if args.callback == "noop":
@@ -162,8 +173,8 @@ def bench_engine(args, game, head_actions, results) -> None:
                     n = obs_batch.shape[0]
                     with torch.inference_mode():
                         src = torch.from_numpy(np.ascontiguousarray(obs_batch))
-                        if pin is not None and n <= pin.shape[0]:
-                            staging = pin[:n]
+                        if pin_tls is not None and n <= pin_cap:
+                            staging = pinned_staging()[:n]
                             staging.copy_(src.reshape(n, -1))
                             x = staging.to(device, non_blocking=True).reshape(
                                 n, c, h, w

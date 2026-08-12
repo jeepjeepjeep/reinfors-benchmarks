@@ -219,7 +219,8 @@ def main() -> None:
         if str(args.stream_depth).lower() in ("none", "inf")
         else int(args.stream_depth)
     )
-    log = (out / "telemetry.jsonl").open("w")
+    # line-buffered: the leg always ends in SIGKILL, so every record must reach the OS
+    log = (out / "telemetry.jsonl").open("w", buffering=1)
     t0 = time.perf_counter()
     deadline = t0 + args.minutes * 60.0
     states = 0
