@@ -12,8 +12,8 @@ deltas between cycles). Losses are definitionally aligned (masked CE, value MSE 
 measured on each side's OWN self-play distribution — per-system learning progress, not
 head-to-head quality.
 
-  uv run python scripts/plot_round.py results/round_chess_rf_120m_n64 \
-      results/round_chess_os_120m_a16_b16 -o results/round1_panels.png
+  uv run python scripts/plot_round.py runs/v1_training/rf_train/cycle1/training \
+      runs/v1_training/os_train/cycle1/training -o /tmp/round_panels.png
 """
 
 import argparse

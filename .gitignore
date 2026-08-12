@@ -1,8 +1,7 @@
 .venv/
 __pycache__/
-results/
 wheels/
 open_spiel_cpp/
-results-box-backup/
 runs/
+archive/
 attic/

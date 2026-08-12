@@ -27,9 +27,10 @@ with the result).
 Smoke test (untrained checkpoints, REQUIRED before any round — validates announcement
 format, HumanBot numeric input, castling ids, draw handling, lazy spawn):
 
-  uv run python benchmarks/eval_h2h.py --rf-model results/rf_smoke/ckpt_60s.pt \
-      --os-model results/os_smoke --os-checkpoint 0 --games 2 --sims 8 \
-      --device cuda --az-device /cuda:0 --out results/h2h_smoke
+  uv run python benchmarks/eval_h2h.py \
+      --rf-model runs/v1_smoke/rf_train_smoke/cycle1/training \
+      --os-model runs/v1_smoke/os_train_smoke/cycle1/training \
+      --games 2 --sims 8 --device cuda --az-device /cuda:0 --out /tmp/h2h_smoke
 """
 
 import argparse

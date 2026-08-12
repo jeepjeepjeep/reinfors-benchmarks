@@ -26,7 +26,7 @@ Isolation (do BOTH on the bench box):
     and thread count are echoed into every result row.
 
     taskset -c 0-3 .venv23/bin/python benchmarks/measure_inference.py \
-        --mode both --game chess --devices cpu,cuda --out results/inference
+        --mode both --game chess --devices cpu,cuda --out /tmp/inference
     # --devices is a sweep: each point runs per device; --mode picks the surface
     # (kernel = pure forwards, engine = data-gen loop)
 """
