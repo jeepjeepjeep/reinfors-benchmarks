@@ -94,7 +94,7 @@ def run_cell(
         value = value.replace("{run_dir}", str(rep_dir)).replace("{cycle}", str(cycle))
         for key, replacement in sets.items():
             value = value.replace("{" + key + "}", replacement)
-        unresolved = re.findall(r"\{[a-z_]+\}", value)
+        unresolved = re.findall(r"\{[a-z0-9_]+\}", value)
         if unresolved:
             raise ValueError(
                 f"unresolved placeholders {unresolved} in cell {cell['name']}; "

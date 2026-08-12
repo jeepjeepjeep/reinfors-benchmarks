@@ -195,6 +195,34 @@ def test_args_dict_expands_into_the_command(tmp_path: Path) -> None:
     assert m["command"][-5:] == ["--n-games", "64", "--seed", "1", "--quick"]
 
 
+def test_cycle_composed_placeholders(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "composed",
+                "argv": [
+                    sys.executable,
+                    "-c",
+                    "import sys; print(sys.argv[1])",
+                    "{ckpt_{cycle}}",
+                ],
+                "cycles": 1,
+            },
+        ],
+    )
+    # {cycle} resolves first, so the missing per-cycle key must be caught — digits
+    # included (a bare [a-z_] guard would let "{ckpt_1}" through as a literal arg)
+    missing = _run(spec)
+    assert missing.returncode != 0 and "{ckpt_1}" in missing.stderr
+
+    ok = _run(spec, "--set", "ckpt_1=/tmp/model.pt")
+    assert ok.returncode == 0, ok.stderr
+    session = _session_dir()
+    log = (session / "composed" / "cycle1" / "stdout.log").read_text()
+    assert "/tmp/model.pt" in log
+
+
 def test_unresolved_expect_tag_is_rejected(tmp_path: Path) -> None:
     spec = tmp_path / "spec.json"
     spec.write_text(json.dumps({"session": "t", "expect_tag": "{tag}", "cells": []}))
