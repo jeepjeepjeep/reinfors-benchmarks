@@ -1,7 +1,7 @@
 """Tensorboard-style comparison panels for one matched round, from the two learners' own
 structured logs:
 
-  reinfors   <rf_dir>/learner.jsonl   (one line per minibatch -> aggregated per collection cycle)
+  reinfors   <rf_dir>/telemetry.jsonl (one line per minibatch -> aggregated per collection cycle)
   openspiel  <os_dir>/learner.jsonl   (one record per learn step, DataLogger jsonl)
 
 Both series are shown at the SAME aggregation: one point per collection/learning cycle
@@ -29,7 +29,7 @@ import numpy as np
 
 def load_rf(path: Path) -> dict[str, np.ndarray]:
     """One point per collection cycle: rows grouped by their cumulative-states plateau."""
-    rows = [json.loads(line) for line in (path / "learner.jsonl").open()]
+    rows = [json.loads(line) for line in (path / "telemetry.jsonl").open()]
     cycles: list[dict[str, float]] = []
     for r in rows:
         if not cycles or r["states"] != cycles[-1]["states"]:
