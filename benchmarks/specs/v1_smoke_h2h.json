@@ -6,7 +6,6 @@
     {
       "name": "h2h_smoke",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/openspiel/eval_h2h_chess.py",
         "{rf_ckpt}",
         "{os_path}",

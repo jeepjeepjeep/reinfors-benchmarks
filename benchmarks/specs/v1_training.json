@@ -48,7 +48,6 @@
     {
       "name": "rf_train",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/openspiel/train_reinfors_az.py",
         "--minutes",
         "130",

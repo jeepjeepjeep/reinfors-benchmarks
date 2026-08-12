@@ -6,7 +6,6 @@
     {
       "name": "os_a8",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -25,7 +24,6 @@
     {
       "name": "os_a16",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -44,7 +42,6 @@
     {
       "name": "os_a32",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -63,7 +60,6 @@
     {
       "name": "os_a64",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -82,7 +78,6 @@
     {
       "name": "os_a64b32",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -102,7 +97,6 @@
     {
       "name": "rf_n64_g1",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -122,7 +116,6 @@
     {
       "name": "rf_n64_g2",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -142,7 +135,6 @@
     {
       "name": "rf_n128_g1",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -162,7 +154,6 @@
     {
       "name": "rf_n128_g2",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -182,7 +173,6 @@
     {
       "name": "rf_n256_g1",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -202,7 +192,6 @@
     {
       "name": "rf_n256_g2",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {

@@ -52,13 +52,13 @@ def test_cells_run_interleaved_with_manifests_and_hashes(tmp_path: Path) -> None
                 {
                     "name": "a",
                     "argv": [
-                        "python3",
+                        sys.executable,
                         "-c",
                         "open('{run_dir}/x.txt','w').write('hi')",
                     ],
                     "outputs": ["x.txt"],
                 },
-                {"name": "b", "argv": ["python3", "-c", "print('ok')"]},
+                {"name": "b", "argv": [sys.executable, "-c", "print('ok')"]},
             ],
         )
     )
@@ -75,7 +75,8 @@ def test_cells_run_interleaved_with_manifests_and_hashes(tmp_path: Path) -> None
     ]
     m = json.loads((session / "a" / "cycle1" / "manifest.json").read_text())
     assert m["completed"] and m["status"] == "ok" and m["exit_code"] == 0
-    assert m["command"][:1] == ["python3"] and "cycle1" in m["command"][2]
+    assert m["command"][0] == sys.executable  # the sentinel resolved to our env
+    assert "cycle1" in m["command"][2]
     assert len(m["output_sha256"]["x.txt"]) == 64
     index = json.loads((session / "index.json").read_text())
     assert len(index) == 4
@@ -88,7 +89,7 @@ def test_expected_deadline_kill_is_success(tmp_path: Path) -> None:
             [
                 {
                     "name": "slow",
-                    "argv": ["python3", "-c", "import time; time.sleep(60)"],
+                    "argv": [sys.executable, "-c", "import time; time.sleep(60)"],
                     "deadline_seconds": 1,
                     "deadline_expected": True,
                     "cycles": 1,
@@ -108,7 +109,7 @@ def test_unexpected_deadline_is_hung_and_blocks_resume(tmp_path: Path) -> None:
         [
             {
                 "name": "wedged",
-                "argv": ["python3", "-c", "import time; time.sleep(60)"],
+                "argv": [sys.executable, "-c", "import time; time.sleep(60)"],
                 "deadline_seconds": 1,
                 "cycles": 1,
             },
@@ -130,7 +131,7 @@ def test_crash_fails_the_session(tmp_path: Path) -> None:
             [
                 {
                     "name": "boom",
-                    "argv": ["python3", "-c", "raise SystemExit(3)"],
+                    "argv": [sys.executable, "-c", "raise SystemExit(3)"],
                     "cycles": 1,
                 },
             ],
@@ -145,8 +146,8 @@ def test_resume_blocks_on_failed_cell_until_archived(tmp_path: Path) -> None:
     spec = _spec(
         tmp_path,
         [
-            {"name": "a", "argv": ["python3", "-c", "print('ok')"]},
-            {"name": "boom", "argv": ["python3", "-c", "raise SystemExit(3)"]},
+            {"name": "a", "argv": [sys.executable, "-c", "print('ok')"]},
+            {"name": "boom", "argv": [sys.executable, "-c", "raise SystemExit(3)"]},
         ],
     )
     first = _run(spec)
@@ -173,7 +174,7 @@ def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> No
         [
             {
                 "name": "sub",
-                "argv": ["python3", "-c", "print('cycle={cycle} extra={extra}')"],
+                "argv": [sys.executable, "-c", "print('cycle={cycle} extra={extra}')"],
                 "cycles": 1,
             },
         ],
@@ -192,12 +193,14 @@ def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> No
 
 
 def test_args_dict_expands_into_the_command(tmp_path: Path) -> None:
+    script = tmp_path / "cellscript.py"
+    script.write_text("import sys; print(sys.argv[1:])")
     spec = _spec(
         tmp_path,
         [
             {
                 "name": "dictargs",
-                "argv": ["python3", "-c", "import sys; print(sys.argv[1:])"],
+                "argv": [str(script)],
                 "args": {"n-games": 64, "seed": "{cycle}", "quick": True},
                 "cycles": 1,
             },
@@ -207,6 +210,7 @@ def test_args_dict_expands_into_the_command(tmp_path: Path) -> None:
     assert out.returncode == 0, out.stderr
     session = _session_dir()
     m = json.loads((session / "dictargs" / "cycle1" / "manifest.json").read_text())
+    assert m["command"][0] == sys.executable  # .py cell: runner's interpreter prepended
     assert m["command"][-5:] == ["--n-games", "64", "--seed", "1", "--quick"]
 
 
@@ -243,11 +247,14 @@ def test_checked_in_specs_are_well_formed() -> None:
                 f"{path.name}:{cell['name']}: unknown keys {set(cell) - cell_known}"
             )
             assert cell["argv"] and all(isinstance(a, str) for a in cell["argv"])
+            assert ".venv" not in json.dumps(cell), (
+                f"{path.name}:{cell['name']}: pins an env; use argv[0] 'python'"
+            )
             assert all(
                 isinstance(v, (str, int, float, bool))
                 for v in cell.get("args", {}).values()
             ), f"{path.name}:{cell['name']}: args values must be scalars"
-            if "measure_grid.py" in cell["argv"][1]:
+            if cell["argv"][0].endswith("measure_grid.py"):
                 # deadlines on self-terminating cells are DERIVED, never hand-set:
                 # warmup + window + 30s tail + 120s margin
                 args = cell["args"]

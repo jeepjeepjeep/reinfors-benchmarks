@@ -13,7 +13,9 @@ Spec:
   "cycles": 3,                      # repeats, interleaved: cycle over all cells, repeat
   "cells": [
     {"name": "rf_n64_g1",
-     "argv": ["python", "benchmarks/openspiel/train_reinfors_az.py", "--out", "{run_dir}/out", ...],
+     "argv": ["benchmarks/openspiel/train_reinfors_az.py", ...],
+                                    # a .py argv[0] runs under the runner's own
+                                    # (preflighted) interpreter — never name one
      "args": {"n-games": 64, "seed": "{cycle}"},  # dict-style config, appended as --key value
      "deadline_seconds": 1200,      # SIGKILL the process group here. For deadline-driven
                                     # cells (matched-cadence training) set "deadline_expected":
@@ -104,6 +106,10 @@ def run_cell(
         return value
 
     argv = [sub(a) for a in cell["argv"]]
+    if argv[0].endswith(".py"):
+        # python cells never name an interpreter: the runner prepends its own, so
+        # the env preflight validated is, by construction, the env cells execute in
+        argv = [sys.executable, *argv]
     for key, value in cell.get("args", {}).items():
         argv.append(f"--{key}")
         if value is not True:  # a literal true is a bare flag

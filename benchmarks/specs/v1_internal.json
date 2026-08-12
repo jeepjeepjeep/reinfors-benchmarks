@@ -6,7 +6,6 @@
     {
       "name": "phase0_curves",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/openspiel/phase0_gpu_sweep.py",
         "--game",
         "chess",
@@ -36,7 +35,6 @@
     {
       "name": "f32_ab_f64",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/openspiel/phase0_gpu_sweep.py",
         "--game",
         "chess",
@@ -68,7 +66,6 @@
     {
       "name": "f32_ab_f32",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/openspiel/phase0_gpu_sweep.py",
         "--game",
         "chess",
@@ -100,7 +97,6 @@
     {
       "name": "rf_cache_4096",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -122,7 +118,6 @@
     {
       "name": "rf_cache_32768",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -144,7 +139,6 @@
     {
       "name": "rf_cache_262144",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
@@ -166,7 +160,6 @@
     {
       "name": "rf_cache_2097152",
       "argv": [
-        ".venv23/bin/python",
         "benchmarks/grid/measure_grid.py"
       ],
       "args": {
