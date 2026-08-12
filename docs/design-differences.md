@@ -33,11 +33,10 @@ a large inference batch — batch size and CPU parallelism are **coupled**. rein
 stages up to one fresh leaf per active game in a synchronized round — **decoupled**.
 Neither batch size is simply the configured count: cache hits, terminal simulations and
 deduplication remove rows, while larger actor/game counts increase per-game latency and
-leave more work in flight at the deadline. The
-[sizing grids](configuring-the-engines.md) measure whether fuller batches outweigh
-those completion costs — and this coupling difference is why the answer differs by
-stack, and why the whole comparison is
-[bounded to the few-core regime](the-comparison.md#scope-of-the-claim).
+leave more work in flight at the deadline. Whether the coupling costs anything on this
+box — and where each stack's curve turns — is measured, not assumed, by the
+[unified sizing grid](configuring-the-engines.md), and the whole comparison stays
+[bounded to its regime](the-comparison.md#scope-of-the-claim).
 
 ## Consequence 2: one inference question per node, or two
 
