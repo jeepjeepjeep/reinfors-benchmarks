@@ -27,22 +27,6 @@ rows/s, slower per-game progress → fewer completed states/s — the OpenSpiel 
 is the canonical case), so topology selection and headline comparisons use
 completed-game states/s at matched search budget; rows/s is recorded as diagnosis.
 
-## Determinism and evidence
-
-Collection is seeded and reproducible per configuration under fixed weights and
-deterministic inference. Every run records its exact command, resolved configuration,
-environment, and output hashes in a start/completion manifest; a crashed or hung leg is
-recorded as such and can never be mistaken for a completed one (see the runner and
-harness in [`experiments/`](../experiments/)).
-
-## Repeats and uncertainty
-
-Repeats are tiered by cost, and V1 raises the floor: grid cells and curves run **three
-interleaved cycles** (reported as median with the per-cycle spread), capacity probes run
-once (labeled single-run), the two-hour rounds run **three independent seeds per side**,
-and match results carry a standard error computed over opening pairs, never over games.
-Sweep-derived selections state the margin between winner and runner-up.
-
-**The provenance rule:** no published number appears without a repeat-derived spread, a
-repeat-median label, or an explicit single-run label — and every table states its
-provenance inline: hardware, window, cells, and run type.
+One rule binds every table downstream: **no published number appears without a
+repeat-derived spread, a repeat-median label, or an explicit single-run label — and
+every table states its provenance inline** (hardware, window, cells, run type).
