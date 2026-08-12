@@ -15,6 +15,7 @@ downstream evaluation never has to guess at filenames.
 
 import argparse
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -139,12 +140,19 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     ckpt, ckpt_number = latest_checkpoint(out, args.side)
+    if ckpt and args.side == "rf":
+        # stable alias so downstream configs reference a knowable path (their side
+        # cannot get one: the os loader takes a directory + checkpoint NUMBER and
+        # builds the filename itself — eval_h2h resolves `latest` instead)
+        shutil.copy2(ckpt, out / "model.pt")
     hashes = {
         "learner.jsonl": manifest.sha256(out / "learner.jsonl"),
         "child.log": manifest.sha256(out / "child.log"),
     }
     if ckpt:
         hashes[Path(ckpt).name] = manifest.sha256(ckpt)
+        if args.side == "rf":
+            hashes["model.pt"] = manifest.sha256(out / "model.pt")
     manifest.finalize(
         out,
         status="ok" if ckpt else "no-checkpoint",
@@ -152,6 +160,7 @@ def main(argv: list[str] | None = None) -> int:
         child_exit_code=proc.returncode,
         latest_checkpoint=ckpt,
         checkpoint_number=ckpt_number,
+        model="model.pt" if ckpt and args.side == "rf" else None,
         output_sha256=hashes,
     )
     if not ckpt:

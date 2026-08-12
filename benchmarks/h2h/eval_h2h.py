@@ -403,7 +403,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rf-checkpoint", required=True)
     ap.add_argument("--os-path", required=True)
-    ap.add_argument("--os-checkpoint", type=int, required=True)
+    ap.add_argument(
+        "--os-checkpoint",
+        default="latest",
+        help='their checkpoint number, or "latest" (default): highest-numbered '
+        "checkpoint-N.pt in --os-path",
+    )
     ap.add_argument("--games", type=int, default=50)
     ap.add_argument(
         "--sims", type=int, default=protocol.SIMS, help="their az bot's simulations"
@@ -453,6 +458,18 @@ def main() -> None:
         ap.error("--games must be even: every opening is played once per color")
     if not hasattr(rf, "Arena"):
         ap.error("this protocol needs a reinfors build with rf.Arena (PRs #159/#160)")
+
+    if args.os_checkpoint == "latest":
+        numbered = [
+            int(m.group(1))
+            for p in Path(args.os_path).glob("checkpoint-*.pt")
+            if (m := re.search(r"checkpoint-(-?\d+)\.pt$", p.name))
+        ]
+        if not numbered:
+            sys.exit(f"no checkpoint-N.pt found in {args.os_path}")
+        args.os_checkpoint = max(numbered)
+    else:
+        args.os_checkpoint = int(args.os_checkpoint)
 
     out = Path(args.out).resolve()
     if out.exists():

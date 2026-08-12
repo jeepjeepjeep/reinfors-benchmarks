@@ -4,7 +4,7 @@ Responsibilities: strict freeze preflight, unique append-only run directories, l
 every benchmark subprocess itself (exact argv and environment captured), start/completion
 manifests finalized atomically, raw-output hashing, and a session index.
 
-    python benchmarks/runner.py spec.json [--resume runs/<session>] [--skip-preflight]
+    python benchmarks/runner.py spec.json [--resume] [--skip-preflight]
 
 Spec:
 {
@@ -184,7 +184,9 @@ def run_cell(
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("spec")
-    ap.add_argument("--resume", default=None, help="existing session dir to continue")
+    ap.add_argument(
+        "--resume", action="store_true", help="continue this spec's existing session"
+    )
     ap.add_argument(
         "--skip-preflight",
         action="store_true",
@@ -216,21 +218,30 @@ def main() -> int:
         if errors:
             return 1
 
+    # deterministic session dir: every artifact path is knowable at spec-authoring
+    # time, so specs reference outputs of earlier families as plain paths
+    session_dir = _REPO / "runs" / spec["session"]
     if args.resume:
-        session_dir = Path(args.resume)
         assert session_dir.is_dir(), f"no session at {session_dir}"
-    else:
-        stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-        base = _REPO / "runs" / f"{stamp}_{spec['session']}"
-        session_dir = next(
-            d
-            for d in (
-                base,
-                *(base.with_name(f"{base.name}-{k}") for k in range(2, 100)),
-            )
-            if not d.exists()
+        # a resume may carry different substitutions than the original invocation;
+        # every invocation that touched the session must be on record
+        path = session_dir / "manifest.json"
+        data = json.loads(path.read_text())
+        data.setdefault("resumes", []).append(
+            {"command": sys.argv, "substitutions": sets}
         )
-        session_dir.mkdir(parents=True, exist_ok=False)  # unique, append-only
+        tmp = path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(data, indent=2) + "\n")
+        os.replace(tmp, path)
+    else:
+        if session_dir.exists():
+            print(
+                f"{session_dir} already exists — pass --resume to continue it, or "
+                f"move it aside to start over",
+                file=sys.stderr,
+            )
+            return 1
+        session_dir.mkdir(parents=True, exist_ok=False)  # append-only
         manifest.write(
             session_dir,
             command=sys.argv,

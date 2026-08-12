@@ -64,6 +64,10 @@ def test_leg_records_the_newest_checkpoint(tmp_path: Path, monkeypatch) -> None:
     assert m["latest_checkpoint"].endswith("ckpt_120s.pt")
     assert m["checkpoint_number"] is None
     assert len(m["output_sha256"]["ckpt_120s.pt"]) == 64
+    # the stable alias downstream configs reference
+    assert m["model"] == "model.pt"
+    assert (out / "model.pt").read_text() == "b"
+    assert m["output_sha256"]["model.pt"] == m["output_sha256"]["ckpt_120s.pt"]
 
 
 def test_os_leg_samples_telemetry_and_numbers_the_checkpoint(
@@ -107,7 +111,8 @@ def test_os_leg_samples_telemetry_and_numbers_the_checkpoint(
     m = json.loads((out / "manifest.json").read_text())
     assert m["telemetry_source"] == "harness-sampler" and m["seed"] is None
     assert m["latest_checkpoint"].endswith("checkpoint-3.pt")
-    assert m["checkpoint_number"] == 3
+    assert m["checkpoint_number"] == 3 and m["model"] is None
+    assert not (out / "model.pt").exists()  # their loader needs dir + number
     rows = [json.loads(x) for x in open(out / "learner.jsonl")]
     assert rows and rows[-1]["states"] > 0 and rows[-1]["infer_rows"] > 0
 

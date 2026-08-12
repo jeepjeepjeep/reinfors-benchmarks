@@ -75,8 +75,7 @@ them and later specs depend on decisions those analyses produce. The campaign or
 with its decision points:
 
 1. **`v1_smoke` / `v1_smoke_h2h`** — cheap end-to-end gates (4-minute legs, a 2-game
-   match) worth running after any fresh environment/build assembly; the smoke-h2h
-   `--set` checkpoint values come from the smoke legs' manifests. The binary-smoke
+   match) worth running after any fresh environment/build assembly. The binary-smoke
    pytest gate runs alongside:
    `H2H_SMOKE_OS_PATH=<os leg out> H2H_SMOKE_OS_CKPT=<n> .venv23/bin/python -m pytest benchmarks/h2h/test_h2h_mirror.py`
 2. **`v1_grid`** — the topology grids, both engines. Its analysis *selects each side's
@@ -85,9 +84,11 @@ with its decision points:
    says otherwise.
 3. **`v1_training`** — the matched 2h legs at the selected topologies. Review the
    telemetry and surviving checkpoints before spending H2H hours on them.
-4. **`v1_h2h`** — strength evaluation of the cycle-k checkpoint pairs. Each leg's
-   manifest records `latest_checkpoint` / `checkpoint_number`; pass them per cycle:
-   `--set rf_ckpt_1=… --set os_path_1=… --set os_ckpt_1=…` (×3).
+4. **`v1_h2h`** — strength evaluation of the cycle-k checkpoint pairs. The spec
+   references the training outputs as plain paths: session directories are
+   deterministic (`runs/<session>/…`), each rf leg publishes its final net as
+   `model.pt`, and the os side resolves `checkpoint-latest` at runtime (their loader
+   needs a directory + number, so no stable filename is possible there).
 5. **`v1_internal`** — reinfors-only curves and probes; independent of the above.
 
 Which runs fed which decisions is recorded per campaign in

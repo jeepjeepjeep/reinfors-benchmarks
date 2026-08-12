@@ -31,8 +31,7 @@ def _run(spec: Path, *extra: str) -> subprocess.CompletedProcess:
 
 
 def _session_dir() -> Path:
-    runs = sorted((REPO / "runs").glob("*_t*"), key=lambda p: p.stat().st_mtime)
-    return runs[-1]
+    return REPO / "runs" / "t"
 
 
 @pytest.fixture(autouse=True)
@@ -40,9 +39,7 @@ def _clean_runs():
     yield
     import shutil
 
-    for d in (REPO / "runs").glob("*_t"):
-        shutil.rmtree(d)
-    for d in (REPO / "runs").glob("*_t-*"):
+    for d in (REPO / "runs").glob("t"):
         shutil.rmtree(d)
 
 
@@ -101,7 +98,7 @@ def test_deadline_backstop_is_hung_and_blocks_resume(tmp_path: Path) -> None:
     session = _session_dir()
     m = json.loads((session / "wedged" / "cycle1" / "manifest.json").read_text())
     assert m["status"] == "hung" and m["intended_deadline_kill"] is True
-    blocked = _run(spec, "--resume", str(session))
+    blocked = _run(spec, "--resume")
     assert blocked.returncode != 0 and "status 'hung'" in blocked.stderr
 
 
@@ -136,7 +133,7 @@ def test_resume_blocks_on_failed_cell_until_archived(tmp_path: Path) -> None:
     session = _session_dir()
 
     # a failed attempt must never count as done: resume refuses until it is archived
-    blocked = _run(spec, "--resume", str(session))
+    blocked = _run(spec, "--resume")
     assert blocked.returncode != 0
     assert (
         "status 'failed'" in blocked.stderr
@@ -144,7 +141,7 @@ def test_resume_blocks_on_failed_cell_until_archived(tmp_path: Path) -> None:
     )
 
     (session / "boom" / "cycle1").rename(session / "boom" / "cycle1.attempt1")
-    second = _run(spec, "--resume", str(session))
+    second = _run(spec, "--resume")
     assert "skip a cycle 1 (ok)" in second.stdout
     assert "run  boom cycle 1" in second.stdout
 
@@ -163,13 +160,14 @@ def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> No
     missing = _run(spec)
     assert missing.returncode != 0 and "unresolved placeholders" in missing.stderr
 
-    ok = _run(spec, "--set", "extra=42")
+    ok = _run(spec, "--resume", "--set", "extra=42")
     assert ok.returncode == 0, ok.stderr
     session = _session_dir()
     log = (session / "sub" / "cycle1" / "stdout.log").read_text()
     assert "cycle=1 extra=42" in log
     m = json.loads((session / "manifest.json").read_text())
-    assert m["substitutions"] == {"extra": "42"}
+    assert m["substitutions"] == {}  # the original (failed) invocation had no --set
+    assert m["resumes"][0]["substitutions"] == {"extra": "42"}
     assert m["packages"] and m["cpu_model"] is not None
 
 
@@ -216,7 +214,7 @@ def test_cycle_composed_placeholders(tmp_path: Path) -> None:
     missing = _run(spec)
     assert missing.returncode != 0 and "{ckpt_1}" in missing.stderr
 
-    ok = _run(spec, "--set", "ckpt_1=/tmp/model.pt")
+    ok = _run(spec, "--resume", "--set", "ckpt_1=/tmp/model.pt")
     assert ok.returncode == 0, ok.stderr
     session = _session_dir()
     log = (session / "composed" / "cycle1" / "stdout.log").read_text()
