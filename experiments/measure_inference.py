@@ -254,14 +254,29 @@ def bench_engine(args, game, head_actions, results) -> None:
                     tot["records"] += batch.obs.shape[0]
 
             t0 = time.perf_counter()
-            threads = [
-                threading.Thread(target=run, args=(eng, tot))
-                for eng, tot in zip(engs, totals)
-            ]
-            for t in threads:
-                t.start()
-            for t in threads:
-                t.join()
+            if engines <= 1:
+                # inline: no worker thread, so compiled callbacks replay on the same
+                # thread that captured them, and any failure raises loudly here
+                run(engs[0], totals[0])
+            else:
+                failures: list[BaseException] = []
+
+                def guarded(eng, tot) -> None:
+                    try:
+                        run(eng, tot)
+                    except BaseException as e:  # a dead thread must fail the leg
+                        failures.append(e)
+
+                threads = [
+                    threading.Thread(target=guarded, args=(eng, tot))
+                    for eng, tot in zip(engs, totals)
+                ]
+                for t in threads:
+                    t.start()
+                for t in threads:
+                    t.join()
+                if failures:
+                    raise failures[0]
             wall = time.perf_counter() - t0
             rows = sum(t["rows"] for t in totals)
             calls = sum(t["calls"] for t in totals)
@@ -398,6 +413,12 @@ def main() -> None:
         help="fresh run directory (rows.jsonl + manifest)",
     )
     args = ap.parse_args()
+    if args.callback == "compiled" and any(
+        e > 1 for e in map(int, args.engines.split(","))
+    ):
+        ap.error(
+            "--callback compiled requires --engines 1 (cudagraph replay is thread-affine)"
+        )
     out_dir = None
     if args.out:
         out_dir = Path(args.out).resolve()

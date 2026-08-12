@@ -18,7 +18,8 @@
         "n-games": "64",
         "engine-leg-seconds": 120,
         "callback": "fast",
-        "out": "{run_dir}/inference"
+        "out": "{run_dir}/inference",
+        "infer-dtype": "f32"
       },
       "cores": "0-3",
       "deadline_seconds": 900,
@@ -41,7 +42,8 @@
         "n-games": "64",
         "engine-leg-seconds": 120,
         "callback": "compiled",
-        "out": "{run_dir}/inference"
+        "out": "{run_dir}/inference",
+        "infer-dtype": "f32"
       },
       "cores": "0-3",
       "deadline_seconds": 900,
