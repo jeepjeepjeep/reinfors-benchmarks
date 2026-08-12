@@ -11,22 +11,21 @@ this repository is the executable and raw-data side of those pages.
 ## The three questions
 
 Everything measured here answers one of three questions — **A characterizes the
-platform, B prices the features, C races the stacks**:
+platform, B configures the engines, C races the stacks**:
 
-- **[A — Sizing the compute](docs/sizing-the-compute.md)** — how do we choose batch
-  sizes, group sizes, and device, independent of the training workload? Device × net
-  response curves: kernel rate, engine rate, the CPU/CUDA crossover.
-- **[B — Configuring the engine](docs/configuring-the-engines.md)** — which throughput
-  features should be on, and what does each buy at the real workload? f32 outputs,
-  inference-cache capacity, grouped collection — measured effects plus the model
-  predicting where each transfers.
-- **[C — The comparison](docs/the-comparison.md)** — how do the stacks compare, each
-  at its own best measured configuration, and was the race fair? Operating-point
-  selection grids → the matched 2-hour round with its fairness verified by telemetry →
-  head-to-head.
+- **[A — Sizing the compute](docs/sizing-the-compute.md)** — what can the device do
+  with this net, independent of any workload or library? The kernel batch curve and
+  the CPU/CUDA crossover — the same ATen kernels bound both stacks.
+- **[B — Configuring the engines](docs/configuring-the-engines.md)** — how is each
+  stack's best configuration determined, and what does each reinfors feature buy?
+  Topology grids for both engines (selected by completed-game states/s under the full
+  workload), the batch-response curve and grouping model, f32 outputs, cache capacity.
+- **[C — The comparison](docs/the-comparison.md)** — how do the stacks compare at the
+  configurations B selected, and was the race fair? The matched 2-hour round with its
+  fairness verified by telemetry, then head-to-head.
 
-A calibrates B (the batch curve prices grouping), A + B explain C's mechanisms, and C
-is the headline. That is also the order the campaign runs them.
+A calibrates B (the kernel curve prices call sizes), B fixes the configurations C races
+at, and C is the headline. That is also the order the campaign runs them.
 
 ## Layout
 
