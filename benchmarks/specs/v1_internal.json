@@ -4,7 +4,7 @@
   "cycles": 3,
   "cells": [
     {
-      "name": "batch_curves",
+      "name": "kernel_rate_vs_batch",
       "argv": [
         "benchmarks/internal/measure_inference.py"
       ],
@@ -12,15 +12,34 @@
         "game": "chess",
         "devices": "cuda",
         "depths": "8",
-        "engine-leg-seconds": 120,
         "widths": "256",
         "batches": "32,64,128",
-        "n-games": "32,64,128",
-        "mode": "both",
+        "mode": "net",
         "out": "{run_dir}/inference"
       },
       "cores": "0-3",
-      "deadline_seconds": 3600,
+      "deadline_seconds": 900,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "engine_rate_vs_n_games",
+      "argv": [
+        "benchmarks/internal/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "widths": "256",
+        "n-games": "32,64,128",
+        "mode": "engine",
+        "engine-leg-seconds": 120,
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 1800,
       "outputs": [
         "inference/rows.jsonl"
       ]
