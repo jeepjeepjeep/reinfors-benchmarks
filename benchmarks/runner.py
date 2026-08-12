@@ -14,6 +14,7 @@ Spec:
   "cells": [
     {"name": "rf_n64_g1",
      "argv": ["python", "benchmarks/openspiel/train_reinfors_az.py", "--out", "{run_dir}/out", ...],
+     "args": {"n-games": 64, "seed": "{cycle}"},  # dict-style config, appended as --key value
      "deadline_seconds": 1200,      # SIGKILL the process group here. For deadline-driven
                                     # cells (matched-cadence training) set "deadline_expected":
                                     # true and an EXACT value; for self-terminating payloads it
@@ -103,6 +104,10 @@ def run_cell(
         return value
 
     argv = [sub(a) for a in cell["argv"]]
+    for key, value in cell.get("args", {}).items():
+        argv.append(f"--{key}")
+        if value is not True:  # a literal true is a bare flag
+            argv.append(sub(str(value)))
     if cell.get("cores"):
         argv = ["taskset", "-c", cell["cores"], *argv]
     env_overrides = {k: sub(str(v)) for k, v in cell.get("env", {}).items()}

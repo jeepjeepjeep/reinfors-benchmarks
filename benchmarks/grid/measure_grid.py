@@ -1,4 +1,4 @@
-"""One topology-grid cell, either engine: launch the trainer pinned, measure the
+"""One topology-grid point, either engine: launch the trainer pinned, measure the
 pre-registered interior window, kill, reduce, record.
 
 Timeline:
@@ -13,8 +13,8 @@ stderr counters and its actor/learner logs into the identical schema (the manife
 `telemetry_source` records which). The metric is a pure function of that artifact and
 (W, T): re-running the reduce on an archived cell reproduces the published number.
 
-    measure_cell.py --side rf --n-games 128 --n-groups 2 --out runs/x/cell
-    measure_cell.py --side os --actors 64 --batch 32 --out runs/x/cell
+    measure_grid.py --side rf --n-games 128 --n-groups 2 --out runs/x/grid
+    measure_grid.py --side os --actors 64 --batch 32 --out runs/x/grid
 """
 
 import argparse
@@ -48,7 +48,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--window-seconds", type=float, default=protocol.WINDOW_SECONDS)
     ap.add_argument("--cache", type=int, default=protocol.CACHE)
     ap.add_argument("--cores", default="0-3", help="taskset pin for the child")
-    ap.add_argument("--out", required=True, help="fresh cell directory")
+    ap.add_argument("--out", required=True, help="fresh grid-point directory")
     ap.add_argument("--poll-seconds", type=float, default=5.0)
     ap.add_argument("--tail-seconds", type=float, default=30.0)
     args = ap.parse_args(argv)
@@ -189,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     manifest.write(
         out,
         command=child_argv,
-        run_kind="grid_cell",
+        run_kind="grid",
         side=args.side,
         topology=topology,
         warmup_seconds=args.warmup_seconds,

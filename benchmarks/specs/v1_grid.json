@@ -7,267 +7,216 @@
       "name": "os_a8",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "os",
-        "--actors",
-        "8",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "os",
+        "actors": 8,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "os_a16",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "os",
-        "--actors",
-        "16",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "os",
+        "actors": 16,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "os_a32",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "os",
-        "--actors",
-        "32",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "os",
+        "actors": 32,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "os_a64",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "os",
-        "--actors",
-        "64",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "os",
+        "actors": 64,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "os_a64b32",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "os",
-        "--actors",
-        "64",
-        "--batch",
-        "32",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "os",
+        "actors": 64,
+        "batch": 32,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "rf_n64_g1",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "64",
-        "--n-groups",
-        "1",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 64,
+        "n-groups": 1,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "rf_n64_g2",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "64",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 64,
+        "n-groups": 2,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "rf_n128_g1",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "1",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 1,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "rf_n128_g2",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "rf_n256_g1",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "256",
-        "--n-groups",
-        "1",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 256,
+        "n-groups": 1,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     },
     {
       "name": "rf_n256_g2",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "256",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 256,
+        "n-groups": 2,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ]
     }
   ]

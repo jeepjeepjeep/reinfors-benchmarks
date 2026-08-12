@@ -18,7 +18,7 @@ pages.
 | `benchmarks/internal/` | the internal-family harness: CPU/parallel-scaling sweeps (`benchmark.py`), cross-framework connect4 tracks (`benchmark_vs.py`) |
 | `benchmarks/openspiel/` | the trainer (`train_reinfors_az.py`), head-to-head runner (`eval_h2h_chess.py`, Arena protocol) and its tests, parity checks, sweep tooling, shared config (`common.py`) |
 | `benchmarks/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `benchmarks/runner.py` |
-| `benchmarks/grid/` | the topology-grid measurement: `measure_cell.py` (one harness, both engines, unified interior-window telemetry) and `protocol.py` (the matched constants, defined once) |
+| `benchmarks/grid/` | the topology-grid measurement: `measure_grid.py` (one harness, both engines, unified interior-window telemetry) and `protocol.py` (the matched constants, defined once) |
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), round orchestration (`run_round_chess_gpu.sh`), campaign driver (`run_v1_campaign.sh`), telemetry panels (`plot_round.py`) |
 | `published/` | per-run artifacts of every published number: learner telemetry, configs, logs, PGNs, provenance |
 | `docs/history.md` | the full investigation log, including retained corrections and retractions |

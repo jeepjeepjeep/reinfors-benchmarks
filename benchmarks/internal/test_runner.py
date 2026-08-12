@@ -191,6 +191,25 @@ def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> No
     assert m["packages"] and m["cpu_model"] is not None
 
 
+def test_args_dict_expands_into_the_command(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "dictargs",
+                "argv": ["python3", "-c", "import sys; print(sys.argv[1:])"],
+                "args": {"n-games": 64, "seed": "{cycle}", "quick": True},
+                "cycles": 1,
+            },
+        ],
+    )
+    out = _run(spec)
+    assert out.returncode == 0, out.stderr
+    session = _session_dir()
+    m = json.loads((session / "dictargs" / "cycle1" / "manifest.json").read_text())
+    assert m["command"][-5:] == ["--n-games", "64", "--seed", "1", "--quick"]
+
+
 def test_unresolved_expect_tag_is_rejected(tmp_path: Path) -> None:
     spec = tmp_path / "spec.json"
     spec.write_text(json.dumps({"session": "t", "expect_tag": "{tag}", "cells": []}))
@@ -205,6 +224,7 @@ def test_checked_in_specs_are_well_formed() -> None:
     cell_known = {
         "name",
         "argv",
+        "args",
         "deadline_seconds",
         "deadline_expected",
         "cores",
@@ -223,11 +243,14 @@ def test_checked_in_specs_are_well_formed() -> None:
                 f"{path.name}:{cell['name']}: unknown keys {set(cell) - cell_known}"
             )
             assert cell["argv"] and all(isinstance(a, str) for a in cell["argv"])
-            if "measure_cell.py" in cell["argv"][1]:
+            assert all(
+                isinstance(v, (str, int, float, bool))
+                for v in cell.get("args", {}).values()
+            ), f"{path.name}:{cell['name']}: args values must be scalars"
+            if "measure_grid.py" in cell["argv"][1]:
                 # deadlines on self-terminating cells are DERIVED, never hand-set:
                 # warmup + window + 30s tail + 120s margin
-                argv = cell["argv"]
-                w = float(argv[argv.index("--warmup-seconds") + 1])
-                t = float(argv[argv.index("--window-seconds") + 1])
+                args = cell["args"]
+                w, t = args["warmup-seconds"], args["window-seconds"]
                 assert cell["deadline_seconds"] == w + t + 30 + 120, cell["name"]
                 assert not cell.get("deadline_expected"), cell["name"]

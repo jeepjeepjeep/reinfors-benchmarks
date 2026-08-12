@@ -101,27 +101,21 @@
       "name": "rf_cache_4096",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--cache",
-        "4096",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 4096,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ],
       "cycles": 1
     },
@@ -129,27 +123,21 @@
       "name": "rf_cache_32768",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--cache",
-        "32768",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 32768,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ],
       "cycles": 1
     },
@@ -157,27 +145,21 @@
       "name": "rf_cache_262144",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--cache",
-        "262144",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 262144,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ],
       "cycles": 1
     },
@@ -185,27 +167,21 @@
       "name": "rf_cache_2097152",
       "argv": [
         ".venv23/bin/python",
-        "benchmarks/grid/measure_cell.py",
-        "--side",
-        "rf",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "2",
-        "--warmup-seconds",
-        "300",
-        "--window-seconds",
-        "900",
-        "--cores",
-        "0-3",
-        "--cache",
-        "2097152",
-        "--out",
-        "{run_dir}/cell"
+        "benchmarks/grid/measure_grid.py"
       ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 2097152,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/grid"
+      },
       "deadline_seconds": 1350,
       "outputs": [
-        "cell/learner.jsonl"
+        "grid/learner.jsonl"
       ],
       "cycles": 1
     }
