@@ -1,15 +1,32 @@
 # reinfors-benchmarks
 
 The companion benchmark harness for [reinfors](https://github.com/jeepjeepjeep/reinfors):
-the OpenSpiel comparison machinery, measurement and round-orchestration scripts, the
-head-to-head runner, and the raw artifacts of every published run. It lives outside the
-reinfors repo so reinfors takes no benchmark-only dependencies.
+every measurement script, the campaign specs, and the raw artifacts behind every
+published number. It lives outside the reinfors repo so reinfors takes no
+benchmark-only dependencies. **Published results and their interpretation live in the
+reinfors documentation**
+([`docs/benchmarks/`](https://github.com/jeepjeepjeep/reinfors/tree/main/docs/benchmarks));
+this repository is the executable and raw-data side of those pages.
 
-**All published results and their interpretation live in the reinfors documentation**
-([`docs/benchmarks/`](https://github.com/jeepjeepjeep/reinfors/tree/main/docs/benchmarks)):
-environment, methodology, the comparison protocol, tuning, the matched round, and the
-internal lever measurements. This repository is the executable and raw-data side of those
-pages.
+## The three questions
+
+Everything measured here answers one of three questions — **A characterizes the
+platform, B prices the features, C races the stacks**:
+
+- **[A — Sizing the compute](docs/sizing-the-compute.md)** — how do we choose batch
+  sizes, group sizes, and device, independent of the training workload? Device × net
+  response curves: kernel rate, engine rate, the CPU/CUDA crossover.
+- **[B — Configuring the engine](docs/configuring-the-engine.md)** — which throughput
+  features should be on, and what does each buy at the real workload? f32 outputs,
+  inference-cache capacity, grouped collection — measured effects plus the model
+  predicting where each transfers.
+- **[C — The comparison](docs/the-comparison.md)** — how do the stacks compare, each
+  at its own best measured configuration, and was the race fair? Operating-point
+  selection grids → the matched 2-hour round with its fairness verified by telemetry →
+  head-to-head.
+
+A calibrates B (the batch curve prices grouping), A + B explain C's mechanisms, and C
+is the headline. That is also the order the campaign runs them.
 
 ## Layout
 
@@ -22,7 +39,7 @@ pages.
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `runs/` | untracked, append-only: every campaign session's evidence (`<session>/<cell>/cycleN/`), box-synced verbatim after a campaign |
 | `published/` | tracked artifacts behind every published number, one directory per campaign as a filtered mirror of `runs/` (same paths, model binaries stripped to the GitHub release); pre-campaign-era artifacts live in the maintainers' archive (and git history) |
-| `docs/history.md` | the full investigation log, including retained corrections and retractions |
+| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engine.md), [C](docs/the-comparison.md)) and the investigation log ([history](docs/history.md)) |
 | `attic/` | superseded scripts (untracked, local-only; git history remains the record) |
 | `archive/` | untracked, frozen raw record of the pre-V1 era: `pre-v1-box/` (box telemetry behind current published figures), `pre-v1-local/` (exploratory local runs) |
 
@@ -70,34 +87,12 @@ repeats, deadlines, pinned cores. Direct harness invocation remains available fo
 exploration, but nothing produced that way is publishable evidence.
 
 The families are separate experiments, not a pipeline — results are analysed between
-them and later specs depend on decisions those analyses produce. The campaign order,
-with its decision points:
-
-1. **`v1_smoke` / `v1_smoke_h2h`** — cheap end-to-end gates (4-minute legs, a 2-game
-   match) worth running after any fresh environment/build assembly. The binary-smoke
-   pytest gate runs alongside:
-   `H2H_SMOKE_OS_PATH=<os leg out> H2H_SMOKE_OS_CKPT=<n> .venv23/bin/python -m pytest benchmarks/tests/test_eval_h2h.py`
-2. **`v1_grid`** — the topology grids, both engines. Its analysis *selects each side's
-   best configuration*; `v1_training.json`'s topology args encode the currently best
-   measured configs (os a16/b16, rf n128/g2) and must be revised here if the grid
-   says otherwise.
-3. **`v1_training`** — the matched 2h legs at the selected topologies. Review the
-   telemetry and surviving checkpoints before spending H2H hours on them.
-4. **`v1_h2h`** — strength evaluation of the cycle-k model pairs. The spec points
-   both sides at their training-leg directories (`rf-model` / `os-model`, knowable at
-   spec-authoring time because session directories are deterministic); the harness
-   resolves each engine's native model format inside — `model.pt` for rf, the
-   highest-numbered checkpoint for os (their loader takes a directory + number) —
-   and records the resolved artifacts and hashes in the match manifest.
-5. **`v1_internal`** — reinfors-only curves and probes; independent of the above.
-
-Which runs fed which decisions is recorded per campaign in
-[`docs/history.md`](docs/history.md), alongside the analysis between phases.
-
-Command templates and interpretation for every measurement are in the reinfors docs
-([reproduction pages](https://github.com/jeepjeepjeep/reinfors/tree/main/docs/benchmarks));
-on GPU instances, mind the per-boot checklist there (SMT off, release wheel, patched
-binaries).
+them, and later specs depend on decisions those analyses produce. Campaign order:
+smoke gates first, then `v1_grid` (selects each side's configuration — a decision
+point), `v1_training` (review telemetry before spending H2H hours), `v1_h2h`, with
+`v1_internal` independent. Each family's details, decision points and gates are in its
+[experiment doc](#the-three-questions); which runs fed which decisions is recorded per
+campaign in [`docs/history.md`](docs/history.md).
 
 ## History
 
