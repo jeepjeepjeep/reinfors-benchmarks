@@ -105,3 +105,14 @@ H2H_SMOKE_OS_PATH=<os smoke leg dir> H2H_SMOKE_OS_CKPT=<n> \
 ```
 
 Their outputs are gates, never evidence.
+
+## Scope of the claim
+
+The comparison is bounded to its regime: one GPU with few CPU cores (4, SMT off) —
+a common single-GPU cloud shape, and the regime where the stacks' designs differ most.
+reinfors' lockstep pooling decouples inference batch size from CPU parallelism;
+OpenSpiel's actor fleet couples them (roughly one core per actor to run at full
+per-game speed), which is why its optimum sits at a small actor count here. With more
+cores its optimum shifts up and would plausibly reach the same batch sweet spot —
+their architecture targets exactly that many-core regime. Core-count scaling is
+unmeasured in V1; nothing here ranks the libraries beyond this workload and host.
