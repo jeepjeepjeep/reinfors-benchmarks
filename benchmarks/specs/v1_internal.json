@@ -10,7 +10,7 @@
       ],
       "args": {
         "game": "chess",
-        "devices": "cuda",
+        "devices": "cpu,cuda",
         "depths": "8",
         "widths": "256",
         "batches": "32,64,128",
@@ -30,7 +30,7 @@
       ],
       "args": {
         "game": "chess",
-        "devices": "cuda",
+        "devices": "cpu,cuda",
         "depths": "8",
         "widths": "256",
         "n-games": "32,64,128",
@@ -39,7 +39,7 @@
         "out": "{run_dir}/inference"
       },
       "cores": "0-3",
-      "deadline_seconds": 1800,
+      "deadline_seconds": 2400,
       "outputs": [
         "inference/rows.jsonl"
       ]
