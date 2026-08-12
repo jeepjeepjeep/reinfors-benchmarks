@@ -13,7 +13,7 @@ Spec:
   "cycles": 3,                      # repeats, interleaved: cycle over all cells, repeat
   "cells": [
     {"name": "rf_n64_g1",
-     "argv": ["benchmarks/openspiel/train_reinfors_az.py", ...],
+     "argv": ["benchmarks/training/train_az_rf.py", ...],
                                     # a .py argv[0] runs under the runner's own
                                     # (preflighted) interpreter — never name one
      "args": {"n-games": 64, "seed": "{cycle}"},  # dict-style config, appended as --key value
@@ -42,7 +42,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "openspiel"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "harness"))
 import manifest  # noqa: E402
 import preflight  # noqa: E402
 

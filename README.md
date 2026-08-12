@@ -15,17 +15,16 @@ pages.
 
 | path | contents |
 |---|---|
-| `benchmarks/internal/` | reinfors-only measurements: inference-path characterization: kernel/engine batch curves incl. the f32 A/B (`measure_inference.py`), CPU/parallel-scaling sweeps (`benchmark.py`), cross-framework connect4 tracks (`benchmark_vs.py`) |
+| `benchmarks/internal/` | reinfors-only measurements: inference-path characterization incl. the f32 A/B and device crossover (`measure_inference.py`) |
 | `benchmarks/h2h/` | the head-to-head strength evaluation: `eval_h2h.py` (Arena protocol, external OpenSpiel engine seat) and its mirror/lifecycle tests |
-| `benchmarks/openspiel/` | the trainer (`train_reinfors_az.py`), parity checks, shared net config (`common.py`), manifest + preflight modules |
 | `benchmarks/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `benchmarks/runner.py` |
-| `benchmarks/harness/` | shared measurement runtime: `protocol.py` (the matched constants, defined once) and `run.py` (pinned launch, scheduled kill, crash detection, os-telemetry sampler) |
+| `benchmarks/harness/` | shared runtime: `protocol.py` (matched constants, defined once), `run.py` (pinned launch, scheduled kill, crash detection, os-telemetry sampler), `manifest.py` + `preflight.py` (evidence + freeze gate), `common.py` (the benchmark net) |
 | `benchmarks/grid/` | the topology-grid measurement: `measure_throughput.py` (training throughput under the full round workload — one harness, both engines, unified interior-window telemetry) |
 | `benchmarks/training/` | the matched-cadence training legs: `train.py` (identical wall-clock budget both engines; newest checkpoint recorded in the manifest) |
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `published/` | per-run artifacts of every published number: learner telemetry, configs, logs, PGNs, provenance |
 | `docs/history.md` | the full investigation log, including retained corrections and retractions |
-| `attic/` | superseded scripts, kept for the historical record |
+| `attic/` | superseded scripts (untracked, local-only; git history remains the record) |
 
 ## Setup
 
@@ -37,7 +36,7 @@ Two environments with distinct roles:
   (`requirements-venv23.txt`; torch 2.3.0 is the load-bearing pin — the libtorch
   generation OpenSpiel's C++ AZ links against; never mix kernel generations across the
   stacks). Every published number runs here, and
-  `benchmarks/openspiel/preflight.py` refuses measurement runs elsewhere.
+  `benchmarks/harness/preflight.py` refuses measurement runs elsewhere.
 - **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch). For
   linting and the harness test suites only; never for measurement.
 

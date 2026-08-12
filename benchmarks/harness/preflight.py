@@ -2,7 +2,7 @@
 
 Every check must pass; recording bad state is not a substitute for refusing to run.
 
-    python benchmarks/openspiel/preflight.py --expect-tag v1
+    python benchmarks/harness/preflight.py --expect-tag v1
 """
 
 from __future__ import annotations

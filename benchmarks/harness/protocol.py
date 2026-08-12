@@ -57,7 +57,7 @@ def rf_train_argv(
 ) -> list[str]:
     return [
         sys.executable,
-        str(REPO / "benchmarks" / "openspiel" / "train_reinfors_az.py"),
+        str(REPO / "benchmarks" / "training" / "train_az_rf.py"),
         "--minutes",
         str(minutes),
         "--device",

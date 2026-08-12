@@ -44,7 +44,6 @@ import reinfors as rf
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "openspiel"))
 import manifest
 import protocol
 from common import SweepResnet, seed_all

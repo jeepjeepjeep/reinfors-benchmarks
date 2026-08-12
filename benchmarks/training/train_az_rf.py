@@ -11,7 +11,7 @@ Outputs one JSONL line per learn step (wall, states collected, steps, losses) pl
 state_dict checkpoints for the offline strength eval — the analogues of their learner.jsonl and
 checkpoint files.
 
-  uv run python benchmarks/openspiel/train_reinfors_az.py --minutes 3 --out results/rf_az_smoke
+  uv run python benchmarks/training/train_az_rf.py --minutes 3 --out results/rf_az_smoke
 """
 
 import argparse
@@ -23,6 +23,7 @@ import threading
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
 import manifest
 import numpy as np
 import reinfors as rf

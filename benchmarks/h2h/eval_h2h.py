@@ -51,7 +51,6 @@ import pyspiel
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "openspiel"))
 import reinfors as rf
 import manifest
 import protocol
