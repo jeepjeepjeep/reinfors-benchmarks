@@ -44,10 +44,12 @@ Two supporting pieces:
 Their topology axis is independent actor threads feeding a central batcher: more
 actors fill larger inference batches (rows/s rises) while decelerating every game's
 progress — completed-game states/s can *fall* as rows/s improves, which is exactly why
-selection is by states/s. The grid — `os_*` cells of `v1_grid`, actors 8/16/32/64 plus
+selection is by states/s. The grid — `os_*` cells of `v1_grid`, actors 4/8/16/32/64 plus
 the 64:32 **decoupling probe** (batch capped below the actor count, separating the
-batch-size effect from the completion effect) — re-verifies their optimum explicitly,
-including the previously unmeasured 8-actor cell.
+batch-size effect from the completion effect) — re-verifies their optimum explicitly
+and brackets it from both sides: the previously unmeasured 4- and 8-actor cells probe
+the left flank, where per-game progress is fastest but the batches starve the
+inference service.
 
 ## reinfors throughput levers
 
@@ -103,6 +105,7 @@ clears CPU ×2 through this loop): TBD.
 
 | config | states/s | achieved batch |
 |---|---|---|
+| 4 actors | TBD | TBD |
 | 8 actors | TBD | TBD |
 | 16 actors | TBD | TBD |
 | 32 actors | TBD | TBD |
@@ -111,7 +114,10 @@ clears CPU ×2 through this loop): TBD.
 
 Previously states/s fell monotonically with actor count on this 4-core box (16 actors
 best measured; the decoupling probe showed batch size was not the cause), while their
-rows/s *rose* — the canonical warning against sizing by rows-level reasoning.
+rows/s *rose* — the canonical warning against sizing by rows-level reasoning. If the
+"smallest actor count that still feeds the inference service" account is right, a4 and
+a8 should fall *below* a16 — the optimum bracketed from the starved side, not just the
+contended one.
 
 **Selected operating points: OpenSpiel TBD, reinfors TBD** — these become the encoded
 topologies in `v1_training.json` ([the comparison](the-comparison.md)).

@@ -4,6 +4,24 @@
   "cycles": 3,
   "cells": [
     {
+      "name": "os_a4",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "os",
+        "actors": 4,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/learner.jsonl"
+      ]
+    },
+    {
       "name": "os_a8",
       "argv": [
         "experiments/measure_throughput.py"
