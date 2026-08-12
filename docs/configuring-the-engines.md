@@ -43,12 +43,7 @@ Two supporting pieces:
 
 Their topology axis is independent actor threads feeding a central batcher, so actor
 count is simultaneously their CPU concurrency and their inference batch size — batch
-is *acquired with actors*, where reinfors acquires it by staging. The corrected
-pre-campaign record (their learner's own counters; the earlier actor-log-based grid
-undercounted by actors/20 and was retracted) shows their states/s **rising
-monotonically** through the measured range — 144.9 / 177.4 / 199.6 at a16/a32/a64,
-single ~25-minute legs — with the curve's turn, if any, beyond the old grid's edge.
-The V1 grid — `os_*` cells of `v1_grid`, actors 32 through 256 — maps the curve in
+is *acquired with actors*, where reinfors acquires it by staging. The V1 grid — `os_*` cells of `v1_grid`, actors 32 through 256 — maps the curve in
 two columns: **full-fill** (batch = actors) and **half-fill** (batch = actors/2),
 the latter separating batch size from concurrency at every call size. The half-fill
 64-row cell (a128:b64) runs 128 games at 64-row calls — the exact games-in-flight and
@@ -114,8 +109,8 @@ where CUDA clears CPU ×2 through this loop): TBD.
 **Selected operating points: OpenSpiel TBD, reinfors TBD** — these become the encoded
 topologies in `v1_training.json` ([the comparison](the-comparison.md)).
 
-Pre-registered questions the grid answers: where does the OpenSpiel curve turn (its
-corrected record still rises at a64); whether half-fill beats full-fill at matched
+Pre-registered questions the grid answers: where each stack's curve turns over call
+size; whether half-fill beats full-fill at matched
 call size (concurrency helps completion but splits CPU further); whether a128:b64
 matches n128×2 at identical concurrency and call size; and the per-row mechanism
 comparison at each side's optimum (µs/row and inference-thread saturation, from the
