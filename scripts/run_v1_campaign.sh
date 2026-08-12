@@ -10,7 +10,7 @@
 #
 # Not covered here (manual): the binary-smoke pytest gate
 #   H2H_SMOKE_OS_PATH=<os_train out> H2H_SMOKE_OS_CKPT=<n> \
-#     .venv23/bin/python -m pytest benchmarks/openspiel/test_h2h_mirror.py
+#     .venv23/bin/python -m pytest benchmarks/h2h/test_h2h_mirror.py
 set -euo pipefail
 cd "$(dirname "$0")/.."
 TAG="${TAG:?set TAG=<frozen tag>; preflight refuses anything not built at it}"

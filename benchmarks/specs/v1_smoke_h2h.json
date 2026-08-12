@@ -6,30 +6,22 @@
     {
       "name": "h2h_smoke",
       "argv": [
-        "benchmarks/openspiel/eval_h2h_chess.py",
-        "{rf_ckpt}",
-        "{os_path}",
-        "--os-checkpoint",
-        "{os_ckpt}",
-        "--games",
-        "2",
-        "--workers",
-        "2",
-        "--seed",
-        "990000",
-        "--device",
-        "cuda",
-        "--az-device",
-        "/cuda:0",
-        "--pgn",
-        "{run_dir}/games.pgn",
-        "--manifest",
-        "{run_dir}/h2h_manifest.jsonl"
+        "benchmarks/h2h/eval_h2h.py"
       ],
+      "args": {
+        "rf-checkpoint": "{rf_ckpt}",
+        "os-path": "{os_path}",
+        "os-checkpoint": "{os_ckpt}",
+        "games": 2,
+        "workers": 2,
+        "seed": 990000,
+        "device": "cuda",
+        "az-device": "/cuda:0",
+        "out": "{run_dir}/h2h"
+      },
       "deadline_seconds": 3600,
-      "cores": "0-3",
       "outputs": [
-        "h2h_manifest.jsonl"
+        "h2h/games.pgn"
       ]
     }
   ]

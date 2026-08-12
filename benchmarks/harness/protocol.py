@@ -11,14 +11,9 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-OS_BIN = (
-    REPO
-    / "open_spiel_cpp"
-    / "open_spiel"
-    / "build"
-    / "examples"
-    / "alpha_zero_torch_example"
-)
+_OS_EXAMPLES = REPO / "open_spiel_cpp" / "open_spiel" / "build" / "examples"
+OS_TRAIN_BIN = _OS_EXAMPLES / "alpha_zero_torch_example"
+OS_PLAY_BIN = _OS_EXAMPLES / "alpha_zero_torch_game_example"
 
 # their binary is single-inference-thread by protocol; stray BLAS threading would
 # poach the pinned cores from the actors
@@ -102,7 +97,7 @@ def os_train_argv(
     device: str = "/cuda:0",
 ) -> list[str]:
     return [
-        str(OS_BIN),
+        str(OS_TRAIN_BIN),
         "--game=chess",
         f"--path={out}",
         f"--actors={actors}",

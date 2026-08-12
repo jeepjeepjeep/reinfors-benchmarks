@@ -16,7 +16,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from eval_h2h_chess import Mirror
+from eval_h2h import Mirror
 
 
 def apply_their_rendering(mirror: Mirror, loose_san: str) -> str:
@@ -75,7 +75,7 @@ def test_close_reaps_on_pre_wait_errors() -> None:
     import subprocess
     import sys
 
-    from eval_h2h_chess import _LIVE_LOCK, _LIVE_PROCS, TheirBot
+    from eval_h2h import _LIVE_LOCK, _LIVE_PROCS, TheirBot
 
     bot = TheirBot(None, 0, itertools.count(1), 1)
     for san in ["e4", "e5", "Qh5", "Nc6", "Bc4", "Nf6", "Qxf7#"]:
@@ -95,7 +95,7 @@ def test_close_reaps_on_pre_wait_errors() -> None:
 
 
 @pytest.mark.skipif(
-    not __import__("eval_h2h_chess").BIN.exists()
+    not __import__("eval_h2h").BIN.exists()
     or "H2H_SMOKE_OS_PATH" not in __import__("os").environ,
     reason="needs the openspiel binary and H2H_SMOKE_OS_PATH/H2H_SMOKE_OS_CKPT (an az "
     "checkpoint dir — the binary refuses to run without an az player); box only",
@@ -108,7 +108,7 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
     import subprocess
     import time as _time
 
-    from eval_h2h_chess import BIN
+    from eval_h2h import BIN
 
     mirror = Mirror()
     their_sans = [apply_their_rendering(mirror, loose) for loose in LINES[name].split()]
@@ -152,7 +152,7 @@ def test_forced_lines_accepted_by_the_binary(name: str) -> None:
     import re as _re
     import threading
 
-    from eval_h2h_chess import CHOSE, RETURNS
+    from eval_h2h import CHOSE, RETURNS
 
     forced_marker = _re.compile(r"Player \d+ forced action:")
     lines: list[str] = []

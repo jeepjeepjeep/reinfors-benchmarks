@@ -20,14 +20,16 @@ player 0 and WHITE to player 1 (chess.h ColorToPlayer); reinfors maps WHITE to a
 
 Openings come from rf.starts.RandomStartingMoves (seeded uniform legal lines, each played
 once per color — Arena's paired seat-swap), and scoring is Arena's pair-level payoff.
-Every run appends a manifest line (checkpoints + hashes, sims, seeds, concurrency,
-versions) to --manifest.
+Every run gets a fresh --out directory holding games.pgn and a manifest.json with the
+full lifecycle (checkpoints + hashes, sims, seeds, concurrency, environment; finalized
+with the result).
 
 Smoke test (untrained checkpoints, REQUIRED before any round — validates announcement
 format, HumanBot numeric input, castling ids, draw handling, lazy spawn):
 
-  uv run python benchmarks/openspiel/eval_h2h_chess.py results/rf_smoke/ckpt_60s.pt \
-      results/os_smoke --os-checkpoint 0 --games 2 --sims 8 --device cuda --az-device /cuda:0
+  uv run python benchmarks/h2h/eval_h2h.py --rf-checkpoint results/rf_smoke/ckpt_60s.pt \
+      --os-path results/os_smoke --os-checkpoint 0 --games 2 --sims 8 \
+      --device cuda --az-device /cuda:0 --out results/h2h_smoke
 """
 
 import argparse
@@ -48,15 +50,14 @@ import chess.pgn as pychess_pgn
 import pyspiel
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "openspiel"))
 import reinfors as rf
-import manifest as shared_manifest
+import manifest
+import protocol
 from common import SweepResnet
 
-BIN = (
-    Path(__file__).resolve().parents[2]
-    / "open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_game_example"
-)
+BIN = protocol.OS_PLAY_BIN
 CHOSE = re.compile(r"Player (\d) chose action: (\S+)")
 RETURNS = re.compile(r"Returns: (-?[\d.]+),? (-?[\d.]+)")
 HEAD_ACTIONS = 4674
@@ -400,18 +401,20 @@ def replay_for_pgn(actions: list[int]):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("rf_checkpoint")
-    ap.add_argument("os_path")
+    ap.add_argument("--rf-checkpoint", required=True)
+    ap.add_argument("--os-path", required=True)
     ap.add_argument("--os-checkpoint", type=int, required=True)
     ap.add_argument("--games", type=int, default=50)
-    ap.add_argument("--sims", type=int, default=64, help="their az bot's simulations")
+    ap.add_argument(
+        "--sims", type=int, default=protocol.SIMS, help="their az bot's simulations"
+    )
     ap.add_argument(
         "--our-sims",
         type=int,
         default=None,
         help="our side's simulations (default: same)",
     )
-    ap.add_argument("--uct-c", type=float, default=2.0)
+    ap.add_argument("--uct-c", type=float, default=protocol.C_PUCT)
     ap.add_argument(
         "--opening-plies",
         type=int,
@@ -444,27 +447,18 @@ def main() -> None:
         help="default: the checkpoint dir's config.json",
     )
     ap.add_argument("--depth", type=int, default=None)
-    ap.add_argument(
-        "--pgn",
-        default="results/h2h_games.pgn",
-        help='append every game as PGN here ("" to disable)',
-    )
-    ap.add_argument(
-        "--manifest",
-        default="results/h2h_manifest.jsonl",
-        help='append one JSON manifest line per run here ("" to disable)',
-    )
+    ap.add_argument("--out", required=True, help="fresh match directory")
     args = ap.parse_args()
     if args.games % 2:
         ap.error("--games must be even: every opening is played once per color")
     if not hasattr(rf, "Arena"):
         ap.error("this protocol needs a reinfors build with rf.Arena (PRs #159/#160)")
 
-    if args.pgn:
-        # fail BEFORE any (expensive) game: create the parent and prove the file is appendable
-        Path(args.pgn).parent.mkdir(parents=True, exist_ok=True)
-        with open(args.pgn, "a"):
-            pass
+    out = Path(args.out).resolve()
+    if out.exists():
+        sys.exit(f"refusing to overwrite {out} — pick a fresh --out")
+    out.mkdir(parents=True)
+    args.pgn = str(out / "games.pgn")
 
     cfg_path = Path(args.rf_checkpoint).parent / "config.json"
     cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
@@ -499,7 +493,6 @@ def main() -> None:
     def factory():
         return TheirBot(args, next(game_seeds), done_counter, args.games)
 
-
     arena = rf.Arena(
         game,
         rf.Reward(win=1.0, loss=-1.0),
@@ -511,6 +504,34 @@ def main() -> None:
         start=rf.starts.RandomStartingMoves(args.opening_plies),
         seed=args.seed,
     )
+    manifest.write(
+        out,
+        command=[sys.executable, *sys.argv],
+        run_kind="h2h",
+        protocol="v1",
+        rf_checkpoint=args.rf_checkpoint,
+        rf_checkpoint_sha256=_sha256(Path(args.rf_checkpoint)),
+        os_path=args.os_path,
+        os_checkpoint=args.os_checkpoint,
+        os_checkpoint_sha256=_sha256(
+            Path(args.os_path) / f"checkpoint-{args.os_checkpoint}.pt"
+        ),
+        net={"width": width, "depth": depth},
+        sims={"theirs": args.sims, "ours": our_sims},
+        uct_c=args.uct_c,
+        opening={"kind": "RandomStartingMoves", "plies": args.opening_plies},
+        seed=args.seed,
+        concurrency={
+            "workers": args.workers,
+            "n_slots": args.workers,
+            "timeout": args.timeout,
+        },
+        devices={"ours": args.device, "theirs": args.az_device},
+        external_cmd=str(BIN),
+        external_cmd_sha256=_sha256(BIN),
+        completed=False,
+    )
+
     started = time.time()
     try:
         result = arena.play(args.games)
@@ -565,51 +586,20 @@ def main() -> None:
         f"(pair stderr {stderr / 2:.3f} over {n // 2} pairs)"
     )
 
-    if args.manifest:
-        Path(args.manifest).parent.mkdir(parents=True, exist_ok=True)
-        manifest = {
-            "protocol": "v1",
-            "environment": shared_manifest.collect(),
-            "command": " ".join([sys.executable, *sys.argv]),
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
-            "wall_seconds": round(time.time() - started, 1),
-            "rf_checkpoint": args.rf_checkpoint,
-            "rf_checkpoint_sha256": _sha256(Path(args.rf_checkpoint)),
-            "os_path": args.os_path,
-            "os_checkpoint": args.os_checkpoint,
-            "net": {"width": width, "depth": depth},
-            "sims": {"theirs": args.sims, "ours": our_sims},
-            "uct_c": args.uct_c,
-            "opening": {"kind": "RandomStartingMoves", "plies": args.opening_plies},
-            "seed": args.seed,
-            "concurrency": {
-                "workers": args.workers,
-                "n_slots": args.workers,
-                "timeout": args.timeout,
-            },
-            "devices": {"ours": args.device, "theirs": args.az_device},
-            "os_checkpoint_sha256": _sha256(
-                Path(args.os_path) / f"checkpoint-{args.os_checkpoint}.pt"
-            ),
-            "external_cmd": str(BIN),
-            "external_cmd_sha256": _sha256(BIN),
-            "versions": {
-                "reinfors": getattr(rf, "__version__", "unknown"),
-                "reinfors_build_sha256": _sha256(Path(rf._reinfors.__file__)),
-                "torch": torch.__version__,
-                "pyspiel": getattr(pyspiel, "__version__", "unknown"),
-            },
-            "result": {
-                "games": n,
-                "wins": wins,
-                "draws": draws,
-                "losses": n - wins - draws,
-                "score": round(score, 4),
-                "pair_stderr": round(stderr / 2, 4),
-            },
-        }
-        with open(args.manifest, "a") as f:
-            f.write(json.dumps(manifest) + "\n")
+    manifest.finalize(
+        out,
+        status="ok",
+        wall_seconds=round(time.time() - started, 1),
+        result={
+            "games": n,
+            "wins": wins,
+            "draws": draws,
+            "losses": n - wins - draws,
+            "score": round(score, 4),
+            "pair_stderr": round(stderr / 2, 4),
+        },
+        output_sha256={"games.pgn": _sha256(Path(args.pgn))},
+    )
 
 
 if __name__ == "__main__":
