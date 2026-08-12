@@ -6,7 +6,7 @@ Timeline:
     [W, W+T]     the measurement window, identical for both sides
     W+T+tail     SIGKILL of the child's process group (early exit = crashed)
 
-Both sides reduce from the same artifact, `<out>/learner.jsonl`, rows of cumulative
+Both sides reduce from the same artifact, `<out>/telemetry.jsonl`, rows of cumulative
 counters {wall, states, infer_rows, infer_calls, steps}. The rf trainer writes it
 natively with its own clock; for os this harness samples the binary's instrumented
 stderr counters and its actor/learner logs into the identical schema (the manifest's
@@ -152,11 +152,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     hashes = {
-        "learner.jsonl": manifest.sha256(out / "learner.jsonl"),
+        "telemetry.jsonl": manifest.sha256(out / "telemetry.jsonl"),
         "child.log": manifest.sha256(out / "child.log"),
     }
     metrics = reduce_window(
-        out / "learner.jsonl",
+        out / "telemetry.jsonl",
         args.warmup_seconds,
         args.warmup_seconds + args.window_seconds,
     )

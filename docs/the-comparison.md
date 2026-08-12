@@ -28,8 +28,9 @@ disagree).
 Three fresh 2-hour legs per side at the selected configurations, the wall-clock budget
 enforced identically on both by [`train_leg.py`](../experiments/train_leg.py)'s
 scheduled kill. Throughput figures reduce post-hoc from the archived telemetry
-(`learner.jsonl` — native from the rf trainer, harness-sampled into the same schema for
-the OpenSpiel binary).
+(`telemetry.jsonl` — written natively by the rf trainer; for the OpenSpiel binary the
+harness derives it from their learner's own counters, which see every actor — their
+per-actor logs are capped at 20 files and must never be counted).
 
 **The matched knobs** ([`lib/protocol.py`](../experiments/lib/protocol.py)), exactly:
 network architecture (layer-for-layer, verified by parameter count at startup); search

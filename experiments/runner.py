@@ -22,7 +22,7 @@ Spec:
                                     # records the cell as hung and fails the session
      "cores": "0-3",                # taskset pinning (omit off-box)
      "env": {"OMP_NUM_THREADS": "1"},
-     "outputs": ["out/learner.jsonl"],          # hashed at completion
+     "outputs": ["out/telemetry.jsonl"],          # hashed at completion
      "cycles": 1                                # optional per-cell override
     }
   ]

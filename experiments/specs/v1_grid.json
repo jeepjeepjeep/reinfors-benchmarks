@@ -18,7 +18,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -36,7 +36,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -54,7 +54,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -72,7 +72,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -90,7 +90,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -109,7 +109,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -128,7 +128,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -147,7 +147,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -166,7 +166,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -185,7 +185,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -204,7 +204,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -223,7 +223,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -242,7 +242,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
@@ -261,7 +261,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     }
   ]

@@ -4,7 +4,7 @@ the experiment (an identical wall-clock budget on both sides; whatever checkpoin
 survived it are the leg's product).
 
 No measurement happens here: throughput and strength analysis are post-hoc from the
-archived telemetry. Both sides leave the same artifacts — `<out>/learner.jsonl`
+archived telemetry. Both sides leave the same artifacts — `<out>/telemetry.jsonl`
 (native from the rf trainer; sampled from the os binary's counters and logs by this
 harness) plus checkpoints, with the newest checkpoint recorded in the manifest so
 downstream evaluation never has to guess at filenames.
@@ -145,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
         # builds the filename itself — eval_h2h resolves `latest` instead)
         shutil.copy2(ckpt, out / "model.pt")
     hashes = {
-        "learner.jsonl": manifest.sha256(out / "learner.jsonl"),
+        "telemetry.jsonl": manifest.sha256(out / "telemetry.jsonl"),
         "child.log": manifest.sha256(out / "child.log"),
     }
     if ckpt:

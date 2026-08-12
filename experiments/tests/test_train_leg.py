@@ -23,7 +23,7 @@ def test_leg_records_the_newest_checkpoint(tmp_path: Path, monkeypatch) -> None:
         tmp_path,
         "import sys, time\n"
         "out = sys.argv[sys.argv.index('--out') + 1]\n"
-        "open(out + '/learner.jsonl', 'w').write('{}\\n')\n"
+        "open(out + '/telemetry.jsonl', 'w').write('{}\\n')\n"
         "open(out + '/ckpt_60s.pt', 'w').write('a')\n"
         "time.sleep(0.3)\n"
         "open(out + '/ckpt_120s.pt', 'w').write('b')\n"
@@ -80,11 +80,13 @@ def test_os_leg_samples_telemetry_and_numbers_the_checkpoint(
         "out = Path(sys.argv[1])\n"
         "(out / 'checkpoint--1.pt').write_text('init')\n"
         "(out / 'checkpoint-3.pt').write_text('later')\n"
-        "actor = open(out / 'log-actor-0.txt', 'a')\n"
+        "import json\n"
+        "learner = open(out / 'learner.jsonl', 'a')\n"
         "for i in range(1, 200):\n"
         "    print(f'[inst] rows={i * 10} fwd={i}', flush=True)\n"
-        "    actor.write(f'[2026-01-01 00:00:{i % 60:02d}] Actions: e4 e5\\n')\n"
-        "    actor.flush()\n"
+        "    learner.write(json.dumps({'total_states': i * 2,"
+        " 'total_trajectories': i, 'step': i}) + '\\n')\n"
+        "    learner.flush()\n"
         "    time.sleep(0.02)\n",
     )
     monkeypatch.setattr(
@@ -113,7 +115,7 @@ def test_os_leg_samples_telemetry_and_numbers_the_checkpoint(
     assert m["latest_checkpoint"].endswith("checkpoint-3.pt")
     assert m["checkpoint_number"] == 3 and m["model"] is None
     assert not (out / "model.pt").exists()  # their loader needs dir + number
-    rows = [json.loads(x) for x in open(out / "learner.jsonl")]
+    rows = [json.loads(x) for x in open(out / "telemetry.jsonl")]
     assert rows and rows[-1]["states"] > 0 and rows[-1]["infer_rows"] > 0
 
 

@@ -1,7 +1,7 @@
 """Shared child runtime for the measurement/training harnesses: pinned launch into a
 fresh process group, scheduled SIGKILL with early-exit (crash) detection, SMT guard,
 and the os-telemetry sampler that normalizes their binary's raw sources into the rf
-learner.jsonl schema."""
+unified telemetry schema."""
 
 import json
 import os
@@ -16,7 +16,6 @@ from pathlib import Path
 import protocol
 
 _INST = re.compile(r"\[inst\].*?rows=(\d+).*?fwd=(\d+)")
-_TS = re.compile(r"^\[")
 
 
 def refuse_smt() -> None:
@@ -65,8 +64,16 @@ def run_scheduled(
 
 
 class OsSampler:
-    """Normalizes the os binary's three raw telemetry sources into rf's learner.jsonl
-    schema: cumulative {wall, states, infer_rows, infer_calls, steps} per poll."""
+    """Normalizes the os binary's telemetry into the unified telemetry.jsonl schema:
+    cumulative {wall, states, games, infer_rows, infer_calls, steps} per poll.
+
+    States/games/steps come from THEIR learner's own counters (`learner.jsonl` in the
+    child dir: total_states / total_trajectories / step), which see every actor by
+    construction. NEVER count from `log-actor-*` files: their binary only opens log
+    files for the first 20 actors (alpha_zero.cc: "Limit the number of open files"),
+    which silently undercounts states by actors/20 — the bug behind the retracted
+    pre-V1 OpenSpiel grid numbers. Inference rows/calls come from the `[inst]`
+    instrumentation on stderr (cumulative; latest wins)."""
 
     def __init__(self, out: Path) -> None:
         self.out = out
@@ -76,7 +83,7 @@ class OsSampler:
         self.steps = 0
         self.rows = 0
         self.calls = 0
-        self.sink = open(out / "learner.jsonl", "a")
+        self.sink = open(out / "telemetry.jsonl", "a")
 
     def _new_lines(self, path: Path):
         try:
@@ -93,15 +100,14 @@ class OsSampler:
             m = _INST.search(line)
             if m:  # cumulative already; latest wins
                 self.rows, self.calls = int(m.group(1)), int(m.group(2))
-        for path in sorted(self.out.glob("log-actor*")):
-            for line in self._new_lines(path):
-                if "Actions:" in line and _TS.match(line):
-                    self.games += 1
-                    self.states += len(line.split("Actions:", 1)[1].split())
-        for path in sorted(self.out.glob("log-learner*")):
-            for line in self._new_lines(path):
-                if "Step" in line and _TS.match(line):
-                    self.steps += 1
+        for line in self._new_lines(self.out / "learner.jsonl"):
+            try:
+                d = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            self.states = d.get("total_states", self.states)
+            self.games = d.get("total_trajectories", self.games)
+            self.steps = d.get("step", self.steps)
         row = {
             "wall": round(wall, 3),
             "states": self.states,

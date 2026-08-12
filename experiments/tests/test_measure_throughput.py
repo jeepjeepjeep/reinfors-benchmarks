@@ -66,26 +66,35 @@ def test_reduce_needs_two_rows_in_window(tmp_path: Path) -> None:
         tmp_path / "learner.jsonl",
         [{"wall": 400, "states": 1, "infer_rows": 1, "infer_calls": 1, "steps": 1}],
     )
-    assert measure_throughput.reduce_window(tmp_path / "learner.jsonl", 300, 1200) is None
+    assert (
+        measure_throughput.reduce_window(tmp_path / "learner.jsonl", 300, 1200) is None
+    )
 
 
-def test_os_sampler_normalizes_all_three_sources(tmp_path: Path) -> None:
+def test_os_sampler_reads_their_learner_counters(tmp_path: Path) -> None:
+    # states/games/steps MUST come from their learner.jsonl (its counters see every
+    # actor); log-actor files are NEVER a source — their binary caps them at 20
+    # actors, the undercount behind the retracted pre-V1 grid numbers
     (tmp_path / "child.log").write_text(
         "noise\n[inst] rows=100 fwd=10\n[inst] rows=250 fwd=25\n"
     )
+    (tmp_path / "learner.jsonl").write_text(
+        json.dumps({"total_states": 3, "total_trajectories": 1, "step": 1}) + "\n"
+    )
+    # a stray log-actor file must have no effect on the counts
     (tmp_path / "log-actor-0.txt").write_text(
         "[2026-01-01 00:00:01] Actions: e4 e5 Nf3\n"
-        "[2026-01-01 00:00:02] not a game line\n"
     )
-    (tmp_path / "log-learner-0.txt").write_text("[2026-01-01 00:00:03] Step 1 done\n")
     sampler = run.OsSampler(tmp_path)
     sampler.sample(10.0)
-    # second poll: only NEW lines counted (incremental offsets, cumulative counters)
-    with open(tmp_path / "log-actor-0.txt", "a") as f:
-        f.write("[2026-01-01 00:00:04] Actions: d4 d5\n")
+    # second poll: only NEW lines read (incremental offsets, cumulative counters)
+    with open(tmp_path / "learner.jsonl", "a") as f:
+        f.write(
+            json.dumps({"total_states": 5, "total_trajectories": 2, "step": 2}) + "\n"
+        )
     sampler.sample(20.0)
     sampler.close()
-    rows = [json.loads(x) for x in open(tmp_path / "learner.jsonl")]
+    rows = [json.loads(x) for x in open(tmp_path / "telemetry.jsonl")]
     assert rows[0] == {
         "wall": 10.0,
         "states": 3,
@@ -114,7 +123,7 @@ def _fake_rf_trainer(tmp_path: Path) -> Path:
             """
             import json, sys, time
             out = sys.argv[sys.argv.index("--out") + 1]
-            with open(out + "/learner.jsonl", "w") as f:
+            with open(out + "/telemetry.jsonl", "w") as f:
                 for i in range(40):
                     f.write(json.dumps({"wall": i * 0.1, "states": i * 10,
                                         "infer_rows": i * 100, "infer_calls": i,
@@ -159,7 +168,7 @@ def test_harness_end_to_end_rf(tmp_path: Path, monkeypatch) -> None:
     assert m["side"] == "rf" and m["topology"] == {"n_games": 8, "n_groups": 1}
     assert m["metrics"]["states_per_sec"] == pytest.approx(100, rel=0.01)
     assert m["child_exit_code"] != 0  # SIGKILL
-    assert len(m["output_sha256"]["learner.jsonl"]) == 64
+    assert len(m["output_sha256"]["telemetry.jsonl"]) == 64
     # append-only: a rerun into the same directory must refuse
     with pytest.raises(SystemExit, match="refusing to overwrite"):
         measure_throughput.main(["--side", "rf", "--n-games", "8", "--out", str(out)])
@@ -231,14 +240,16 @@ def test_harness_end_to_end_os_sampler(tmp_path: Path, monkeypatch) -> None:
     fake.write_text(
         textwrap.dedent(
             """
-            import sys, time
+            import json, sys, time
             from pathlib import Path
             out = Path(sys.argv[1])
-            actor = open(out / "log-actor-0.txt", "a")
+            learner = open(out / "learner.jsonl", "a")
             for i in range(1, 200):
                 print(f"[inst] rows={i * 100} fwd={i * 10}", flush=True)
-                actor.write(f"[2026-01-01 00:00:{i:02d}] Actions: e4 e5 Nf3\\n")
-                actor.flush()
+                learner.write(json.dumps({"total_states": i * 3,
+                                          "total_trajectories": i,
+                                          "step": i}) + "\\n")
+                learner.flush()
                 time.sleep(0.05)
             """
         )
@@ -274,7 +285,7 @@ def test_harness_end_to_end_os_sampler(tmp_path: Path, monkeypatch) -> None:
     # sampler-normalized telemetry: ~3 states per 0.05s child tick
     assert m["metrics"]["states_per_sec"] == pytest.approx(60, rel=0.35)
     assert m["metrics"]["net_rows_per_sec"] > 0
-    rows = [json.loads(x) for x in open(out / "learner.jsonl")]
+    rows = [json.loads(x) for x in open(out / "telemetry.jsonl")]
     assert all(r["states"] <= s2["states"] for r, s2 in zip(rows, rows[1:]))
 
 
@@ -283,5 +294,7 @@ def test_side_topology_flags_are_mutually_exclusive() -> None:
         measure_throughput.parse_args(["--side", "rf", "--actors", "8", "--out", "x"])
     with pytest.raises(SystemExit):
         measure_throughput.parse_args(["--side", "os", "--n-games", "8", "--out", "x"])
-    args = measure_throughput.parse_args(["--side", "os", "--actors", "64", "--out", "x"])
+    args = measure_throughput.parse_args(
+        ["--side", "os", "--actors", "64", "--out", "x"]
+    )
     assert args.batch == 64  # defaults to full-fill

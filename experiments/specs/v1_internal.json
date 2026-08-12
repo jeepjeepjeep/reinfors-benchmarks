@@ -107,7 +107,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ],
       "cycles": 1
     },
@@ -128,7 +128,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ],
       "cycles": 1
     },
@@ -149,7 +149,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ],
       "cycles": 1
     },
@@ -170,7 +170,7 @@
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "throughput/learner.jsonl"
+        "throughput/telemetry.jsonl"
       ],
       "cycles": 1
     }

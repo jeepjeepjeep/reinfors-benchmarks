@@ -18,7 +18,7 @@
       },
       "deadline_seconds": 7350,
       "outputs": [
-        "training/learner.jsonl"
+        "training/telemetry.jsonl"
       ]
     },
     {
@@ -37,7 +37,7 @@
       },
       "deadline_seconds": 7350,
       "outputs": [
-        "training/learner.jsonl"
+        "training/telemetry.jsonl"
       ]
     }
   ]
