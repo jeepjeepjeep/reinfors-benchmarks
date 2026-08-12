@@ -27,6 +27,8 @@ Isolation (do BOTH on the bench box):
 
     taskset -c 0-3 .venv23/bin/python benchmarks/internal/measure_inference.py \
         --mode both --game chess --devices cpu,cuda --out results/inference
+    # --devices is a sweep: each point runs per device; --mode picks the surface
+    # (kernel = pure forwards, engine = data-gen loop)
 """
 
 import argparse
@@ -302,9 +304,21 @@ def verdict(results, args) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["net", "engine", "both"], default="both")
+    ap.add_argument(
+        "--mode",
+        choices=["kernel", "engine", "both"],
+        default="both",
+        help="measurement surface: kernel = pure net forwards (no engine), "
+        "engine = the self-play data-gen loop with the net as callback",
+    )
     ap.add_argument("--game", choices=["chess", "connect4"], default="chess")
-    ap.add_argument("--devices", type=str, default="cpu,cuda")
+    ap.add_argument(
+        "--devices",
+        type=str,
+        default="cpu,cuda",
+        help="SWEEP list: every point runs once per device; the verdict compares "
+        "them (pass a single device to skip the crossover comparison)",
+    )
     ap.add_argument("--widths", type=str, default="32,64,128")
     ap.add_argument("--depths", type=str, default="1,4")
     ap.add_argument(
@@ -402,7 +416,7 @@ def main() -> None:
 
     game, head_actions = build_game(args.game)
     results: list[dict] = []
-    if args.mode in ("net", "both"):
+    if args.mode in ("kernel", "both"):
         bench_net(args, game.observation_space().shape, head_actions, results)
     if args.mode in ("engine", "both"):
         bench_engine(args, game, head_actions, results)

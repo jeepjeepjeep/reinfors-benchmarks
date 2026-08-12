@@ -9,7 +9,7 @@ SCRIPT = Path(__file__).resolve().parent / "measure_inference.py"
 
 TINY = [
     "--mode",
-    "net",
+    "kernel",
     "--game",
     "connect4",
     "--devices",
@@ -47,7 +47,7 @@ def test_out_dir_lifecycle_and_overwrite_refusal(tmp_path: Path) -> None:
     assert m["run_kind"] == "inference" and m["completed"] and m["status"] == "ok"
     assert m["result_rows"] == len(rows) - 1
     assert len(m["output_sha256"]["rows.jsonl"]) == 64
-    assert m["config"]["mode"] == "net"
+    assert m["config"]["mode"] == "kernel"
 
     second = _run(out)
     assert second.returncode != 0 and "refusing to overwrite" in second.stderr

@@ -14,7 +14,7 @@
         "depths": "8",
         "widths": "256",
         "batches": "32,64,128",
-        "mode": "net",
+        "mode": "kernel",
         "out": "{run_dir}/inference"
       },
       "cores": "0-3",
