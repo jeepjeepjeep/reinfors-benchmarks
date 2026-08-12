@@ -17,12 +17,9 @@ Spec:
                                     # a .py argv[0] runs under the runner's own
                                     # (preflighted) interpreter — never name one
      "args": {"n-games": 64, "seed": "{cycle}"},  # dict-style config, appended as --key value
-     "deadline_seconds": 1200,      # SIGKILL the process group here. For deadline-driven
-                                    # cells (matched-cadence training) set "deadline_expected":
-                                    # true and an EXACT value; for self-terminating payloads it
-                                    # is an APPROXIMATE hang backstop (payload + margin) and its
-                                    # firing records the cell as hung, failing the session.
-     "deadline_expected": false,
+     "deadline_seconds": 1200,      # hang backstop, APPROXIMATE (payload + margin): every
+                                    # payload self-terminates, so a backstop that fires
+                                    # records the cell as hung and fails the session
      "cores": "0-3",                # taskset pinning (omit off-box)
      "env": {"OMP_NUM_THREADS": "1"},
      "outputs": ["out/learner.jsonl"],          # hashed at completion
@@ -150,7 +147,7 @@ def run_cell(
 
     outputs = {rel: manifest.sha256(rep_dir / rel) for rel in cell.get("outputs", [])}
     if intended_kill:
-        status = "deadline" if cell.get("deadline_expected") else "hung"
+        status = "hung"
     elif proc.returncode == 0:
         status = "ok"
     else:
@@ -252,7 +249,7 @@ def main() -> int:
                 continue
             rep_dir = _rep_dir(session_dir, cell, cycle)
             status = _finalized_status(rep_dir)
-            if status in ("ok", "deadline"):
+            if status == "ok":
                 print(f"skip {cell['name']} cycle {cycle} ({status})")
                 continue
             if status is not None:

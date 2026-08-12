@@ -499,7 +499,6 @@ def main() -> None:
     def factory():
         return TheirBot(args, next(game_seeds), done_counter, args.games)
 
-
     arena = rf.Arena(
         game,
         rf.Reward(win=1.0, loss=-1.0),

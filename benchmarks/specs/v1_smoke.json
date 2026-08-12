@@ -6,83 +6,38 @@
     {
       "name": "rf_train_smoke",
       "argv": [
-        "benchmarks/openspiel/train_reinfors_az.py",
-        "--minutes",
-        "4",
-        "--device",
-        "cuda",
-        "--game",
-        "chess",
-        "--out",
-        "{run_dir}/out",
-        "--seed",
-        "0",
-        "--n-games",
-        "128",
-        "--n-groups",
-        "2",
-        "--sims",
-        "64",
-        "--c-puct",
-        "2.0",
-        "--width",
-        "256",
-        "--depth",
-        "8",
-        "--infer-cache",
-        "262144",
-        "--collect-size",
-        "21845",
-        "--checkpoint-every",
-        "60"
+        "benchmarks/training/train.py"
       ],
-      "deadline_seconds": 420,
-      "cores": "0-3",
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "minutes": 4,
+        "cores": "0-3",
+        "out": "{run_dir}/training"
+      },
+      "deadline_seconds": 390,
       "outputs": [
-        "out/learner.jsonl"
+        "training/learner.jsonl"
       ]
     },
     {
       "name": "os_train_smoke",
       "argv": [
-        "open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_example",
-        "--game=chess",
-        "--path={run_dir}/out",
-        "--actors=16",
-        "--evaluators=0",
-        "--devices=/cuda:0",
-        "--max_simulations=64",
-        "--uct_c=2",
-        "--policy_alpha=0.3",
-        "--policy_epsilon=0.25",
-        "--temperature=1",
-        "--temperature_drop=10",
-        "--nn_model=resnet",
-        "--nn_width=256",
-        "--nn_depth=8",
-        "--inference_batch_size=16",
-        "--inference_threads=1",
-        "--inference_cache=262144",
-        "--replay_buffer_size=65536",
-        "--replay_buffer_reuse=3",
-        "--train_batch_size=1024",
-        "--learning_rate=0.0001",
-        "--weight_decay=0.0001",
-        "--checkpoint_freq=1",
-        "--evaluation_window=100",
-        "--eval_levels=7",
-        "--cutoff_probability=0",
-        "--cutoff_value=0.95",
-        "--explicit_learning=false",
-        "--max_steps=0"
+        "benchmarks/training/train.py"
       ],
-      "deadline_seconds": 240,
-      "cores": "0-3",
-      "env": {
-        "OMP_NUM_THREADS": "1",
-        "MKL_NUM_THREADS": "1"
+      "args": {
+        "side": "os",
+        "actors": 16,
+        "batch": 16,
+        "minutes": 4,
+        "cores": "0-3",
+        "out": "{run_dir}/training"
       },
-      "deadline_expected": true
+      "deadline_seconds": 390,
+      "outputs": [
+        "training/learner.jsonl"
+      ]
     }
   ]
 }

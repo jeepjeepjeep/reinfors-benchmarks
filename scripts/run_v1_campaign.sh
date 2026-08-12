@@ -28,17 +28,16 @@ run_family() { # spec-name, extra --set args...
 }
 
 latest_session() { ls -td runs/*_"$1" 2>/dev/null | head -1; }
-rf_ckpt() { ls -t "$1"/out/ckpt* 2>/dev/null | head -1; }
-os_ckpt_n() {
-  ls "$1"/out/checkpoint-*.pt 2>/dev/null |
-    sed -E 's/.*checkpoint-(-?[0-9]+)\.pt/\1/' | sort -n | tail -1
-}
+# training legs record their newest checkpoint in the leg manifest — read, never guess
+leg_field() { "$PY" -c "import json; print(json.load(open('$1/training/manifest.json'))['$2'])"; }
+rf_ckpt() { leg_field "$1" latest_checkpoint; }
+os_ckpt_n() { leg_field "$1" checkpoint_number; }
 
 run_family v1_smoke
 smoke=$(latest_session v1_smoke)
 run_family v1_smoke_h2h \
   --set "rf_ckpt=$(rf_ckpt "$smoke/rf_train_smoke/cycle1")" \
-  --set "os_path=$smoke/os_train_smoke/cycle1/out" \
+  --set "os_path=$smoke/os_train_smoke/cycle1/training" \
   --set "os_ckpt=$(os_ckpt_n "$smoke/os_train_smoke/cycle1")"
 
 run_family v1_grid
@@ -48,7 +47,7 @@ training=$(latest_session v1_training)
 h2h_sets=()
 for k in 1 2 3; do
   h2h_sets+=(--set "rf_ckpt_$k=$(rf_ckpt "$training/rf_train/cycle$k")")
-  h2h_sets+=(--set "os_path_$k=$training/os_train/cycle$k/out")
+  h2h_sets+=(--set "os_path_$k=$training/os_train/cycle$k/training")
   h2h_sets+=(--set "os_ckpt_$k=$(os_ckpt_n "$training/os_train/cycle$k")")
 done
 run_family v1_h2h "${h2h_sets[@]}"

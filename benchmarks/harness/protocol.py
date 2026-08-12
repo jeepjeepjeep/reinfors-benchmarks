@@ -20,6 +20,10 @@ OS_BIN = (
     / "alpha_zero_torch_example"
 )
 
+# their binary is single-inference-thread by protocol; stray BLAS threading would
+# poach the pinned cores from the actors
+OS_CHILD_ENV = {"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
+
 WIDTH = 256
 DEPTH = 8
 SIMS = 64

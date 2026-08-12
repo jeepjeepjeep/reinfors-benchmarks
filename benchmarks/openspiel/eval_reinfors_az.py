@@ -65,7 +65,9 @@ class C4:
             n = 1
             for s in (1, -1):
                 r, c = row + s * dr, col + s * dc
-                while 0 <= r < ROWS and 0 <= c < COLS and self.cells[r * COLS + c] == me:
+                while (
+                    0 <= r < ROWS and 0 <= c < COLS and self.cells[r * COLS + c] == me
+                ):
                     n += 1
                     r, c = r + s * dr, c + s * dc
             if n >= 4:
@@ -106,8 +108,15 @@ def rollout(state: C4, rng: random.Random) -> float:
     return 1.0 if s.winner == me else -1.0
 
 
-def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
-           net: AZResnetReplica | None, rollouts: int, return_visits: bool = False) -> int | list[int]:
+def search(
+    root_state: C4,
+    sims: int,
+    uct_c: float,
+    rng: random.Random,
+    net: AZResnetReplica | None,
+    rollouts: int,
+    return_visits: bool = False,
+) -> int | list[int]:
     """One move's search. net=None -> vanilla UCT with `rollouts` random playouts per leaf
     (their RandomRolloutEvaluator); net set -> PUCT with net priors + value (their az bot)."""
 
@@ -137,8 +146,12 @@ def search(root_state: C4, sims: int, uct_c: float, rng: random.Random,
             total = sum(node.visits)
             if net is None:
                 scores = [
-                    (node.value_sum[a] / node.visits[a] + uct_c * math.sqrt(math.log(max(total, 1)) / node.visits[a]))
-                    if node.visits[a] > 0 else math.inf
+                    (
+                        node.value_sum[a] / node.visits[a]
+                        + uct_c * math.sqrt(math.log(max(total, 1)) / node.visits[a])
+                    )
+                    if node.visits[a] > 0
+                    else math.inf
                     for a in range(COLS)
                 ]
             else:
@@ -196,17 +209,23 @@ def main() -> None:
         az_side = g % 2
         while not state.done:
             if state.turn == az_side:
-                move = search(state, args.sims, args.uct_c, rng, net, args.rollout_count)
+                move = search(
+                    state, args.sims, args.uct_c, rng, net, args.rollout_count
+                )
             else:
-                move = search(state, args.sims, args.uct_c, rng, None, args.rollout_count)
+                move = search(
+                    state, args.sims, args.uct_c, rng, None, args.rollout_count
+                )
             state.play(move)
         if state.winner == az_side:
             wins += 1
         elif state.winner == -1:
             draws += 1
     n = args.games
-    print(f"az vs vanilla-mcts ({args.sims} sims, {args.rollout_count} rollouts): "
-          f"{wins}W {draws}D {n - wins - draws}L  ->  score {(wins + 0.5 * draws) / n:.2f}")
+    print(
+        f"az vs vanilla-mcts ({args.sims} sims, {args.rollout_count} rollouts): "
+        f"{wins}W {draws}D {n - wins - draws}L  ->  score {(wins + 0.5 * draws) / n:.2f}"
+    )
 
 
 if __name__ == "__main__":

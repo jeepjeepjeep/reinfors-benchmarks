@@ -8,8 +8,10 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
 import measure_grid
 import protocol
+import run
 
 
 def _rows(path: Path, rows: list[dict]) -> None:
@@ -76,7 +78,7 @@ def test_os_sampler_normalizes_all_three_sources(tmp_path: Path) -> None:
         "[2026-01-01 00:00:02] not a game line\n"
     )
     (tmp_path / "log-learner-0.txt").write_text("[2026-01-01 00:00:03] Step 1 done\n")
-    sampler = measure_grid.OsSampler(tmp_path)
+    sampler = run.OsSampler(tmp_path)
     sampler.sample(10.0)
     # second poll: only NEW lines counted (incremental offsets, cumulative counters)
     with open(tmp_path / "log-actor-0.txt", "a") as f:

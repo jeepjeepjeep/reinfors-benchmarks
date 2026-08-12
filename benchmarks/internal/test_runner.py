@@ -82,28 +82,7 @@ def test_cells_run_interleaved_with_manifests_and_hashes(tmp_path: Path) -> None
     assert len(index) == 4
 
 
-def test_expected_deadline_kill_is_success(tmp_path: Path) -> None:
-    out = _run(
-        _spec(
-            tmp_path,
-            [
-                {
-                    "name": "slow",
-                    "argv": [sys.executable, "-c", "import time; time.sleep(60)"],
-                    "deadline_seconds": 1,
-                    "deadline_expected": True,
-                    "cycles": 1,
-                },
-            ],
-        )
-    )
-    assert out.returncode == 0, out.stderr
-    m = json.loads((_session_dir() / "slow" / "cycle1" / "manifest.json").read_text())
-    assert m["status"] == "deadline" and m["intended_deadline_kill"] is True
-    assert m["exit_code"] != 0
-
-
-def test_unexpected_deadline_is_hung_and_blocks_resume(tmp_path: Path) -> None:
+def test_deadline_backstop_is_hung_and_blocks_resume(tmp_path: Path) -> None:
     spec = _spec(
         tmp_path,
         [
@@ -230,7 +209,6 @@ def test_checked_in_specs_are_well_formed() -> None:
         "argv",
         "args",
         "deadline_seconds",
-        "deadline_expected",
         "cores",
         "env",
         "outputs",
@@ -254,10 +232,11 @@ def test_checked_in_specs_are_well_formed() -> None:
                 isinstance(v, (str, int, float, bool))
                 for v in cell.get("args", {}).values()
             ), f"{path.name}:{cell['name']}: args values must be scalars"
+            # deadlines are DERIVED hang backstops (payload + margin), never hand-set
             if cell["argv"][0].endswith("measure_grid.py"):
-                # deadlines on self-terminating cells are DERIVED, never hand-set:
-                # warmup + window + 30s tail + 120s margin
                 args = cell["args"]
                 w, t = args["warmup-seconds"], args["window-seconds"]
                 assert cell["deadline_seconds"] == w + t + 30 + 120, cell["name"]
-                assert not cell.get("deadline_expected"), cell["name"]
+            if cell["argv"][0].endswith("train.py"):
+                minutes = cell["args"]["minutes"]
+                assert cell["deadline_seconds"] == minutes * 60 + 30 + 120, cell["name"]

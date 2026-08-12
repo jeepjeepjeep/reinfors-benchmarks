@@ -17,9 +17,27 @@ import pyspiel
 import reinfors as rf
 
 ROLLS = [
-    (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (2, 3), (2, 4), (2, 5), (2, 6),
-    (3, 4), (3, 5), (3, 6), (4, 5), (4, 6), (5, 6),
-    (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6),
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
+    (1, 6),
+    (2, 3),
+    (2, 4),
+    (2, 5),
+    (2, 6),
+    (3, 4),
+    (3, 5),
+    (3, 6),
+    (4, 5),
+    (4, 6),
+    (5, 6),
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
 ]
 
 
@@ -73,7 +91,9 @@ def run_game(game: object, seed: int) -> tuple[int, int]:
         for player in (0, 1):
             mine = [round(float(x), 5) for x in env.observe(player).ravel()]
             theirs = [round(float(x), 5) for x in os_state.observation_tensor(player)]
-            assert mine == theirs, f"observation mismatch for player {player} at ply {plies}"
+            assert mine == theirs, (
+                f"observation mismatch for player {player} at ply {plies}"
+            )
         positions += 1
 
         action = rng.choice(ours_legal)
