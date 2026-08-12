@@ -35,6 +35,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--n-groups", type=int, default=1, help="rf: collection groups")
     ap.add_argument("--actors", type=int, help="os: actor count")
     ap.add_argument("--batch", type=int, help="os: inference batch (default: actors)")
+    ap.add_argument(
+        "--rf-infer",
+        choices=["fast", "compiled"],
+        default="fast",
+        help="rf: trainer callback implementation",
+    )
     ap.add_argument("--warmup-seconds", type=float, default=protocol.WARMUP_SECONDS)
     ap.add_argument("--window-seconds", type=float, default=protocol.WINDOW_SECONDS)
     ap.add_argument("--cache", type=int, default=protocol.CACHE)
@@ -51,6 +57,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ap.error("--actors is an os parameter")
     if args.side == "os" and args.n_games is not None:
         ap.error("--n-games is an rf parameter")
+    if args.side == "os" and args.rf_infer != "fast":
+        ap.error("--rf-infer is an rf parameter")
     if args.side == "os" and args.batch is None:
         args.batch = args.actors
     return args
@@ -63,7 +71,12 @@ def build_child_argv(args: argparse.Namespace, out: Path) -> list[str]:
             args.warmup_seconds + args.window_seconds + args.tail_seconds
         ) / 60 + 10
         child = protocol.rf_train_argv(
-            out, args.n_games, args.n_groups, args.cache, minutes=round(minutes, 1)
+            out,
+            args.n_games,
+            args.n_groups,
+            args.cache,
+            minutes=round(minutes, 1),
+            infer=args.rf_infer,
         )
     else:
         child = protocol.os_train_argv(out, args.actors, args.batch, args.cache)

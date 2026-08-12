@@ -120,6 +120,29 @@ def test_child_argv_carries_the_matched_protocol() -> None:
     assert "--inference_batch_size=32" in os_ and "--actors=64" in os_
 
 
+def test_rf_infer_flag_reaches_the_trainer() -> None:
+    args = measure_throughput.parse_args(
+        [
+            "--side",
+            "rf",
+            "--n-games",
+            "128",
+            "--n-groups",
+            "2",
+            "--rf-infer",
+            "compiled",
+            "--out",
+            "x",
+        ]
+    )
+    child = measure_throughput.build_child_argv(args, Path("/x"))
+    assert child[child.index("--infer") + 1] == "compiled"
+    with pytest.raises(SystemExit):
+        measure_throughput.parse_args(
+            ["--side", "os", "--actors", "8", "--rf-infer", "compiled", "--out", "x"]
+        )
+
+
 def _fake_rf_trainer(tmp_path: Path) -> Path:
     """Writes rf-schema telemetry fast, then sleeps forever (killed by harness)."""
     script = tmp_path / "fake_trainer.py"

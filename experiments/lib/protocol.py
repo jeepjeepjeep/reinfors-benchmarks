@@ -54,6 +54,7 @@ def rf_train_argv(
     minutes: float,
     seed: int = 0,
     device: str = "cuda",
+    infer: str = "fast",
 ) -> list[str]:
     return [
         sys.executable,
@@ -86,6 +87,8 @@ def rf_train_argv(
         str(COLLECT_SIZE),
         "--checkpoint-every",
         str(CHECKPOINT_EVERY),
+        "--infer",
+        infer,
     ]
 
 

@@ -108,6 +108,12 @@ def main() -> None:
         help="engine infer-cache entries (0 = off)",
     )
     ap.add_argument(
+        "--infer",
+        choices=["fast", "compiled"],
+        default="fast",
+        help="compiled = torch.compile(reduce-overhead) served from a persistent thread",
+    )
+    ap.add_argument(
         "--checkpoint-every",
         type=float,
         default=60.0,
@@ -202,18 +208,35 @@ def main() -> None:
     sync_lock = threading.Lock()
     c, h, w = obs_c, obs_h, obs_w
 
-    def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        with sync_lock, torch.inference_mode():
-            x = (
-                torch.from_numpy(np.ascontiguousarray(obs_batch))
-                .reshape(-1, c, h, w)
-                .to(args.device)
-            )
-            logits, values = collector_net.heads(x)
-        # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE — the
-        # binding accepts width >= A and ignores the tail (a pre-transfer slice costs a
-        # device-side gather). This is the measured operating-point path.
-        return logits.cpu().numpy(), values.cpu().numpy()
+    if args.infer == "compiled":
+        from compiled import CompiledInferServer
+
+        server = CompiledInferServer(
+            collector_net.heads,
+            (c, h, w),
+            -(-args.n_games // args.n_groups),
+            args.device,
+        )
+
+        def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+            # sync_lock still excludes weight refresh during a forward; the refresh
+            # copies in-place, so the captured graph sees the new weights
+            with sync_lock:
+                return server.infer(obs_batch)
+    else:
+
+        def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+            with sync_lock, torch.inference_mode():
+                x = (
+                    torch.from_numpy(np.ascontiguousarray(obs_batch))
+                    .reshape(-1, c, h, w)
+                    .to(args.device)
+                )
+                logits, values = collector_net.heads(x)
+            # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE —
+            # the binding accepts width >= A and ignores the tail (a pre-transfer slice
+            # costs a device-side gather). This is the measured operating-point path.
+            return logits.cpu().numpy(), values.cpu().numpy()
 
     depth = (
         None
