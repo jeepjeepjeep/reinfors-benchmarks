@@ -31,6 +31,11 @@ work overlaps the other's inference —
 OpenSpiel's asynchronous batcher needs enough independently progressing actors to fill
 a large inference batch — batch size and CPU parallelism are **coupled**. reinfors
 stages up to one fresh leaf per active game in a synchronized round — **decoupled**.
+The staging is deliberately sequential: per round, the tree walks cost far less than
+the inference call they feed, so once grouped collection overlaps one group's walks
+with the other's inference the walks are fully hidden — parallelizing the searches
+themselves would gain nothing (each cell's measured inference share in the
+[sizing grid](configuring-the-engines.md) quantifies this).
 Neither batch size is simply the configured count: cache hits, terminal simulations and
 deduplication remove rows, while larger actor/game counts increase per-game latency and
 leave more work in flight at the deadline. Whether the coupling costs anything on this
