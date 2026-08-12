@@ -31,7 +31,7 @@ def _run(spec: Path, *extra: str) -> subprocess.CompletedProcess:
 
 
 def _session_dir() -> Path:
-    runs = sorted((REPO / "runs").glob("*_t"))
+    runs = sorted((REPO / "runs").glob("*_t*"), key=lambda p: p.stat().st_mtime)
     return runs[-1]
 
 
