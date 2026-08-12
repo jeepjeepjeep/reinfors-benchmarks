@@ -71,7 +71,8 @@ example code.
   `9972442` (2025-10-10, "Improve performance of Tensor object creation" — from_blob
   staging; landed 3 days AFTER the build glue was deleted, i.e. author built internally)
   and PR #1488 (2026-03, NoGradGuard + batched output extraction; issue #1487).
-  Our independent diagnosis + backport for the pinned era: `scripts/fix_vpnet_gpu_staging.patch`
+  Our independent diagnosis + backport for the pinned era: `fix_vpnet_gpu_staging.patch`
+  (retired from the tree now that master carries upstream's own fix; in git history)
   (kept for the as-shipped-era measurements; NOT applied to master builds).
 - **Measured effect of their fixes** (chess w128 d8, 8 actors, A10G): 134.6 -> ~4,700
   rows/s (**~35x**), GPU now 17x their CPU. Strong PR-motivation numbers: master's code is

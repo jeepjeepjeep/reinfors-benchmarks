@@ -41,8 +41,9 @@ cd open_spiel_cpp
 # as-is: 86fe553c deleted the libtorch/libnop CMake glue while the root CMakeLists still
 # add_subdirectory's both (configure error; unreported upstream as of 2026-07). Restored
 # below content-identical from that commit's parent — build glue only, zero behavior.
-# (Historical: pre-master-era "as shipped" measurements used pin d15d49f8 +
-# scripts/fix_vpnet_gpu_staging.patch, kept for the record.)
+# (Historical: pre-master-era "as shipped" measurements used pin d15d49f8 + a
+# staging backport, fix_vpnet_gpu_staging.patch — retired to the untracked attic;
+# retrievable from git history.)
 OPEN_SPIEL_COMMIT=112b7770
 
 if [ ! -d open_spiel ]; then
