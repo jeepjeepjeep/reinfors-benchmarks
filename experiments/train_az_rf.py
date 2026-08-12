@@ -1,7 +1,8 @@
 """reinfors-side AlphaZero training driver for the like-for-like comparison, mirroring the
 open_spiel alpha_zero_torch learner's hyperparameters and topology:
 
-  net        AZResnetReplica (exact torch mirror of their resnet(width=32, depth=1))
+  net        SweepResnet (torch mirror of their resnet family; --width/--depth
+             match their --nn_width/--nn_depth; parameter counts asserted equal)
   actors     engine.collect_stream (continuous by default — their actors+learner topology)
   learner    replay buffer (65,536 states) -> minibatch 1,024, Adam lr 1e-4, wd 1e-4;
              pacing: one learn step per (batch_size / reuse) new states (their replay_buffer_reuse)

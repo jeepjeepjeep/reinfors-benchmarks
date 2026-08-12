@@ -66,7 +66,9 @@ records it, its source, and their hashes in the leg manifest.
 > manifests under `published/v1/`. Directional language reflects the pre-campaign
 > measurements these tables replace.
 
-Cells read as median over the three seeds (spread in parentheses):
+Cells read as median over the three runs per side (spread in parentheses) — the
+reinfors legs are seeded 1–3; their trainer exposes no seed surface, so its legs are
+three fresh draws:
 
 | | OpenSpiel | reinfors |
 |---|---|---|
@@ -109,7 +111,7 @@ match manifest. Every game is exported as PGN.
 | score ± SE (paired) | TBD |
 | implied Elo difference (95% CI) | TBD |
 
-Per-match (one row per training seed pair):
+Per-match (one row per training-run pair):
 
 | match | games | W / D / L | score ± SE |
 |---|---|---|---|
@@ -118,7 +120,7 @@ Per-match (one row per training seed pair):
 | cycle 3 | 100 | TBD | TBD |
 
 Interpretation uses the pair-level standard error, and robustness across training
-draws is evidenced by the per-seed replication, not by the pooled interval.
+draws is evidenced by the per-run replication, not by the pooled interval.
 
 ## Gates
 

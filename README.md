@@ -1,12 +1,11 @@
 # reinfors-benchmarks
 
-The companion benchmark harness for [reinfors](https://github.com/jeepjeepjeep/reinfors):
-every measurement script, the campaign specs, and the raw artifacts behind every
-published number. It lives outside the reinfors repo so reinfors takes no
-benchmark-only dependencies. **Published results and their interpretation live in the
-reinfors documentation**
-([`docs/benchmarks/`](https://github.com/jeepjeepjeep/reinfors/tree/main/docs/benchmarks));
-this repository is the executable and raw-data side of those pages.
+The benchmark suite for [reinfors](https://github.com/jeepjeepjeep/reinfors): every
+measurement script, the campaign specs, the raw artifacts, **and the published results
+and their interpretation** — this repository is the single home for all of it (the
+[experiment docs](#the-three-questions) carry the figures). It lives outside the
+reinfors repo so reinfors takes no benchmark-only dependencies; reinfors' README
+carries one headline sentence and links here.
 
 ## The three questions
 
@@ -73,8 +72,16 @@ Two environments with distinct roles:
   stacks — a 2.13-vs-2.3 skew was measured at 1.29–1.4× on this workload, large enough
   to dominate any real difference). Every published number runs here, and
   `experiments/lib/preflight.py` refuses measurement runs elsewhere.
-- **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch). For
-  linting and the harness test suites only; never for measurement.
+- **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch;
+  includes pytest via the dev dependency group). For linting and the test suites only;
+  never for measurement. Create it and run the tests with:
+
+  ```bash
+  uv sync
+  cd ../reinfors && VIRTUAL_ENV=../reinfors-benchmarks/.venv \
+    uvx maturin develop --release -m crates/reinfors-py/Cargo.toml && cd -
+  .venv/bin/python -m pytest experiments/tests/
+  ```
 
 ```bash
 # canonical measurement env from pinned requirements
