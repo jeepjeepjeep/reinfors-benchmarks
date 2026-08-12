@@ -19,6 +19,26 @@ probe. reinfors: n_games 64/128/256 × 1/2 groups. Three interleaved cycles per 
 **Decision point:** each side's winner becomes its configuration in
 `v1_training.json` — revise the encoded topologies there if the grid disagrees.
 
+### Results — V1 (pending)
+
+> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
+> manifests under `published/v1/`. Directional language reflects the pre-campaign
+> measurements these tables replace.
+
+| OpenSpiel | states/s | | reinfors | states/s |
+|---|---|---|---|---|
+| 8 actors | TBD | | n64 × 1 | TBD |
+| 16 actors | TBD | | n64 × 2 | TBD |
+| 32 actors | TBD | | n128 × 1 | TBD |
+| 64 actors | TBD | | n128 × 2 | TBD |
+| 64 actors, batch 32 | TBD | | n256 × 1 | TBD |
+| | | | n256 × 2 | TBD |
+
+Previously the OpenSpiel optimum was 16 actors (its states/s fell monotonically with
+actor count on this 4-core box) and reinfors' was n128 × 2 groups; V1 re-measures both
+grids in full, including the previously unmeasured a8 and n256 cells.
+**Selected operating points: OpenSpiel TBD, reinfors TBD.**
+
 ## 2. The matched round — `v1_training`
 
 Three fresh 2-hour legs per side at the selected configurations, the wall-clock budget
@@ -37,6 +57,29 @@ learning parameters themselves are matched constants
 Each rf leg publishes its final net as `model.pt`; every leg records its newest
 checkpoint in its manifest.
 
+### Results — V1 (pending)
+
+> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
+> manifests under `published/v1/`. Directional language reflects the pre-campaign
+> measurements these tables replace.
+
+Cells read as median over the three seeds (spread in parentheses):
+
+| | OpenSpiel | reinfors |
+|---|---|---|
+| states collected (2h) | TBD | TBD |
+| sustained states/s (interior window) | TBD | TBD |
+| learn steps (1024-sample equivalents) | TBD | TBD |
+| gradient-samples per state (target 3.0) | TBD | TBD |
+| final cache hit rate¹ | TBD | TBD |
+
+Every prior round showed a sustained-throughput edge to reinfors at matched wall-clock,
+cadence and net architecture: **+TBD%** in V1.
+
+¹ Not comparable across the columns: the two stacks define cache hits differently
+(query structure and measurement window differ); the figures are reported per-stack,
+never compared.
+
 ## 3. Head-to-head — `v1_h2h`
 
 The cycle-k model pairs play 100 Arena-protocol games each: seeded uniform-random
@@ -47,6 +90,31 @@ training-leg directories (`rf-model` / `os-model`); the harness resolves each en
 native model format (rf: `model.pt`; OpenSpiel: highest-numbered checkpoint, their
 loader takes a directory + number) and records the resolved artifacts and hashes in the
 match manifest. Every game is exported as PGN.
+
+### Results — V1 (pending)
+
+> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
+> manifests under `published/v1/`. Directional language reflects the pre-campaign
+> measurements these tables replace.
+
+| | pooled (3 matches) |
+|---|---|
+| games (opening pairs) | 300 (150) |
+| W / D / L (reinfors perspective) | TBD |
+| score ± SE (paired) | TBD |
+| implied Elo difference (95% CI) | TBD |
+
+Per-match (one row per training seed pair):
+
+| match | games | W / D / L | score ± SE |
+|---|---|---|---|
+| cycle 1 | 100 | TBD | TBD |
+| cycle 2 | 100 | TBD | TBD |
+| cycle 3 | 100 | TBD | TBD |
+
+In prior campaigns the edge held in each match and pooled; interpretation uses the
+pair-level standard error, and robustness across training draws is evidenced by the
+per-seed replication, not by the pooled interval.
 
 ## Gates
 

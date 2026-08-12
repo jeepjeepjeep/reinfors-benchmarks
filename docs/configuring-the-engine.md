@@ -34,3 +34,50 @@ constants and are deliberately never tuned — see
 **What it feeds:** the rf side's operating configuration for
 [the comparison](the-comparison.md) — and the same decision procedure, applied to your
 own workload's telemetry, for yours.
+
+## Results — V1 (pending)
+
+> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
+> manifests under `published/v1/`. Directional language reflects the pre-campaign
+> measurements these tables replace.
+
+**f32 vs f64 callback outputs** (engine mode, batch 64; medians over 3 cycles):
+
+| config (chess, CUDA) | f64 rows/s | f32 rows/s | gain |
+|---|---|---|---|
+| w256 d8 | TBD | TBD | +TBD% |
+| w128 d8 | TBD | TBD | +TBD% |
+
+The gain has grown as the net shrinks — the boundary cost is a larger share of a
+smaller forward.
+
+**Inference-cache capacity** (chess self-play, early-training net):
+
+| capacity | hit rate |
+|---|---|
+| 4,096 | TBD |
+| 32,768 | TBD |
+| 262,144 | TBD |
+| 2M | TBD |
+
+Hit rate has been monotone in capacity but flattens sharply — capacity is a
+throughput/host-memory choice, not a cliff. It also *rises over training* as the net
+concentrates its own play: TBD% by two hours at the 262,144-entry operating point
+(read from the [matched round](the-comparison.md)'s telemetry).
+
+**Grouped collection** (rf cells of `v1_grid`, full round workload):
+
+| config | states/s | rows/call | infer share |
+|---|---|---|---|
+| n64 × 1 group | TBD | TBD | TBD |
+| n128 × 1 group | TBD | TBD | TBD |
+| n128 × 2 groups | TBD | TBD | TBD |
+| n64 × 2 groups | TBD | TBD | TBD |
+
+In every prior grid the matched-rows comparison (n64×1 → n128×2) delivered close to the
+ceiling the ungrouped inference share predicts, while the matched-games split (n64×1 →
+n64×2) gained little — as the batch term predicts for half-sized calls. V1 re-measures
+both: realized ×TBD against a predicted ×TBD ceiling.
+
+*Provenance: V1 campaign (tag TBD), cells `f32_ab_*` / `rf_cache_*` (`v1_internal`) and
+the rf grid (`v1_grid`), 3 cycles (capacity probes: 1), medians with spreads.*
