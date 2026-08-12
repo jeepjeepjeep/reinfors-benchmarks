@@ -6,7 +6,11 @@ workload?*
 This family characterizes the platform: device × net response curves, measured on
 isolated components (no learner, no self-play distribution, cache off). Because nothing
 about the training workload enters, the curves transfer to any workload on the same net
-and device — they are the calibration everything downstream cites.
+and device — they are the calibration everything downstream cites. They also apply to
+*both* stacks in [the comparison](the-comparison.md): reinfors' callback and OpenSpiel's
+libtorch evaluator dispatch the same ATen kernels from the same pinned torch generation,
+so the kernel ceiling and batch sweet spot bound both sides (the engine curve, by
+contrast, is measured through reinfors' own loop).
 
 | experiment | measures | cells |
 |---|---|---|
