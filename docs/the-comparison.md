@@ -76,8 +76,8 @@ Cells read as median over the three seeds (spread in parentheses):
 | gradient-samples per state (target 3.0) | TBD | TBD |
 | final cache hit rate¹ | TBD | TBD |
 
-Every prior round showed a sustained-throughput edge to reinfors at matched wall-clock,
-cadence and net architecture: **+TBD%** in V1.
+The headline: the sustained-throughput difference at matched wall-clock, cadence and
+net architecture — **TBD** in V1.
 
 ¹ Not comparable across the columns: the two stacks define cache hits differently
 (query structure and measurement window differ); the figures are reported per-stack,
@@ -117,9 +117,8 @@ Per-match (one row per training seed pair):
 | cycle 2 | 100 | TBD | TBD |
 | cycle 3 | 100 | TBD | TBD |
 
-In prior campaigns the edge held in each match and pooled; interpretation uses the
-pair-level standard error, and robustness across training draws is evidenced by the
-per-seed replication, not by the pooled interval.
+Interpretation uses the pair-level standard error, and robustness across training
+draws is evidenced by the per-seed replication, not by the pooled interval.
 
 ## Gates
 

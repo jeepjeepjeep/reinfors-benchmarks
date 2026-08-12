@@ -22,10 +22,10 @@ A *row* is one position forwarded through the net: search effort. A *state* is o
 training example delivered to the learner — and in AlphaZero-style training a position
 only becomes an example when its game **finishes**, because the value target is the
 realized outcome. Under a hard deadline, in-flight games count for nothing.
-Configurations routinely trade the two against each other (more parallel games → more
-rows/s, slower per-game progress → fewer completed states/s — the OpenSpiel actor grid
-is the canonical case), so topology selection and headline comparisons use
-completed-game states/s at matched search budget; rows/s is recorded as diagnosis.
+Configurations can trade the two against each other — more parallel games buy rows/s
+while slowing every game's progress and growing the in-flight loss at the kill — so
+topology selection and headline comparisons use completed-game states/s at matched
+search budget; rows/s is recorded as diagnosis.
 
 One rule binds every table downstream: **no published number appears without a
 repeat-derived spread, a repeat-median label, or an explicit single-run label — and
