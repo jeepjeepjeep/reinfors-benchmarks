@@ -1,41 +1,38 @@
 # A — Sizing the compute
 
-*How do we choose batch sizes, group sizes, and device — independent of the training
-workload?*
+*What can the device do with this net — independent of any training workload or
+library?*
 
-This family characterizes the platform: device × net response curves, measured on
-isolated components (no learner, no self-play distribution, cache off). Because nothing
-about the training workload enters, the curves transfer to any workload on the same net
-and device — they are the calibration everything downstream cites. They also apply to
-*both* stacks in [the comparison](the-comparison.md): reinfors' callback and OpenSpiel's
-libtorch evaluator dispatch the same ATen kernels from the same pinned torch generation,
-so the kernel ceiling and batch sweet spot bound both sides (the engine curve, by
-contrast, is measured through reinfors' own loop).
+This family characterizes the platform: the response of the benchmark net's kernels to
+batch size, per device, measured outside any engine. The claim is deliberately
+stack-neutral: reinfors' callback and OpenSpiel's libtorch evaluator dispatch the
+**same ATen kernels from the same pinned torch generation**, so the kernel ceiling and
+batch sweet spot bound both sides of [the comparison](the-comparison.md).
 
 | experiment | measures | cells |
 |---|---|---|
 | kernel rate vs batch | pure net forwards/s at batch 32/64/128, per device | `kernel_rate_vs_batch` (`v1_internal`) |
-| engine rate vs n_games | realized rows/s through the data-gen loop at n_games 32/64/128, per device | `engine_rate_vs_n_games` (`v1_internal`) |
-| CPU/CUDA crossover | the ratio between the device arms of both curves | analysis across the two cells above |
+| CPU/CUDA crossover | the ratio between the device arms of the curve | analysis of the cell above |
 
-**Instrument:** [`experiments/measure_inference.py`](../experiments/measure_inference.py).
-`--mode kernel` runs the net alone; `--mode engine` runs the self-play data-gen loop
-with the net as callback. `--devices` is a sweep list — every point runs once per
-listed device, and the crossover is the comparison between the arms. Three cycles per
-cell; each run leaves `rows.jsonl` plus a finalized manifest.
+**Instrument:** [`experiments/measure_inference.py`](../experiments/measure_inference.py)
+`--mode kernel` — the net alone, no engine. `--devices` is a sweep list: every point
+runs once per listed device, and the crossover is the comparison between the arms.
+Three cycles; each run leaves `rows.jsonl` plus a finalized manifest. (The companion
+`--mode engine` measurement — the same sweep through reinfors' data-gen loop — is
+reinfors-specific and lives with [engine sizing](configuring-the-engines.md).)
 
 **What it feeds:**
 
-- the engine batch sweet spot → group sizing for
-  [grouped collection](configuring-the-engine.md) and the batch term in its transfer
-  model;
+- the batch sweet spot → call sizing in
+  [configuring the engines](configuring-the-engines.md) (engine batch, group size) and
+  the batch term in the grouping model;
 - the kernel ceiling → the bound every configuration in
-  [the comparison](the-comparison.md) approaches;
+  [the comparison](the-comparison.md) approaches, on either stack;
 - the crossover → whether the GPU is worth using at all for a given net size.
 
-**Caveat carried into every downstream use:** these curves are strongly device- and
-net-shape-dependent. They are measured at the benchmark net (w256 d8) and do not
-transfer to other nets or devices — measure yours before sizing anything against them.
+**Caveat carried into every downstream use:** the curve is strongly device- and
+net-shape-dependent. It is measured at the benchmark net (w256 d8) and does not
+transfer to other nets or devices — measure yours before sizing anything against it.
 
 ## Results — V1 (pending)
 
@@ -52,21 +49,12 @@ transfer to other nets or devices — measure yours before sizing anything again
 | 128 | TBD | TBD |
 
 The A10G's sweet spot for this net has sat at batch 64, with a measurable per-row
-*regression* at batch 128 — the term the [grouping lever](configuring-the-engine.md)
-prices against.
-
-**Engine rate vs n_games** (data-gen loop, cache off): same shape as the kernel curve,
-lower absolute — the gap is the engine's per-row overhead.
-
-| n_games | CUDA rows/s | CPU rows/s |
-|---|---|---|
-| 32 | TBD | TBD |
-| 64 | TBD | TBD |
-| 128 | TBD | TBD |
+*regression* at batch 128 — the term the
+[grouping model](configuring-the-engines.md) prices against.
 
 **Crossover:** CUDA has cleared CPU from small batches at this net size, while batch-1
 GPU inference sits far *below* CPU — the regime pooled collection exists to escape.
-The V1 verdict (smallest batch / n_games where the CUDA:CPU ratio clears 2.0): TBD.
+The V1 verdict (smallest batch where the CUDA:CPU ratio clears 2.0): TBD.
 
-*Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G), cells `kernel_rate_vs_batch` /
-`engine_rate_vs_n_games` in `v1_internal`, 3 cycles, medians with per-cycle spreads.*
+*Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G), cell `kernel_rate_vs_batch` in
+`v1_internal`, 3 cycles, medians with per-cycle spreads.*

@@ -16,7 +16,7 @@ platform, B prices the features, C races the stacks**:
 - **[A — Sizing the compute](docs/sizing-the-compute.md)** — how do we choose batch
   sizes, group sizes, and device, independent of the training workload? Device × net
   response curves: kernel rate, engine rate, the CPU/CUDA crossover.
-- **[B — Configuring the engine](docs/configuring-the-engine.md)** — which throughput
+- **[B — Configuring the engine](docs/configuring-the-engines.md)** — which throughput
   features should be on, and what does each buy at the real workload? f32 outputs,
   inference-cache capacity, grouped collection — measured effects plus the model
   predicting where each transfers.
@@ -39,7 +39,7 @@ is the headline. That is also the order the campaign runs them.
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `runs/` | untracked, append-only: every campaign session's evidence (`<session>/<cell>/cycleN/`), box-synced verbatim after a campaign |
 | `published/` | tracked artifacts behind every published number, one directory per campaign as a filtered mirror of `runs/` (same paths, model binaries stripped to the GitHub release); pre-campaign-era artifacts live in the maintainers' archive (and git history) |
-| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engine.md), [C](docs/the-comparison.md)) and notes on the pinned OpenSpiel build |
+| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engines.md), [C](docs/the-comparison.md)) and notes on the pinned OpenSpiel build |
 
 ## Setup
 

@@ -7,37 +7,14 @@ Three acts, in an order that is itself the argument: selection first, so neither
 races handicapped; a matched round whose fairness is verified by telemetry, not
 assumed; then the head-to-head between the models that round produced.
 
-## 1. Operating-point selection — `v1_grid`
+## 1. Operating points
 
-Both engines sweep their topology under the **full round workload** (learner,
-checkpoint writes and cache sharing the GPU), measured over the pre-registered interior
-window and selected by completed-game states/s — the rate that survives a hard
-deadline, not raw search speed. OpenSpiel: actors 8/16/32/64 plus the 64:32 decoupling
-probe. reinfors: n_games 64/128/256 × 1/2 groups. Three interleaved cycles per cell via
-[`measure_throughput.py`](../experiments/measure_throughput.py).
-
-**Decision point:** each side's winner becomes its configuration in
-`v1_training.json` — revise the encoded topologies there if the grid disagrees.
-
-### Results — V1 (pending)
-
-> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
-> manifests under `published/v1/`. Directional language reflects the pre-campaign
-> measurements these tables replace.
-
-| OpenSpiel | states/s | | reinfors | states/s |
-|---|---|---|---|---|
-| 8 actors | TBD | | n64 × 1 | TBD |
-| 16 actors | TBD | | n64 × 2 | TBD |
-| 32 actors | TBD | | n128 × 1 | TBD |
-| 64 actors | TBD | | n128 × 2 | TBD |
-| 64 actors, batch 32 | TBD | | n256 × 1 | TBD |
-| | | | n256 × 2 | TBD |
-
-Previously the OpenSpiel optimum was 16 actors (its states/s fell monotonically with
-actor count on this 4-core box) and reinfors' was n128 × 2 groups; V1 re-measures both
-grids in full, including the previously unmeasured a8 and n256 cells.
-**Selected operating points: OpenSpiel TBD, reinfors TBD.**
+Both sides' topology grids run in `v1_grid` and are analysed in
+[configuring the engines](configuring-the-engines.md), which selects each stack's best
+measured configuration under the full round workload.
+**Selected operating points: OpenSpiel TBD, reinfors TBD** — these are the topologies
+encoded in `v1_training.json` (decision point: revise them there if the grids
+disagree).
 
 ## 2. The matched round — `v1_training`
 
