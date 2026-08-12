@@ -6,7 +6,7 @@
     {
       "name": "h2h_smoke",
       "argv": [
-        "benchmarks/h2h/eval_h2h.py"
+        "benchmarks/eval_h2h.py"
       ],
       "args": {
         "rf-model": "runs/v1_smoke/rf_train_smoke/cycle1/training",

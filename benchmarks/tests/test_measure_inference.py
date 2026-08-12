@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parent / "measure_inference.py"
+SCRIPT = Path(__file__).resolve().parents[1] / "measure_inference.py"
 
 TINY = [
     "--mode",

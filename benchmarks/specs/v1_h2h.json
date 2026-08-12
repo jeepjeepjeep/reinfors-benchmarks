@@ -6,7 +6,7 @@
     {
       "name": "h2h_100",
       "argv": [
-        "benchmarks/h2h/eval_h2h.py"
+        "benchmarks/eval_h2h.py"
       ],
       "args": {
         "rf-model": "runs/v1_training/rf_train/cycle{cycle}/training",

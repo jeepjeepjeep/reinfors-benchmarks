@@ -6,7 +6,7 @@
     {
       "name": "os_train",
       "argv": [
-        "benchmarks/training/train.py"
+        "benchmarks/train_leg.py"
       ],
       "args": {
         "side": "os",
@@ -24,7 +24,7 @@
     {
       "name": "rf_train",
       "argv": [
-        "benchmarks/training/train.py"
+        "benchmarks/train_leg.py"
       ],
       "args": {
         "side": "rf",

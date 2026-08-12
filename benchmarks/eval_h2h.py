@@ -27,7 +27,7 @@ with the result).
 Smoke test (untrained checkpoints, REQUIRED before any round — validates announcement
 format, HumanBot numeric input, castling ids, draw handling, lazy spawn):
 
-  uv run python benchmarks/h2h/eval_h2h.py --rf-model results/rf_smoke/ckpt_60s.pt \
+  uv run python benchmarks/eval_h2h.py --rf-model results/rf_smoke/ckpt_60s.pt \
       --os-model results/os_smoke --os-checkpoint 0 --games 2 --sims 8 \
       --device cuda --az-device /cuda:0 --out results/h2h_smoke
 """
@@ -50,7 +50,7 @@ import chess.pgn as pychess_pgn
 import pyspiel
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 import reinfors as rf
 import manifest
 import protocol

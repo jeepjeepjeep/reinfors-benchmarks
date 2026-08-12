@@ -6,7 +6,7 @@
     {
       "name": "os_a8",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -24,7 +24,7 @@
     {
       "name": "os_a16",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -42,7 +42,7 @@
     {
       "name": "os_a32",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -60,7 +60,7 @@
     {
       "name": "os_a64",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -78,7 +78,7 @@
     {
       "name": "os_a64b32",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -97,7 +97,7 @@
     {
       "name": "rf_n64_g1",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -116,7 +116,7 @@
     {
       "name": "rf_n64_g2",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -135,7 +135,7 @@
     {
       "name": "rf_n128_g1",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -154,7 +154,7 @@
     {
       "name": "rf_n128_g2",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -173,7 +173,7 @@
     {
       "name": "rf_n256_g1",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -192,7 +192,7 @@
     {
       "name": "rf_n256_g2",
       "argv": [
-        "benchmarks/grid/measure_throughput.py"
+        "benchmarks/measure_throughput.py"
       ],
       "args": {
         "side": "rf",

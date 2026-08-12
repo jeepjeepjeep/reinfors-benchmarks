@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 RUNNER = REPO / "benchmarks" / "runner.py"
 
 
@@ -265,6 +265,6 @@ def test_checked_in_specs_are_well_formed() -> None:
                 args = cell["args"]
                 w, t = args["warmup-seconds"], args["window-seconds"]
                 assert cell["deadline_seconds"] == w + t + 30 + 120, cell["name"]
-            if cell["argv"][0].endswith("train.py"):
+            if cell["argv"][0].endswith("train_leg.py"):
                 minutes = cell["args"]["minutes"]
                 assert cell["deadline_seconds"] == minutes * 60 + 30 + 120, cell["name"]

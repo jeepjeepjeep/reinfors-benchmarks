@@ -15,12 +15,10 @@ pages.
 
 | path | contents |
 |---|---|
-| `benchmarks/internal/` | reinfors-only measurements: inference-path characterization incl. the f32 A/B and device crossover (`measure_inference.py`) |
-| `benchmarks/h2h/` | the head-to-head strength evaluation: `eval_h2h.py` (Arena protocol, external OpenSpiel engine seat) and its mirror/lifecycle tests |
+| `benchmarks/` | one script per experiment surface: `measure_throughput.py` (training throughput under the full round workload, both engines), `measure_inference.py` (kernel/engine curves, f32 A/B, device crossover), `train_leg.py` + `train_az_rf.py` (matched-cadence legs: harness + the rf workload), `eval_h2h.py` (Arena-protocol head-to-head), `runner.py` (the orchestrator) |
+| `benchmarks/lib/` | shared, non-executable: `protocol.py` (matched constants), `run.py` (child runtime), `manifest.py` + `preflight.py` (evidence + freeze gate), `common.py` (the benchmark net) |
 | `benchmarks/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `benchmarks/runner.py` |
-| `benchmarks/harness/` | shared runtime: `protocol.py` (matched constants, defined once), `run.py` (pinned launch, scheduled kill, crash detection, os-telemetry sampler), `manifest.py` + `preflight.py` (evidence + freeze gate), `common.py` (the benchmark net) |
-| `benchmarks/grid/` | the topology-grid measurement: `measure_throughput.py` (training throughput under the full round workload — one harness, both engines, unified interior-window telemetry) |
-| `benchmarks/training/` | the matched-cadence training legs: `train.py` (identical wall-clock budget both engines; newest checkpoint recorded in the manifest) |
+| `benchmarks/tests/` | the test suite, one file per surface |
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `published/` | per-run artifacts of every published number: learner telemetry, configs, logs, PGNs, provenance |
 | `docs/history.md` | the full investigation log, including retained corrections and retractions |
@@ -36,7 +34,7 @@ Two environments with distinct roles:
   (`requirements-venv23.txt`; torch 2.3.0 is the load-bearing pin — the libtorch
   generation OpenSpiel's C++ AZ links against; never mix kernel generations across the
   stacks). Every published number runs here, and
-  `benchmarks/harness/preflight.py` refuses measurement runs elsewhere.
+  `benchmarks/lib/preflight.py` refuses measurement runs elsewhere.
 - **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch). For
   linting and the harness test suites only; never for measurement.
 
@@ -76,7 +74,7 @@ with its decision points:
 1. **`v1_smoke` / `v1_smoke_h2h`** — cheap end-to-end gates (4-minute legs, a 2-game
    match) worth running after any fresh environment/build assembly. The binary-smoke
    pytest gate runs alongside:
-   `H2H_SMOKE_OS_PATH=<os leg out> H2H_SMOKE_OS_CKPT=<n> .venv23/bin/python -m pytest benchmarks/h2h/test_h2h_mirror.py`
+   `H2H_SMOKE_OS_PATH=<os leg out> H2H_SMOKE_OS_CKPT=<n> .venv23/bin/python -m pytest benchmarks/tests/test_eval_h2h.py`
 2. **`v1_grid`** — the topology grids, both engines. Its analysis *selects each side's
    best configuration*; `v1_training.json`'s topology args encode the currently best
    measured configs (os a16/b16, rf n128/g2) and must be revised here if the grid

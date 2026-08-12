@@ -9,8 +9,8 @@ archived telemetry. Both sides leave the same artifacts — `<out>/learner.jsonl
 harness) plus checkpoints, with the newest checkpoint recorded in the manifest so
 downstream evaluation never has to guess at filenames.
 
-    train.py --side rf --n-games 128 --n-groups 2 --minutes 120 --seed 1 --out runs/x/training
-    train.py --side os --actors 16 --minutes 120 --out runs/x/training
+    train_leg.py --side rf --n-games 128 --n-groups 2 --minutes 120 --seed 1 --out runs/x/training
+    train_leg.py --side os --actors 16 --minutes 120 --out runs/x/training
 """
 
 import argparse
@@ -19,7 +19,7 @@ import shutil
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 import manifest
 import protocol
 import run
