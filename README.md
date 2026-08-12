@@ -25,7 +25,11 @@ platform, B configures the engines, C races the stacks**:
   fairness verified by telemetry, then head-to-head.
 
 A calibrates B (the kernel curve prices call sizes), B fixes the configurations C races
-at, and C is the headline. That is also the order the campaign runs them.
+at, and C is the headline. That is also the order the campaign runs them. Two
+cross-cutting pages govern every number: the [methodology](docs/methodology.md) (hard
+kills, interior windows, states/s, the provenance rule) and the
+[design differences](docs/design-differences.md) (both architectures, and why the
+numbers differ).
 
 ## Layout
 
@@ -38,9 +42,26 @@ at, and C is the headline. That is also the order the campaign runs them.
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `runs/` | untracked, append-only: every campaign session's evidence (`<session>/<cell>/cycleN/`), box-synced verbatim after a campaign |
 | `published/` | tracked artifacts behind every published number, one directory per campaign as a filtered mirror of `runs/` (same paths, model binaries stripped to the GitHub release); pre-campaign-era artifacts live in the maintainers' archive (and git history) |
-| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engines.md), [C](docs/the-comparison.md)) and notes on the pinned OpenSpiel build |
+| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engines.md), [C](docs/the-comparison.md)), the shared [methodology](docs/methodology.md) and [design differences](docs/design-differences.md), and notes on the pinned OpenSpiel build |
 
 ## Setup
+
+### Measurement host
+
+Every published number comes from one machine, one measurement at a time:
+AWS g5.2xlarge — 1× NVIDIA A10G (24 GB), 8 vCPU (4 physical cores, **SMT disabled**),
+32 GiB, Ubuntu 22.04, gp3 storage (baseline 125 MB/s — relevant to checkpoint-write
+costs). Isolation invariants, enforced by the harnesses and preflight rather than
+assumed: SMT off (it silently resets on every instance stop/start), all benchmark
+processes pinned to cores 0–3, `OMP_NUM_THREADS=1` for the OpenSpiel side (per its own
+docs — the libtorch intra-op pool otherwise competes with its actor threads).
+
+Per boot, before any session: re-disable SMT, pull both repos at the frozen tag,
+rebuild the reinfors release wheel (with a fresh `REINFORS_BUILD_NONCE`), re-run
+`setup_openspiel_cpp.sh` if any patch changed, and pass
+`experiments/lib/preflight.py`.
+
+### Environments
 
 Requires a local reinfors checkout as a sibling directory.
 
@@ -49,7 +70,8 @@ Two environments with distinct roles:
 - **`.venv23` — the canonical measurement env.** Built from pinned requirements
   (`requirements-venv23.txt`; torch 2.3.0 is the load-bearing pin — the libtorch
   generation OpenSpiel's C++ AZ links against; never mix kernel generations across the
-  stacks). Every published number runs here, and
+  stacks — a 2.13-vs-2.3 skew was measured at 1.29–1.4× on this workload, large enough
+  to dominate any real difference). Every published number runs here, and
   `experiments/lib/preflight.py` refuses measurement runs elsewhere.
 - **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch). For
   linting and the harness test suites only; never for measurement.

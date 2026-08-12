@@ -57,4 +57,5 @@ GPU inference sits far *below* CPU — the regime pooled collection exists to es
 The V1 verdict (smallest batch where the CUDA:CPU ratio clears 2.0): TBD.
 
 *Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G), cell `kernel_rate_vs_batch` in
-`v1_internal`, 3 cycles, medians with per-cycle spreads.*
+`v1_internal`, 3 cycles, medians with per-cycle spreads
+([methodology](methodology.md)).*

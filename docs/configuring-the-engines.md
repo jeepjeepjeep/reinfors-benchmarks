@@ -6,7 +6,7 @@ feature buy?*
 Both stacks are sized by the same rule: sweep the topology under the **full round
 workload** (learner, checkpoint writes and cache sharing the GPU) and select by
 completed-game states/s — the rate that survives a hard deadline, not raw search
-speed. reinfors additionally has opt-in throughput features, each priced here. None of
+speed ([methodology](methodology.md)). reinfors additionally has opt-in throughput features, each priced here. None of
 this touches learning: the learning parameters (lr, weight decay, buffer size, reuse)
 are protocol-matched constants and are deliberately never tuned — see
 [the comparison](the-comparison.md).
@@ -120,7 +120,11 @@ a8 should fall *below* a16 — the optimum bracketed from the starved side, not 
 contended one.
 
 **Selected operating points: OpenSpiel TBD, reinfors TBD** — these become the encoded
-topologies in `v1_training.json` ([the comparison](the-comparison.md)).
+topologies in `v1_training.json` ([the comparison](the-comparison.md)). At each side's
+optimum, the per-row mechanism comparison (from the same grid telemetry): OpenSpiel
+TBD µs/row at its achieved batch with its inference thread TBD% saturated, against
+reinfors' TBD µs/row at its call size — previously ~128 vs ~90 µs/row, the structural
+gap [design differences](design-differences.md) traces.
 
 **f32 vs f64** (engine mode, call size 64):
 

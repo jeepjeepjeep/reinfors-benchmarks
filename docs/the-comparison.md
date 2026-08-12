@@ -7,6 +7,13 @@ Three acts, in an order that is itself the argument: selection first, so neither
 races handicapped; a matched round whose fairness is verified by telemetry, not
 assumed; then the head-to-head between the models that round produced.
 
+The workload is chess, AlphaZero-style self-play: both stacks support it natively, and
+its 4,672-move encoded action space exercises the wide-policy path where boundary costs
+show — the path the claim is about. Where the resulting numbers differ, the causes
+trace to structural design choices on each side
+([design differences](design-differences.md)), measured under one shared
+[methodology](methodology.md).
+
 ## 1. Operating points
 
 Both sides' topology grids run in `v1_grid` and are analysed in
@@ -24,15 +31,33 @@ scheduled kill. Throughput figures reduce post-hoc from the archived telemetry
 (`learner.jsonl` — native from the rf trainer, harness-sampled into the same schema for
 the OpenSpiel binary).
 
-**Fairness is measured, not assumed:** gradient-samples per state (target 3.0, both
-sides) verifies matched training intensity, so scheduling differences cannot be
-mistaken for intensity differences; telemetry fields that are *not* comparable across
-stacks (the two cache-hit definitions differ) are flagged rather than compared. The
-learning parameters themselves are matched constants
-([`lib/protocol.py`](../experiments/lib/protocol.py)), never tuned.
+**The matched knobs** ([`lib/protocol.py`](../experiments/lib/protocol.py)), exactly:
+network architecture (layer-for-layer, verified by parameter count at startup); search
+budget per move, including the convention that the root expansion counts against it;
+exploration constants, Dirichlet noise, temperature schedule; replay-buffer size,
+minibatch size, optimizer hyperparameters, with weight decay applied to the same
+parameter-name set; and aligned loss definitions — masked policy cross-entropy over
+legal actions, value MSE on outcomes in [−1, 1]. None of these is ever tuned.
 
-Each rf leg publishes its final net as `model.pt`; every leg records its newest
-checkpoint in its manifest.
+**Fairness is measured, not assumed:** the two learners amortize training differently
+(one minibatch per fixed state count vs periodic full-buffer sweeps), so matched
+training intensity is verified from telemetry as gradient-samples per state (target
+3.0, both sides) — scheduling differences cannot be mistaken for intensity differences.
+Caches are **architecture, not a matched knob**: each stack runs its own cache design
+at equal capacity, and cache-off is not a "clean" condition
+([why](design-differences.md#consequence-2-one-inference-question-per-node-or-two)).
+Telemetry fields that are *not* comparable across stacks (the two cache-hit
+definitions differ) are flagged rather than compared. Loss curves are definitionally
+aligned but each is measured on its own self-play distribution — they show per-system
+learning progress, never head-to-head quality.
+
+**Artifacts under the deadline:** the deadline is a kill, not a request — neither stack
+gets to write a "final" checkpoint. The head-to-head loads each side's last *complete
+periodic* checkpoint, with cadences configured so worst-case staleness is comparable
+(~a minute on both sides); alias files written by the trainers themselves are never
+trusted, since a kill can tear them mid-write. Each rf leg's `model.pt` satisfies the
+rule: the harness copies the newest periodic checkpoint *after* the child is dead, and
+records it, its source, and their hashes in the leg manifest.
 
 ### Results — V1 (pending)
 
@@ -61,7 +86,9 @@ never compared.
 
 The cycle-k model pairs play 100 Arena-protocol games each: seeded uniform-random
 openings, each played once per color, pair-level scoring; 64 simulations per move on
-both sides; their side runs its own unmodified engine over the bridge
+both sides with their native chess solver disabled — search-plus-network against
+search-plus-network, no solver assist; their side runs its own unmodified engine over
+the bridge
 ([`eval_h2h.py`](../experiments/eval_h2h.py)). The spec points both sides at their
 training-leg directories (`rf-model` / `os-model`); the harness resolves each engine's
 native model format (rf: `model.pt`; OpenSpiel: highest-numbered checkpoint, their
@@ -108,7 +135,16 @@ Their outputs are gates, never evidence.
 
 ## Scope of the claim
 
-The comparison is bounded to its regime: one GPU with few CPU cores (4, SMT off) —
+**What this comparison is — and is not.** OpenSpiel is a research library whose goals
+are breadth and reference clarity; high throughput is not among its stated objectives.
+reinfors narrows its scope to a modular game/search/training boundary and asks a
+narrower question: **how much throughput does that modularity preserve against a mature
+C++ implementation, on a workload both systems support well?** The claim under test is
+not "reinfors is faster" — it is that throughput remains comparable while keeping the
+pluggable seams that are reinfors' design goal, with every mismatch found treated as a
+bug in the benchmark rather than a result.
+
+The comparison is also bounded to its regime: one GPU with few CPU cores (4, SMT off) —
 a common single-GPU cloud shape, and the regime where the stacks' designs differ most.
 reinfors' lockstep pooling decouples inference batch size from CPU parallelism;
 OpenSpiel's actor fleet couples them (roughly one core per actor to run at full
