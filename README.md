@@ -21,7 +21,7 @@ pages.
 | `benchmarks/tests/` | the test suite, one file per surface |
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `runs/` | untracked, append-only: every campaign session's evidence (`<session>/<cell>/cycleN/`), box-synced verbatim after a campaign |
-| `published/` | tracked artifacts behind every published number; from V1 on, a filtered mirror of `runs/` (same paths, heavy binaries stripped — checkpoints live in the GitHub release) |
+| `published/` | tracked artifacts behind every published number, one directory per campaign as a filtered mirror of `runs/` (same paths, model binaries stripped to the GitHub release); `pre-v1/` holds the pre-campaign era |
 | `docs/history.md` | the full investigation log, including retained corrections and retractions |
 | `attic/` | superseded scripts (untracked, local-only; git history remains the record) |
 | `archive/` | untracked, frozen raw record of the pre-V1 era: `pre-v1-box/` (box telemetry behind current published figures), `pre-v1-local/` (exploratory local runs) |
