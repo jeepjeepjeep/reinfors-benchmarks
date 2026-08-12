@@ -42,7 +42,8 @@
       "env": {
         "OMP_NUM_THREADS": "1",
         "MKL_NUM_THREADS": "1"
-      }
+      },
+      "deadline_expected": true
     },
     {
       "name": "rf_train",
@@ -82,7 +83,8 @@
       "cores": "0-3",
       "outputs": [
         "out/learner.jsonl"
-      ]
+      ],
+      "deadline_expected": true
     }
   ]
 }

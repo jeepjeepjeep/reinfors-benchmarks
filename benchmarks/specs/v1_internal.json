@@ -34,86 +34,6 @@
       ]
     },
     {
-      "name": "rf_cache_4096",
-      "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
-      ],
-      "deadline_seconds": 2400,
-      "cycles": 1,
-      "env": {
-        "NGAMES": "128",
-        "NGROUPS": "2",
-        "CACHE": "4096",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
-    },
-    {
-      "name": "rf_cache_32768",
-      "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
-      ],
-      "deadline_seconds": 2400,
-      "cycles": 1,
-      "env": {
-        "NGAMES": "128",
-        "NGROUPS": "2",
-        "CACHE": "32768",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
-    },
-    {
-      "name": "rf_cache_262144",
-      "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
-      ],
-      "deadline_seconds": 2400,
-      "cycles": 1,
-      "env": {
-        "NGAMES": "128",
-        "NGROUPS": "2",
-        "CACHE": "262144",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
-    },
-    {
-      "name": "rf_cache_2097152",
-      "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
-      ],
-      "deadline_seconds": 2400,
-      "cycles": 1,
-      "env": {
-        "NGAMES": "128",
-        "NGROUPS": "2",
-        "CACHE": "2097152",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
-    },
-    {
       "name": "f32_ab_f64",
       "argv": [
         ".venv23/bin/python",
@@ -176,6 +96,118 @@
       "outputs": [
         "rows.jsonl"
       ]
+    },
+    {
+      "name": "rf_cache_4096",
+      "argv": [
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "128",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--cache",
+        "4096",
+        "--out",
+        "{run_dir}/cell"
+      ],
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ],
+      "cycles": 1
+    },
+    {
+      "name": "rf_cache_32768",
+      "argv": [
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "128",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--cache",
+        "32768",
+        "--out",
+        "{run_dir}/cell"
+      ],
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ],
+      "cycles": 1
+    },
+    {
+      "name": "rf_cache_262144",
+      "argv": [
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "128",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--cache",
+        "262144",
+        "--out",
+        "{run_dir}/cell"
+      ],
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ],
+      "cycles": 1
+    },
+    {
+      "name": "rf_cache_2097152",
+      "argv": [
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "128",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--cache",
+        "2097152",
+        "--out",
+        "{run_dir}/cell"
+      ],
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ],
+      "cycles": 1
     }
   ]
 }

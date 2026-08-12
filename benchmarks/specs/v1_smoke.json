@@ -82,7 +82,8 @@
       "env": {
         "OMP_NUM_THREADS": "1",
         "MKL_NUM_THREADS": "1"
-      }
+      },
+      "deadline_expected": true
     }
   ]
 }

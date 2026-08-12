@@ -81,7 +81,7 @@ def test_cells_run_interleaved_with_manifests_and_hashes(tmp_path: Path) -> None
     assert len(index) == 4
 
 
-def test_deadline_kill_is_recorded_as_intended(tmp_path: Path) -> None:
+def test_expected_deadline_kill_is_success(tmp_path: Path) -> None:
     out = _run(
         _spec(
             tmp_path,
@@ -90,6 +90,7 @@ def test_deadline_kill_is_recorded_as_intended(tmp_path: Path) -> None:
                     "name": "slow",
                     "argv": ["python3", "-c", "import time; time.sleep(60)"],
                     "deadline_seconds": 1,
+                    "deadline_expected": True,
                     "cycles": 1,
                 },
             ],
@@ -99,6 +100,27 @@ def test_deadline_kill_is_recorded_as_intended(tmp_path: Path) -> None:
     m = json.loads((_session_dir() / "slow" / "cycle1" / "manifest.json").read_text())
     assert m["status"] == "deadline" and m["intended_deadline_kill"] is True
     assert m["exit_code"] != 0
+
+
+def test_unexpected_deadline_is_hung_and_blocks_resume(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "wedged",
+                "argv": ["python3", "-c", "import time; time.sleep(60)"],
+                "deadline_seconds": 1,
+                "cycles": 1,
+            },
+        ],
+    )
+    out = _run(spec)
+    assert out.returncode != 0 and "hang backstop" in out.stderr
+    session = _session_dir()
+    m = json.loads((session / "wedged" / "cycle1" / "manifest.json").read_text())
+    assert m["status"] == "hung" and m["intended_deadline_kill"] is True
+    blocked = _run(spec, "--resume", str(session))
+    assert blocked.returncode != 0 and "status 'hung'" in blocked.stderr
 
 
 def test_crash_fails_the_session(tmp_path: Path) -> None:
@@ -184,6 +206,7 @@ def test_checked_in_specs_are_well_formed() -> None:
         "name",
         "argv",
         "deadline_seconds",
+        "deadline_expected",
         "cores",
         "env",
         "outputs",
@@ -200,3 +223,11 @@ def test_checked_in_specs_are_well_formed() -> None:
                 f"{path.name}:{cell['name']}: unknown keys {set(cell) - cell_known}"
             )
             assert cell["argv"] and all(isinstance(a, str) for a in cell["argv"])
+            if "measure_cell.py" in cell["argv"][1]:
+                # deadlines on self-terminating cells are DERIVED, never hand-set:
+                # warmup + window + 30s tail + 120s margin
+                argv = cell["argv"]
+                w = float(argv[argv.index("--warmup-seconds") + 1])
+                t = float(argv[argv.index("--window-seconds") + 1])
+                assert cell["deadline_seconds"] == w + t + 30 + 120, cell["name"]
+                assert not cell.get("deadline_expected"), cell["name"]

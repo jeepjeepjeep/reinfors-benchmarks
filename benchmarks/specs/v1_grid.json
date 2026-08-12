@@ -6,200 +6,269 @@
     {
       "name": "os_a8",
       "argv": [
-        "bash",
-        "scripts/measure_states.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "os",
+        "--actors",
+        "8",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2100,
-      "env": {
-        "ACTORS": "8",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "GAME": "chess",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "WARMUP": "300",
-        "WINDOW": "1200"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "os_a16",
       "argv": [
-        "bash",
-        "scripts/measure_states.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "os",
+        "--actors",
+        "16",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2100,
-      "env": {
-        "ACTORS": "16",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "GAME": "chess",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "WARMUP": "300",
-        "WINDOW": "1200"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "os_a32",
       "argv": [
-        "bash",
-        "scripts/measure_states.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "os",
+        "--actors",
+        "32",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2100,
-      "env": {
-        "ACTORS": "32",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "GAME": "chess",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "WARMUP": "300",
-        "WINDOW": "1200"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "os_a64",
       "argv": [
-        "bash",
-        "scripts/measure_states.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "os",
+        "--actors",
+        "64",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2100,
-      "env": {
-        "ACTORS": "64",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "GAME": "chess",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "WARMUP": "300",
-        "WINDOW": "1200"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "os_a64b32",
       "argv": [
-        "bash",
-        "scripts/measure_states.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "os",
+        "--actors",
+        "64",
+        "--batch",
+        "32",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2100,
-      "env": {
-        "ACTORS": "64:32",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "GAME": "chess",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "WARMUP": "300",
-        "WINDOW": "1200"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "rf_n64_g1",
       "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "64",
+        "--n-groups",
+        "1",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2400,
-      "env": {
-        "NGAMES": "64",
-        "NGROUPS": "1",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "rf_n64_g2",
       "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "64",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2400,
-      "env": {
-        "NGAMES": "64",
-        "NGROUPS": "2",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "rf_n128_g1",
       "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "128",
+        "--n-groups",
+        "1",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2400,
-      "env": {
-        "NGAMES": "128",
-        "NGROUPS": "1",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "rf_n128_g2",
       "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "128",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2400,
-      "env": {
-        "NGAMES": "128",
-        "NGROUPS": "2",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "rf_n256_g1",
       "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "256",
+        "--n-groups",
+        "1",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2400,
-      "env": {
-        "NGAMES": "256",
-        "NGROUPS": "1",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     },
     {
       "name": "rf_n256_g2",
       "argv": [
-        "bash",
-        "scripts/measure_states_rf.sh"
+        ".venv23/bin/python",
+        "benchmarks/grid/measure_cell.py",
+        "--side",
+        "rf",
+        "--n-games",
+        "256",
+        "--n-groups",
+        "2",
+        "--warmup-seconds",
+        "300",
+        "--window-seconds",
+        "900",
+        "--cores",
+        "0-3",
+        "--out",
+        "{run_dir}/cell"
       ],
-      "deadline_seconds": 2400,
-      "env": {
-        "NGAMES": "256",
-        "NGROUPS": "2",
-        "OUT_ROOT": "{run_dir}",
-        "CORES": "0-3",
-        "WIDTH": "256",
-        "DEPTH": "8",
-        "MINUTES": "20",
-        "WARMUP": "300"
-      }
+      "deadline_seconds": 1350,
+      "outputs": [
+        "cell/learner.jsonl"
+      ]
     }
   ]
 }

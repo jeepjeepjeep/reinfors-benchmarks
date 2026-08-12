@@ -14,7 +14,12 @@ Spec:
   "cells": [
     {"name": "rf_n64_g1",
      "argv": ["python", "benchmarks/openspiel/train_reinfors_az.py", "--out", "{run_dir}/out", ...],
-     "deadline_seconds": 1200,      # SIGKILL the process group here (recorded as intended)
+     "deadline_seconds": 1200,      # SIGKILL the process group here. For deadline-driven
+                                    # cells (matched-cadence training) set "deadline_expected":
+                                    # true and an EXACT value; for self-terminating payloads it
+                                    # is an APPROXIMATE hang backstop (payload + margin) and its
+                                    # firing records the cell as hung, failing the session.
+     "deadline_expected": false,
      "cores": "0-3",                # taskset pinning (omit off-box)
      "env": {"OMP_NUM_THREADS": "1"},
      "outputs": ["out/learner.jsonl"],          # hashed at completion
@@ -133,9 +138,12 @@ def run_cell(
     elapsed = time.monotonic() - started
 
     outputs = {rel: manifest.sha256(rep_dir / rel) for rel in cell.get("outputs", [])}
-    status = (
-        "deadline" if intended_kill else ("ok" if proc.returncode == 0 else "failed")
-    )
+    if intended_kill:
+        status = "deadline" if cell.get("deadline_expected") else "hung"
+    elif proc.returncode == 0:
+        status = "ok"
+    else:
+        status = "failed"
     manifest.finalize(
         rep_dir,
         exit_code=proc.returncode,
@@ -156,6 +164,11 @@ def run_cell(
         raise RuntimeError(
             f"cell {cell['name']} cycle {cycle} failed (exit {proc.returncode}); "
             f"see {rep_dir}/stderr.log"
+        )
+    if status == "hung":
+        raise RuntimeError(
+            f"cell {cell['name']} cycle {cycle} hit its hang backstop "
+            f"({deadline}s) — a self-terminating payload never should; see {rep_dir}"
         )
     return entry
 
