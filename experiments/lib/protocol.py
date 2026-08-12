@@ -39,7 +39,7 @@ CHECKPOINT_EVERY = 60
 # WARMUP: rf telemetry does not exist before the first learn step, measured at
 # 160-224s across n64-n128 (first collect batch of COLLECT_SIZE records must
 # complete first); 300 clears that with margin. Re-check before trusting it for
-# topologies with a later first collect (n256 is unmeasured).
+# topologies with a later first collect (n256/n512 are unmeasured).
 # WINDOW: `states` advances in ~120s collect-round bursts, so the window must span
 # many bursts; 900 covers ~7, keeping the one-partial-burst edge error small.
 WARMUP_SECONDS = 300
