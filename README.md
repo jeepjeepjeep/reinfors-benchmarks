@@ -22,7 +22,7 @@ pages.
 | `benchmarks/harness/` | shared measurement runtime: `protocol.py` (the matched constants, defined once) and `run.py` (pinned launch, scheduled kill, crash detection, os-telemetry sampler) |
 | `benchmarks/grid/` | the topology-grid measurement: `measure_grid.py` (one harness, both engines, unified interior-window telemetry) |
 | `benchmarks/training/` | the matched-cadence training legs: `train.py` (identical wall-clock budget both engines; newest checkpoint recorded in the manifest) |
-| `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), campaign driver (`run_v1_campaign.sh`), telemetry panels (`plot_round.py`) |
+| `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `published/` | per-run artifacts of every published number: learner telemetry, configs, logs, PGNs, provenance |
 | `docs/history.md` | the full investigation log, including retained corrections and retractions |
 | `attic/` | superseded scripts, kept for the historical record |
@@ -63,16 +63,35 @@ argv and environment captured, keeps run directories append-only, and finalizes 
 completion manifest (status, exit code, output hashes) for every cell:
 
 ```bash
-# the whole frozen campaign, phase by phase (smoke gates first):
-TAG=<frozen tag> bash scripts/run_v1_campaign.sh
-
-# or one family:
 .venv23/bin/python benchmarks/runner.py benchmarks/specs/v1_grid.json --set tag=<frozen tag>
 ```
 
 The specs under `benchmarks/specs/` are the reviewable experiment matrix: cells,
-repeats, deadlines, pinned cores. Direct shell-harness invocation remains available for
+repeats, deadlines, pinned cores. Direct harness invocation remains available for
 exploration, but nothing produced that way is publishable evidence.
+
+The families are separate experiments, not a pipeline — results are analysed between
+them and later specs depend on decisions those analyses produce. The campaign order,
+with its decision points:
+
+1. **`v1_smoke` / `v1_smoke_h2h`** — cheap end-to-end gates (4-minute legs, a 2-game
+   match) worth running after any fresh environment/build assembly; the smoke-h2h
+   `--set` checkpoint values come from the smoke legs' manifests. The binary-smoke
+   pytest gate runs alongside:
+   `H2H_SMOKE_OS_PATH=<os leg out> H2H_SMOKE_OS_CKPT=<n> .venv23/bin/python -m pytest benchmarks/h2h/test_h2h_mirror.py`
+2. **`v1_grid`** — the topology grids, both engines. Its analysis *selects each side's
+   best configuration*; `v1_training.json`'s topology args encode the currently best
+   measured configs (os a16/b16, rf n128/g2) and must be revised here if the grid
+   says otherwise.
+3. **`v1_training`** — the matched 2h legs at the selected topologies. Review the
+   telemetry and surviving checkpoints before spending H2H hours on them.
+4. **`v1_h2h`** — strength evaluation of the cycle-k checkpoint pairs. Each leg's
+   manifest records `latest_checkpoint` / `checkpoint_number`; pass them per cycle:
+   `--set rf_ckpt_1=… --set os_path_1=… --set os_ckpt_1=…` (×3).
+5. **`v1_internal`** — reinfors-only curves and probes; independent of the above.
+
+Which runs fed which decisions is recorded per campaign in
+[`docs/history.md`](docs/history.md), alongside the analysis between phases.
 
 Command templates and interpretation for every measurement are in the reinfors docs
 ([reproduction pages](https://github.com/jeepjeepjeep/reinfors/tree/main/docs/benchmarks));
