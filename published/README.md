@@ -13,4 +13,4 @@ The published tables and their interpretation live in the reinfors documentation
 
 Pre-campaign-era artifacts (the runs behind the figures published before V1) were
 retired from tracking at commit `a1745b5` and are retained in the maintainers'
-archive; `docs/history.md` remains their narrative record.
+archive.

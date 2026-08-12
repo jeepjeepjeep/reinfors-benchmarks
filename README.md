@@ -39,9 +39,7 @@ is the headline. That is also the order the campaign runs them.
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `runs/` | untracked, append-only: every campaign session's evidence (`<session>/<cell>/cycleN/`), box-synced verbatim after a campaign |
 | `published/` | tracked artifacts behind every published number, one directory per campaign as a filtered mirror of `runs/` (same paths, model binaries stripped to the GitHub release); pre-campaign-era artifacts live in the maintainers' archive (and git history) |
-| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engine.md), [C](docs/the-comparison.md)) and the investigation log ([history](docs/history.md)) |
-| `attic/` | superseded scripts (untracked, local-only; git history remains the record) |
-| `archive/` | untracked, frozen raw record of the pre-V1 era: `pre-v1-box/` (box telemetry behind current published figures), `pre-v1-local/` (exploratory local runs) |
+| `docs/` | the three experiment families ([A](docs/sizing-the-compute.md), [B](docs/configuring-the-engine.md), [C](docs/the-comparison.md)) and notes on the pinned OpenSpiel build |
 
 ## Setup
 
@@ -91,12 +89,5 @@ them, and later specs depend on decisions those analyses produce. Campaign order
 smoke gates first, then `v1_grid` (selects each side's configuration — a decision
 point), `v1_training` (review telemetry before spending H2H hours), `v1_h2h`, with
 `v1_internal` independent. Each family's details, decision points and gates are in its
-[experiment doc](#the-three-questions); which runs fed which decisions is recorded per
-campaign in [`docs/history.md`](docs/history.md).
-
-## History
-
-This repository accumulated its protocol the honest way — including two retracted result
-classes (a broken-opponent era and a drain-inflated measurement era) that were diagnosed,
-corrected, and kept on record. [`docs/history.md`](docs/history.md) preserves that log
-intact; nothing in the published tables rests on a retracted number.
+[experiment doc](#the-three-questions); a campaign's session manifests record every
+invocation, substitution and resume that produced its evidence.
