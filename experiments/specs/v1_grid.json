@@ -40,14 +40,13 @@
       ]
     },
     {
-      "name": "os_a64b32",
+      "name": "os_a128",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "os",
-        "actors": 64,
-        "batch": 32,
+        "actors": 128,
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
@@ -59,13 +58,32 @@
       ]
     },
     {
-      "name": "os_a128",
+      "name": "os_a256",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "os",
-        "actors": 128,
+        "actors": 256,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ]
+    },
+    {
+      "name": "os_a64b32",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "os",
+        "actors": 64,
+        "batch": 32,
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
@@ -89,24 +107,6 @@
         "cores": "0-3",
         "out": "{run_dir}/throughput",
         "batch": 64
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
-      "name": "os_a256",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "os",
-        "actors": 256,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
@@ -190,25 +190,6 @@
       ]
     },
     {
-      "name": "rf_n64_g2",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "rf",
-        "n-games": 64,
-        "n-groups": 2,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
       "name": "rf_n128_g1",
       "argv": [
         "experiments/measure_throughput.py"
@@ -228,13 +209,32 @@
       ]
     },
     {
-      "name": "rf_n128_g2",
+      "name": "rf_n256_g1",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 256,
+        "n-groups": 1,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ]
+    },
+    {
+      "name": "rf_n64_g2",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 64,
         "n-groups": 2,
         "warmup-seconds": 300,
         "window-seconds": 900,
@@ -247,14 +247,14 @@
       ]
     },
     {
-      "name": "rf_n256_g1",
+      "name": "rf_n128_g2",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
-        "n-games": 256,
-        "n-groups": 1,
+        "n-games": 128,
+        "n-groups": 2,
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
