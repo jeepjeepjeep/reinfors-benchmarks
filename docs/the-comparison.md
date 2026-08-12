@@ -145,11 +145,11 @@ not "reinfors is faster" — it is that throughput remains comparable while keep
 pluggable seams that are reinfors' design goal, with every mismatch found treated as a
 bug in the benchmark rather than a result.
 
-The comparison is also bounded to its regime: one GPU with few CPU cores (4, SMT off) —
-a common single-GPU cloud shape, and the regime where the stacks' designs differ most.
-reinfors' lockstep pooling decouples inference batch size from CPU parallelism;
-OpenSpiel's actor fleet couples them (roughly one core per actor to run at full
-per-game speed), which is why its optimum sits at a small actor count here. With more
-cores its optimum shifts up and would plausibly reach the same batch sweet spot —
-their architecture targets exactly that many-core regime. Core-count scaling is
-unmeasured in V1; nothing here ranks the libraries beyond this workload and host.
+The comparison is also bounded to its regime: one GPU with few CPU cores (4, SMT
+off) — a common single-GPU cloud shape. reinfors' lockstep pooling decouples inference
+batch size from CPU concurrency; OpenSpiel's actor fleet couples them, acquiring batch
+by adding actors. What that coupling costs on this box is a measured question the
+[unified sizing grid](configuring-the-engines.md) answers, not an assumption — and
+their architecture is built to scale further with more cores and actors. Core-count
+scaling is unmeasured in V1; nothing here ranks the libraries beyond this workload and
+host.
