@@ -6,7 +6,7 @@
     {
       "name": "rf_train_smoke",
       "argv": [
-        "benchmarks/train_leg.py"
+        "experiments/train_leg.py"
       ],
       "args": {
         "side": "rf",
@@ -24,7 +24,7 @@
     {
       "name": "os_train_smoke",
       "argv": [
-        "benchmarks/train_leg.py"
+        "experiments/train_leg.py"
       ],
       "args": {
         "side": "os",

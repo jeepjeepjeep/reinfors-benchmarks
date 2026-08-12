@@ -14,7 +14,7 @@ and device — they are the calibration everything downstream cites.
 | engine rate vs n_games | realized rows/s through the data-gen loop at n_games 32/64/128, per device | `engine_rate_vs_n_games` (`v1_internal`) |
 | CPU/CUDA crossover | the ratio between the device arms of both curves | analysis across the two cells above |
 
-**Instrument:** [`benchmarks/measure_inference.py`](../benchmarks/measure_inference.py).
+**Instrument:** [`experiments/measure_inference.py`](../experiments/measure_inference.py).
 `--mode kernel` runs the net alone; `--mode engine` runs the self-play data-gen loop
 with the net as callback. `--devices` is a sweep list — every point runs once per
 listed device, and the crossover is the comparison between the arms. Three cycles per

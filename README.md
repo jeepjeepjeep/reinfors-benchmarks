@@ -32,10 +32,10 @@ is the headline. That is also the order the campaign runs them.
 
 | path | contents |
 |---|---|
-| `benchmarks/` | one script per experiment surface: `measure_throughput.py` (training throughput under the full round workload, both engines), `measure_inference.py` (kernel/engine curves, f32 A/B, device crossover), `train_leg.py` + `train_az_rf.py` (matched-cadence legs: harness + the rf workload), `eval_h2h.py` (Arena-protocol head-to-head), `runner.py` (the orchestrator) |
-| `benchmarks/lib/` | shared, non-executable: `protocol.py` (matched constants), `run.py` (child runtime), `manifest.py` + `preflight.py` (evidence + freeze gate), `common.py` (the benchmark net) |
-| `benchmarks/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `benchmarks/runner.py` |
-| `benchmarks/tests/` | the test suite, one file per surface |
+| `experiments/` | one script per experiment surface: `measure_throughput.py` (training throughput under the full round workload, both engines), `measure_inference.py` (kernel/engine curves, f32 A/B, device crossover), `train_leg.py` + `train_az_rf.py` (matched-cadence legs: harness + the rf workload), `eval_h2h.py` (Arena-protocol head-to-head), `runner.py` (the orchestrator) |
+| `experiments/lib/` | shared, non-executable: `protocol.py` (matched constants), `run.py` (child runtime), `manifest.py` + `preflight.py` (evidence + freeze gate), `common.py` (the benchmark net) |
+| `experiments/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `experiments/runner.py` |
+| `experiments/tests/` | the test suite, one file per surface |
 | `scripts/` | OpenSpiel source-build + patches (`setup_openspiel_cpp.sh`), telemetry panels (`plot_round.py`) |
 | `runs/` | untracked, append-only: every campaign session's evidence (`<session>/<cell>/cycleN/`), box-synced verbatim after a campaign |
 | `published/` | tracked artifacts behind every published number, one directory per campaign as a filtered mirror of `runs/` (same paths, model binaries stripped to the GitHub release); pre-campaign-era artifacts live in the maintainers' archive (and git history) |
@@ -53,7 +53,7 @@ Two environments with distinct roles:
   (`requirements-venv23.txt`; torch 2.3.0 is the load-bearing pin — the libtorch
   generation OpenSpiel's C++ AZ links against; never mix kernel generations across the
   stacks). Every published number runs here, and
-  `benchmarks/lib/preflight.py` refuses measurement runs elsewhere.
+  `experiments/lib/preflight.py` refuses measurement runs elsewhere.
 - **`.venv` — the dev/test env** (`pyproject.toml` + `uv.lock`, current torch). For
   linting and the harness test suites only; never for measurement.
 
@@ -79,10 +79,10 @@ argv and environment captured, keeps run directories append-only, and finalizes 
 completion manifest (status, exit code, output hashes) for every cell:
 
 ```bash
-.venv23/bin/python benchmarks/runner.py benchmarks/specs/v1_grid.json --set tag=<frozen tag>
+.venv23/bin/python experiments/runner.py experiments/specs/v1_grid.json --set tag=<frozen tag>
 ```
 
-The specs under `benchmarks/specs/` are the reviewable experiment matrix: cells,
+The specs under `experiments/specs/` are the reviewable experiment matrix: cells,
 repeats, deadlines, pinned cores. Direct harness invocation remains available for
 exploration, but nothing produced that way is publishable evidence.
 

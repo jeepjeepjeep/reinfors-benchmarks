@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-RUNNER = REPO / "benchmarks" / "runner.py"
+RUNNER = REPO / "experiments" / "runner.py"
 
 
 def _spec(tmp_path: Path, cells) -> Path:
@@ -229,7 +229,7 @@ def test_unresolved_expect_tag_is_rejected(tmp_path: Path) -> None:
 
 
 def test_checked_in_specs_are_well_formed() -> None:
-    specs = sorted((REPO / "benchmarks" / "specs").glob("*.json"))
+    specs = sorted((REPO / "experiments" / "specs").glob("*.json"))
     assert specs, "no checked-in specs found"
     known = {"session", "expect_tag", "cycles", "cells"}
     cell_known = {

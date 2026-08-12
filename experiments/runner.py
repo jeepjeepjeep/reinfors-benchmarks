@@ -4,7 +4,7 @@ Responsibilities: strict freeze preflight, unique append-only run directories, l
 every benchmark subprocess itself (exact argv and environment captured), start/completion
 manifests finalized atomically, raw-output hashing, and a session index.
 
-    python benchmarks/runner.py spec.json [--resume] [--skip-preflight]
+    python experiments/runner.py spec.json [--resume] [--skip-preflight]
 
 Spec:
 {
@@ -13,7 +13,7 @@ Spec:
   "cycles": 3,                      # repeats, interleaved: cycle over all cells, repeat
   "cells": [
     {"name": "rf_n64_g1",
-     "argv": ["benchmarks/train_az_rf.py", ...],
+     "argv": ["experiments/train_az_rf.py", ...],
                                     # a .py argv[0] runs under the runner's own
                                     # (preflighted) interpreter — never name one
      "args": {"n-games": 64, "seed": "{cycle}"},  # dict-style config, appended as --key value

@@ -4,7 +4,7 @@
 state. The benchmark COMMAND must be supplied by the caller (`command=[...]`); this
 module never guesses it. Shell harnesses invoke the CLI with the real command string:
 
-    python benchmarks/lib/manifest.py --out <run_dir> --command "<exact command>" k=v ...
+    python experiments/lib/manifest.py --out <run_dir> --command "<exact command>" k=v ...
 """
 
 from __future__ import annotations

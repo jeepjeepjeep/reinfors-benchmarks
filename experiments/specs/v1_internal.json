@@ -6,7 +6,7 @@
     {
       "name": "kernel_rate_vs_batch",
       "argv": [
-        "benchmarks/measure_inference.py"
+        "experiments/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -26,7 +26,7 @@
     {
       "name": "engine_rate_vs_n_games",
       "argv": [
-        "benchmarks/measure_inference.py"
+        "experiments/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -47,7 +47,7 @@
     {
       "name": "f32_ab_f64",
       "argv": [
-        "benchmarks/measure_inference.py"
+        "experiments/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -70,7 +70,7 @@
     {
       "name": "f32_ab_f32",
       "argv": [
-        "benchmarks/measure_inference.py"
+        "experiments/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -93,7 +93,7 @@
     {
       "name": "rf_cache_4096",
       "argv": [
-        "benchmarks/measure_throughput.py"
+        "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -114,7 +114,7 @@
     {
       "name": "rf_cache_32768",
       "argv": [
-        "benchmarks/measure_throughput.py"
+        "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -135,7 +135,7 @@
     {
       "name": "rf_cache_262144",
       "argv": [
-        "benchmarks/measure_throughput.py"
+        "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -156,7 +156,7 @@
     {
       "name": "rf_cache_2097152",
       "argv": [
-        "benchmarks/measure_throughput.py"
+        "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",

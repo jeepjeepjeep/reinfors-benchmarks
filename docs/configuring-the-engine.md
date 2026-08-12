@@ -18,11 +18,11 @@ constants and are deliberately never tuned — see
 **Per-lever notes:**
 
 - **f32** — engine-mode A/B via
-  [`measure_inference.py`](../benchmarks/measure_inference.py), identical except the
+  [`measure_inference.py`](../experiments/measure_inference.py), identical except the
   callback output dtype. The gain grows as the net shrinks, because the boundary cost
   is a larger share of a smaller forward.
 - **cache** — full-workload legs via
-  [`measure_throughput.py`](../benchmarks/measure_throughput.py) `--cache N`. Hit rate
+  [`measure_throughput.py`](../experiments/measure_throughput.py) `--cache N`. Hit rate
   depends on the game's transposition structure and *rises over training* as the net
   concentrates its own play — the trajectory reads from the matched round's telemetry.
 - **grouping** — the decision comparison is matched rows-per-call (n64×1 vs n128×2),

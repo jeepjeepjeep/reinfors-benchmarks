@@ -11,7 +11,7 @@ Outputs one JSONL line per learn step (wall, states collected, steps, losses) pl
 state_dict checkpoints for the offline strength eval — the analogues of their learner.jsonl and
 checkpoint files.
 
-  uv run python benchmarks/train_az_rf.py --minutes 3 --out /tmp/rf_az_smoke
+  uv run python experiments/train_az_rf.py --minutes 3 --out /tmp/rf_az_smoke
 """
 
 import argparse

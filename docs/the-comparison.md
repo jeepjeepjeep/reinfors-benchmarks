@@ -14,7 +14,7 @@ checkpoint writes and cache sharing the GPU), measured over the pre-registered i
 window and selected by completed-game states/s — the rate that survives a hard
 deadline, not raw search speed. OpenSpiel: actors 8/16/32/64 plus the 64:32 decoupling
 probe. reinfors: n_games 64/128/256 × 1/2 groups. Three interleaved cycles per cell via
-[`measure_throughput.py`](../benchmarks/measure_throughput.py).
+[`measure_throughput.py`](../experiments/measure_throughput.py).
 
 **Decision point:** each side's winner becomes its configuration in
 `v1_training.json` — revise the encoded topologies there if the grid disagrees.
@@ -22,7 +22,7 @@ probe. reinfors: n_games 64/128/256 × 1/2 groups. Three interleaved cycles per 
 ## 2. The matched round — `v1_training`
 
 Three fresh 2-hour legs per side at the selected configurations, the wall-clock budget
-enforced identically on both by [`train_leg.py`](../benchmarks/train_leg.py)'s
+enforced identically on both by [`train_leg.py`](../experiments/train_leg.py)'s
 scheduled kill. Throughput figures reduce post-hoc from the archived telemetry
 (`learner.jsonl` — native from the rf trainer, harness-sampled into the same schema for
 the OpenSpiel binary).
@@ -32,7 +32,7 @@ sides) verifies matched training intensity, so scheduling differences cannot be
 mistaken for intensity differences; telemetry fields that are *not* comparable across
 stacks (the two cache-hit definitions differ) are flagged rather than compared. The
 learning parameters themselves are matched constants
-([`lib/protocol.py`](../benchmarks/lib/protocol.py)), never tuned.
+([`lib/protocol.py`](../experiments/lib/protocol.py)), never tuned.
 
 Each rf leg publishes its final net as `model.pt`; every leg records its newest
 checkpoint in its manifest.
@@ -42,7 +42,7 @@ checkpoint in its manifest.
 The cycle-k model pairs play 100 Arena-protocol games each: seeded uniform-random
 openings, each played once per color, pair-level scoring; 64 simulations per move on
 both sides; their side runs its own unmodified engine over the bridge
-([`eval_h2h.py`](../benchmarks/eval_h2h.py)). The spec points both sides at their
+([`eval_h2h.py`](../experiments/eval_h2h.py)). The spec points both sides at their
 training-leg directories (`rf-model` / `os-model`); the harness resolves each engine's
 native model format (rf: `model.pt`; OpenSpiel: highest-numbered checkpoint, their
 loader takes a directory + number) and records the resolved artifacts and hashes in the
@@ -56,7 +56,7 @@ binary-smoke pytest gate:
 
 ```bash
 H2H_SMOKE_OS_PATH=<os smoke leg dir> H2H_SMOKE_OS_CKPT=<n> \
-  .venv23/bin/python -m pytest benchmarks/tests/test_eval_h2h.py
+  .venv23/bin/python -m pytest experiments/tests/test_eval_h2h.py
 ```
 
 Their outputs are gates, never evidence.
