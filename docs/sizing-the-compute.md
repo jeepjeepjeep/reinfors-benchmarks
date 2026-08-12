@@ -11,12 +11,12 @@ batch sweet spot bound both sides of [the comparison](the-comparison.md).
 
 | experiment | measures | cells |
 |---|---|---|
-| kernel rate vs batch | pure net forwards/s at batch 32/64/128/256, per device | `kernel_rate_vs_batch` (`v1_internal`) |
-| CPU/CUDA crossover | the ratio between the device arms of the curve | analysis of the cell above |
+| kernel rate vs batch | pure net forwards/s at batch 32/64/128/256, per device — the CUDA:CPU ratio of the two arms is the crossover curve | `kernel_rate_vs_batch` (`v1_internal`) |
 
 **Instrument:** [`experiments/measure_inference.py`](../experiments/measure_inference.py)
 `--mode kernel` — the net alone, no engine. `--devices` is a sweep list: every point
-runs once per listed device, and the crossover is the comparison between the arms.
+runs once per listed device; the crossover is not a separate measurement but the
+ratio between the arms.
 Three cycles; each run leaves `rows.jsonl` plus a finalized manifest. (The companion
 `--mode engine` measurement — the same sweep through reinfors' data-gen loop — is
 reinfors-specific and lives with [engine sizing](configuring-the-engines.md).)
