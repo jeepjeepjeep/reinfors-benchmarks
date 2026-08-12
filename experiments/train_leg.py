@@ -14,17 +14,15 @@ downstream evaluation never has to guess at filenames.
 """
 
 import argparse
-import re
 import shutil
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
+import checkpoints
 import manifest
 import protocol
 import run
-
-_OS_CKPT = re.compile(r"checkpoint-(-?\d+)\.pt$")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -61,18 +59,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def verify_checkpoint(path: str | Path, side: str) -> bool:
-    """The deadline kill can tear a mid-write checkpoint; only one that LOADS counts
-    as complete. rf checkpoints are torch state_dicts; theirs are libtorch archives."""
-    import torch
-
-    try:
-        if side == "rf":
-            torch.load(path, map_location="cpu")
-        else:
-            torch.jit.load(str(path), map_location="cpu")
-        return True
-    except Exception:
-        return False
+    """Delegates to the shared resolver: rf = state_dict load; os = the model AND
+    optimizer archive pair (their loader loads both — see lib/checkpoints.py)."""
+    if side == "rf":
+        return checkpoints.verify_rf(path)
+    return checkpoints.verify_os_pair(path)
 
 
 def latest_checkpoint(out: Path, side: str) -> tuple[str | None, int | None, list[str]]:
@@ -90,7 +81,7 @@ def latest_checkpoint(out: Path, side: str) -> tuple[str | None, int | None, lis
             (
                 (int(m.group(1)), p)
                 for p in out.glob("checkpoint-*.pt")
-                if (m := _OS_CKPT.search(p.name))
+                if (m := checkpoints.OS_CKPT.search(p.name))
             ),
             reverse=True,
         )
@@ -176,6 +167,9 @@ def main(argv: list[str] | None = None) -> int:
     }
     if ckpt:
         hashes[Path(ckpt).name] = manifest.sha256(ckpt)
+        if args.side == "os":
+            opt = checkpoints.optimizer_path(Path(ckpt))
+            hashes[opt.name] = manifest.sha256(opt)
         if args.side == "rf":
             hashes["model.pt"] = manifest.sha256(out / "model.pt")
     manifest.finalize(

@@ -54,6 +54,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 import numpy as np
 import reinfors as rf
+import checkpoints
 import manifest
 import protocol
 from common import SweepResnet
@@ -491,17 +492,9 @@ def main() -> None:
     rf_model = Path(args.rf_model)
     args.rf_checkpoint = str(rf_model / "model.pt" if rf_model.is_dir() else rf_model)
     args.os_path = args.os_model
-    if args.os_checkpoint == "latest":
-        numbered = [
-            int(m.group(1))
-            for p in Path(args.os_path).glob("checkpoint-*.pt")
-            if (m := re.search(r"checkpoint-(-?\d+)\.pt$", p.name))
-        ]
-        if not numbered:
-            sys.exit(f"no checkpoint-N.pt found in {args.os_path}")
-        args.os_checkpoint = max(numbered)
-    else:
-        args.os_checkpoint = int(args.os_checkpoint)
+    # manifest-first: a training leg records its VERIFIED selection; re-resolving by
+    # filename could pick a torn checkpoint the leg already skipped
+    args.os_checkpoint = checkpoints.resolve_os(args.os_path, args.os_checkpoint)
 
     out = Path(args.out).resolve()
     if out.exists():
@@ -561,6 +554,9 @@ def main() -> None:
         os_checkpoint=args.os_checkpoint,
         os_checkpoint_sha256=_sha256(
             Path(args.os_path) / f"checkpoint-{args.os_checkpoint}.pt"
+        ),
+        os_optimizer_sha256=_sha256(
+            Path(args.os_path) / f"checkpoint-{args.os_checkpoint}-optimizer.pt"
         ),
         net={"width": width, "depth": depth},
         sims={"theirs": args.sims, "ours": our_sims},

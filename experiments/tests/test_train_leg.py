@@ -194,9 +194,14 @@ def test_verify_checkpoint_rejects_torn_files(tmp_path: Path) -> None:
 
     good_os = tmp_path / "checkpoint-3.pt"
     torch.jit.save(torch.jit.script(torch.nn.Linear(2, 2)), str(good_os))
+    # a model without its optimizer archive is an INCOMPLETE pair (their loader
+    # loads both; a kill can land between the two writes)
+    assert not train.verify_checkpoint(good_os, "os")
+    torch.save({"s": torch.zeros(1)}, tmp_path / "checkpoint-3-optimizer.pt")
     assert train.verify_checkpoint(good_os, "os")
     torn_os = tmp_path / "checkpoint-4.pt"
     torn_os.write_bytes(good_os.read_bytes()[: good_os.stat().st_size // 2])
+    torch.save({"s": torch.zeros(1)}, tmp_path / "checkpoint-4-optimizer.pt")
     assert not train.verify_checkpoint(torn_os, "os")
 
 
