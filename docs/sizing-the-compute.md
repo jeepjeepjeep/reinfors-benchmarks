@@ -11,7 +11,7 @@ batch sweet spot bound both sides of [the comparison](the-comparison.md).
 
 | experiment | measures | cells |
 |---|---|---|
-| kernel rate vs batch | pure net forwards/s at batch 32/64/128, per device | `kernel_rate_vs_batch` (`v1_internal`) |
+| kernel rate vs batch | pure net forwards/s at batch 32/64/128/256, per device | `kernel_rate_vs_batch` (`v1_internal`) |
 | CPU/CUDA crossover | the ratio between the device arms of the curve | analysis of the cell above |
 
 **Instrument:** [`experiments/measure_inference.py`](../experiments/measure_inference.py)
@@ -42,19 +42,21 @@ transfer to other nets or devices — measure yours before sizing anything again
 
 **Kernel rate vs batch** (pure forwards, w256 d8; medians over 3 cycles):
 
-| batch | CUDA rows/s | CPU rows/s |
-|---|---|---|
-| 32 | TBD | TBD |
-| 64 | TBD | TBD |
-| 128 | TBD | TBD |
+| batch | CUDA rows/s | CPU rows/s | CUDA : CPU |
+|---|---|---|---|
+| 32 | TBD | TBD | TBD |
+| 64 | TBD | TBD | TBD |
+| 128 | TBD | TBD | TBD |
+| 256 | TBD | TBD | TBD |
 
 The A10G's sweet spot for this net has sat at batch 64, with a measurable per-row
 *regression* at batch 128 — the term the
 [grouping model](configuring-the-engines.md) prices against.
 
-**Crossover:** CUDA has cleared CPU from small batches at this net size, while batch-1
-GPU inference sits far *below* CPU — the regime pooled collection exists to escape.
-The V1 verdict (smallest batch where the CUDA:CPU ratio clears 2.0): TBD.
+**Crossover:** the ratio column is the crossover curve — CUDA has cleared CPU from
+small batches at this net size, while batch-1 GPU inference sits far *below* CPU (the
+regime pooled collection exists to escape). The V1 verdict (smallest batch where the
+ratio clears 2.0): TBD.
 
 *Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G), cell `kernel_rate_vs_batch` in
 `v1_internal`, 3 cycles, medians with per-cycle spreads
