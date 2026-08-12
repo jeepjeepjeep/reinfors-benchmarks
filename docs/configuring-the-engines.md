@@ -48,12 +48,11 @@ pre-campaign record (their learner's own counters; the earlier actor-log-based g
 undercounted by actors/20 and was retracted) shows their states/s **rising
 monotonically** through the measured range — 144.9 / 177.4 / 199.6 at a16/a32/a64,
 single ~25-minute legs — with the curve's turn, if any, beyond the old grid's edge.
-The V1 grid — `os_*` cells of `v1_grid`, actors 4 through 128 — maps the full curve:
-the left flank (a4/a8, where small batches pay the kernel curve's worst prices), the
-previously measured range, and the extension (a128) that looks for the turn. Two
-**decoupling probes** separate batch size from concurrency: a64:b32, and a128:b64 —
-the latter running 128 games at 64-row calls, the exact games-in-flight and call size
-of reinfors' n128×2 operating point.
+The V1 grid — `os_*` cells of `v1_grid`, actors 32 through 256 — maps the curve in
+two columns: **full-fill** (batch = actors) and **half-fill** (batch = actors/2),
+the latter separating batch size from concurrency at every call size. The half-fill
+64-row cell (a128:b64) runs 128 games at 64-row calls — the exact games-in-flight and
+call size of reinfors' n128×2 operating point.
 
 ## reinfors throughput levers
 
@@ -81,16 +80,18 @@ states/s; achieved batch and games-in-flight come from each cell's telemetry —
 equal call size does *not* mean equal concurrency, and that difference is the design
 comparison itself:
 
-| call size | OpenSpiel (batch = actors) | rf ungrouped | rf grouped (2 groups) |
-|---|---|---|---|
-| 4 | a4: TBD | — | — |
-| 8 | a8: TBD | — | — |
-| 16 | a16: TBD | — | n32×2: TBD |
-| 32 | a32: TBD | n32×1: TBD | n64×2: TBD |
-| 64 | a64: TBD | n64×1: TBD | n128×2: TBD |
-| 128 | a128: TBD | n128×1: TBD | n256×2: TBD |
-| 32 @ 64 games | a64:b32: TBD | | |
-| 64 @ 128 games | a128:b64: TBD | | matched-concurrency partner of n128×2 |
+| call size | OpenSpiel (actors = size) | OpenSpiel half-fill (actors = 2×size) | rf ungrouped (n = size) | rf grouped (n = 2×size) |
+|---|---|---|---|---|
+| 32 | a32: TBD | a64:b32: TBD | n32×1: TBD | n64×2: TBD |
+| 64 | a64: TBD | a128:b64: TBD | n64×1: TBD | n128×2: TBD |
+| 128 | a128: TBD | a256:b128: TBD | n128×1: TBD | n256×2: TBD |
+| 256 | a256: TBD | — | n256×1: TBD | — |
+
+The two "2×size" columns are structural mirrors: each runs twice the games of its
+call size — OpenSpiel by capping the batch below the actor count, reinfors by
+splitting into two overlapped groups — so every horizontal neighbor pair compares the
+stacks at identical concurrency *and* identical call size (a128:b64 ↔ n128×2 being
+the operating-point case).
 
 Within the reinfors columns, the grouping lever reads on the diagonal (matched
 rows-per-call: n64×1 → n128×2 realized ×TBD against a ×TBD predicted ceiling) and on
@@ -104,6 +105,7 @@ inference share per rf cell accompany the published table.
 | 32 | TBD | TBD |
 | 64 | TBD | TBD |
 | 128 | TBD | TBD |
+| 256 | TBD | TBD |
 
 The per-row rate has peaked at 64 with a measurable regression at 128 — the mechanism
 pricing every column of the unified grid. Engine-level crossover (smallest call size
@@ -113,10 +115,11 @@ where CUDA clears CPU ×2 through this loop): TBD.
 topologies in `v1_training.json` ([the comparison](the-comparison.md)).
 
 Pre-registered questions the grid answers: where does the OpenSpiel curve turn (its
-corrected record still rises at a64); whether a4/a8 fall below a16 (small-batch kernel
-prices); whether the a128:b64 probe matches n128×2 at identical concurrency and call
-size; and the per-row mechanism comparison at each side's optimum (µs/row and
-inference-thread saturation, from the same telemetry).
+corrected record still rises at a64); whether half-fill beats full-fill at matched
+call size (concurrency helps completion but splits CPU further); whether a128:b64
+matches n128×2 at identical concurrency and call size; and the per-row mechanism
+comparison at each side's optimum (µs/row and inference-thread saturation, from the
+same telemetry).
 
 **f32 vs f64** (engine mode, call size 64):
 

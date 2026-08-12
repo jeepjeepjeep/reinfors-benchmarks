@@ -13,7 +13,7 @@
         "devices": "cpu,cuda",
         "depths": "8",
         "widths": "256",
-        "batches": "32,64,128",
+        "batches": "32,64,128,256",
         "mode": "kernel",
         "out": "{run_dir}/inference"
       },
@@ -33,7 +33,7 @@
         "devices": "cpu,cuda",
         "depths": "8",
         "widths": "256",
-        "n-games": "32,64,128",
+        "n-games": "32,64,128,256",
         "mode": "engine",
         "engine-leg-seconds": 120,
         "out": "{run_dir}/inference"

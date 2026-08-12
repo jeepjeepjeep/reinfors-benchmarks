@@ -4,60 +4,6 @@
   "cycles": 3,
   "cells": [
     {
-      "name": "os_a4",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "os",
-        "actors": 4,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
-      "name": "os_a8",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "os",
-        "actors": 8,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
-      "name": "os_a16",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "os",
-        "actors": 16,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
       "name": "os_a32",
       "argv": [
         "experiments/measure_throughput.py"
@@ -150,14 +96,13 @@
       ]
     },
     {
-      "name": "rf_n32_g1",
+      "name": "os_a256",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
-        "side": "rf",
-        "n-games": 32,
-        "n-groups": 1,
+        "side": "os",
+        "actors": 256,
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
@@ -169,14 +114,33 @@
       ]
     },
     {
-      "name": "rf_n32_g2",
+      "name": "os_a256b128",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "os",
+        "actors": 256,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput",
+        "batch": 128
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ]
+    },
+    {
+      "name": "rf_n32_g1",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
         "n-games": 32,
-        "n-groups": 2,
+        "n-groups": 1,
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
