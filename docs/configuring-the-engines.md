@@ -21,24 +21,6 @@ partner sits one diagonal away** (n64×1 ↔ n128×2, n128×1 ↔ n256×2): the 
 advantage at equal call size is a direct table read, and the winner is bracketed by
 measured neighbors on both sides.
 
-Two supporting pieces:
-
-- **The batch-response curve** — `engine_rate_vs_n_games` (`v1_internal`) via
-  [`measure_inference.py`](../experiments/measure_inference.py): rows/s vs call size
-  through reinfors' data-gen loop, cache off, no learner, per device. It isolates the
-  mechanism (per-row rate peaks at the device's sweet spot and regresses past it),
-  predicts the grid's ordering, and is the cheap transferable artifact — on different
-  hardware, run this ~6-minute curve instead of the multi-hour grid. It also yields
-  the engine-level CPU/CUDA crossover (from which n_games the GPU pays through this
-  loop).
-- **The grouping model** — with per-round search time `S` and inference time `I`,
-  overlap lifts throughput by up to `(S + I) / max(S, I)` (equivalently
-  `1 / max(p, 1 - p)` for inference share `p`, measured in the target condition's own
-  telemetry), **minus** what the new call size pays on the batch curve. The
-  matched-rows diagonal validates the prediction; the matched-games column (same n,
-  ×2 groups) shows why splitting *without* doubling usually loses — half-size calls
-  pay the curve's left flank.
-
 ## Sizing OpenSpiel — actors × inference batch
 
 Their topology axis is independent actor threads feeding a central batcher, so actor
@@ -90,8 +72,11 @@ the operating-point case).
 
 Within the reinfors columns, the grouping lever reads on the diagonal (matched
 rows-per-call: n64×1 → n128×2 realized ×TBD against a ×TBD predicted ceiling) and on
-the verticals (matched games: half-size calls pay the batch curve). Rows/call and
-inference share per rf cell accompany the published table.
+the verticals (matched games: half-size calls pay the batch curve). The ceiling is
+`1 / max(p, 1 − p)` for inference share `p` measured in the ungrouped cell's own
+telemetry — overlap can hide at most the smaller of search and inference — minus what
+the new call size pays on the batch-response curve. Rows/call and inference share per
+rf cell accompany the published table.
 
 **Batch-response curve** (isolated loop, per device; medians over 3 cycles):
 
