@@ -1,0 +1,27 @@
+{
+  "session": "v1_smoke_h2h",
+  "expect_tag": "{tag}",
+  "cycles": 1,
+  "cells": [
+    {
+      "name": "h2h_smoke",
+      "argv": [
+        "experiments/eval_h2h.py"
+      ],
+      "args": {
+        "rf-model": "runs/v1_smoke/rf_train_smoke/cycle1/training",
+        "os-model": "runs/v1_smoke/os_train_smoke/cycle1/training",
+        "games": 2,
+        "workers": 2,
+        "seed": 990000,
+        "device": "cuda",
+        "az-device": "/cuda:0",
+        "out": "{run_dir}/h2h"
+      },
+      "deadline_seconds": 3600,
+      "outputs": [
+        "h2h/games.pgn"
+      ]
+    }
+  ]
+}

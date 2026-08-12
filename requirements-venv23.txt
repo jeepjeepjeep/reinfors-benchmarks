@@ -1,0 +1,10 @@
+# Pins for the canonical measurement env (.venv23) — built by scripts/make_venv23.sh.
+# torch is THE load-bearing pin: 2.3.0 matches the libtorch generation the OpenSpiel
+# C++ AZ build links against (never mix kernel generations across the stacks).
+# reinfors itself is installed separately from a release wheel (see README).
+# The authoritative record for any published run is the pip freeze in its provenance.
+torch==2.3.0
+numpy==2.5.1
+open_spiel==2.0
+chess==1.11.2
+matplotlib==3.11.1

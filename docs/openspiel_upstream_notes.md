@@ -4,6 +4,20 @@ Everything we learned getting OpenSpiel's C++ libtorch AlphaZero building and pe
 GPU box (AWS g5.2xlarge, Ubuntu 22.04, A10G), 2026-07-31. All claims below are measured or
 reproduced, with commits/SHAs named. Our working recipe: `scripts/setup_openspiel_cpp.sh`.
 
+## Pin policy
+
+The comparison targets OpenSpiel **as maintained today**: a pinned master snapshot
+built from source with CUDA libtorch, including upstream's own performance fixes. The
+snapshot is taken from the upstream tip and, before any publication run, re-verified
+against current master — if commits have landed touching the measured subsystems
+(`algorithms/alpha_zero_torch`, the game, the evaluator/bot surfaces), the benchmark
+re-pins and rebuilds rather than publishing against a superseded target. The pin in
+force (commit + patch hashes + applied-diff hash) is recorded in `open_spiel_cpp/PIN`,
+verified by preflight, and carried in every run manifest. The two required
+interventions are content-preserving and documented below: restoring build glue master
+deletes while still referencing, and measurement instrumentation plus a device flag in
+example code.
+
 ## Issue inventory (current master, snapshot 112b7770 / 2026-07-17)
 
 1. **libtorch/libnop build glue deleted; path unbuildable since 2025-10-07.**
@@ -57,7 +71,8 @@ reproduced, with commits/SHAs named. Our working recipe: `scripts/setup_openspie
   `9972442` (2025-10-10, "Improve performance of Tensor object creation" — from_blob
   staging; landed 3 days AFTER the build glue was deleted, i.e. author built internally)
   and PR #1488 (2026-03, NoGradGuard + batched output extraction; issue #1487).
-  Our independent diagnosis + backport for the pinned era: `scripts/fix_vpnet_gpu_staging.patch`
+  Our independent diagnosis + backport for the pinned era: `fix_vpnet_gpu_staging.patch`
+  (retired from the tree now that master carries upstream's own fix; in git history)
   (kept for the as-shipped-era measurements; NOT applied to master builds).
 - **Measured effect of their fixes** (chess w128 d8, 8 actors, A10G): 134.6 -> ~4,700
   rows/s (**~35x**), GPU now 17x their CPU. Strong PR-motivation numbers: master's code is

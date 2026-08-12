@@ -1,0 +1,27 @@
+{
+  "session": "v1_h2h",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "h2h_100",
+      "argv": [
+        "experiments/eval_h2h.py"
+      ],
+      "args": {
+        "rf-model": "runs/v1_training/rf_train/cycle{cycle}/training",
+        "os-model": "runs/v1_training/os_train/cycle{cycle}/training",
+        "games": 100,
+        "workers": 4,
+        "seed": "{cycle}000",
+        "device": "cuda",
+        "az-device": "/cuda:0",
+        "out": "{run_dir}/h2h"
+      },
+      "deadline_seconds": 21600,
+      "outputs": [
+        "h2h/games.pgn"
+      ]
+    }
+  ]
+}

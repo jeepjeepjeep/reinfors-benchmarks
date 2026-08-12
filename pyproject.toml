@@ -3,6 +3,8 @@ name = "reinfors-benchmarks"
 version = "0.1.0"
 description = "Systems benchmarks comparing reinfors against peer RL frameworks (OpenSpiel)"
 requires-python = ">=3.11"
+# Dev/test env only (.venv): lint + harness test suites. Measurements run in .venv23,
+# built from requirements-venv23.txt (torch 2.3.0 to match OpenSpiel's libtorch pin).
 dependencies = [
     "numpy>=1.26",
     "torch>=2.4",
@@ -11,6 +13,9 @@ dependencies = [
     "matplotlib>=3.8",  # scripts/plot_round.py telemetry panels
     # reinfors is installed from a locally built wheel (see README) until it is published.
 ]
+
+[dependency-groups]
+dev = ["pytest>=8"]
 
 [tool.uv]
 package = false

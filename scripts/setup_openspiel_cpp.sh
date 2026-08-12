@@ -41,8 +41,9 @@ cd open_spiel_cpp
 # as-is: 86fe553c deleted the libtorch/libnop CMake glue while the root CMakeLists still
 # add_subdirectory's both (configure error; unreported upstream as of 2026-07). Restored
 # below content-identical from that commit's parent — build glue only, zero behavior.
-# (Historical: pre-master-era "as shipped" measurements used pin d15d49f8 +
-# scripts/fix_vpnet_gpu_staging.patch, kept for the record.)
+# (Historical: pre-master-era "as shipped" measurements used pin d15d49f8 + a
+# staging backport, fix_vpnet_gpu_staging.patch — retired to the untracked attic;
+# retrievable from git history.)
 OPEN_SPIEL_COMMIT=112b7770
 
 if [ ! -d open_spiel ]; then
@@ -81,6 +82,7 @@ if git apply --check ../../scripts/az_device_game_example.patch 2>/dev/null; the
   git apply ../../scripts/az_device_game_example.patch
 fi
 
+
 # fetches abseil/json/... plus (with the flags above) libtorch and libnop; cached + resumable
 ./install.sh
 
@@ -114,3 +116,19 @@ fi
 make -j"$JOBS" alpha_zero_torch_example alpha_zero_torch_game_example
 echo "binary: $(find . -name 'alpha_zero_torch_example' -type f)"
 echo "h2h binary: $(find . -name 'alpha_zero_torch_game_example' -type f)"
+
+# PIN is written only after a successful build, recording the full identity chain:
+# commit, the managed patches, the applied working-tree diff, AND the built binaries —
+# preflight verifies all four, so a stale binary from an earlier build cannot pass.
+cd ..
+{
+  echo "$OPEN_SPIEL_COMMIT"
+  for pf in instrument_vpevaluator.patch az_device_game_example.patch; do
+    echo "patch $pf $(shasum -a 256 "../../scripts/$pf" | cut -d' ' -f1)"
+  done
+  echo "diff $(git diff HEAD | shasum -a 256 | cut -d' ' -f1)"
+  for b in alpha_zero_torch_example alpha_zero_torch_game_example; do
+    echo "bin $b $(shasum -a 256 "build/examples/$b" | cut -d' ' -f1)"
+  done
+} > ../PIN
+echo "PIN written with source, patch, diff, and binary records"

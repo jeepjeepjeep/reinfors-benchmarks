@@ -1,0 +1,44 @@
+{
+  "session": "v1_training",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "os_train",
+      "argv": [
+        "experiments/train_leg.py"
+      ],
+      "args": {
+        "side": "os",
+        "actors": 64,
+        "batch": 64,
+        "minutes": 120,
+        "cores": "0-3",
+        "out": "{run_dir}/training"
+      },
+      "deadline_seconds": 7350,
+      "outputs": [
+        "training/telemetry.jsonl"
+      ]
+    },
+    {
+      "name": "rf_train",
+      "argv": [
+        "experiments/train_leg.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "seed": "{cycle}",
+        "minutes": 120,
+        "cores": "0-3",
+        "out": "{run_dir}/training"
+      },
+      "deadline_seconds": 7350,
+      "outputs": [
+        "training/telemetry.jsonl"
+      ]
+    }
+  ]
+}

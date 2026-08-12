@@ -1,0 +1,308 @@
+"""Runner semantics: unique dirs, captured argv, deadline vs crash, resume."""
+
+from __future__ import annotations
+
+import json
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+REPO = Path(__file__).resolve().parents[2]
+RUNNER = REPO / "experiments" / "runner.py"
+
+
+def _spec(tmp_path: Path, cells) -> Path:
+    spec = tmp_path / "spec.json"
+    spec.write_text(
+        json.dumps({"session": "t", "expect_tag": "v1", "cycles": 2, "cells": cells})
+    )
+    return spec
+
+
+def _run(spec: Path, *extra: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, str(RUNNER), str(spec), "--skip-preflight", *extra],
+        capture_output=True,
+        text=True,
+        cwd=REPO,
+    )
+
+
+def _session_dir() -> Path:
+    return REPO / "runs" / "t"
+
+
+@pytest.fixture(autouse=True)
+def _clean_runs():
+    yield
+    import shutil
+
+    for d in (REPO / "runs").glob("t"):
+        shutil.rmtree(d)
+
+
+def test_cells_run_interleaved_with_manifests_and_hashes(tmp_path: Path) -> None:
+    out = _run(
+        _spec(
+            tmp_path,
+            [
+                {
+                    "name": "a",
+                    "argv": [
+                        sys.executable,
+                        "-c",
+                        "open('{run_dir}/x.txt','w').write('hi')",
+                    ],
+                    "outputs": ["x.txt"],
+                },
+                {"name": "b", "argv": [sys.executable, "-c", "print('ok')"]},
+            ],
+        )
+    )
+    assert out.returncode == 0, out.stderr
+    session = _session_dir()
+    order = [
+        line.split()[1:] for line in out.stdout.splitlines() if line.startswith("run")
+    ]
+    assert order == [
+        ["a", "cycle", "1"],
+        ["b", "cycle", "1"],
+        ["a", "cycle", "2"],
+        ["b", "cycle", "2"],
+    ]
+    m = json.loads((session / "a" / "cycle1" / "manifest.json").read_text())
+    assert m["completed"] and m["status"] == "ok" and m["exit_code"] == 0
+    assert m["command"][0] == sys.executable  # the sentinel resolved to our env
+    assert "cycle1" in m["command"][2]
+    assert len(m["output_sha256"]["x.txt"]) == 64
+    index = json.loads((session / "index.json").read_text())
+    assert len(index) == 4
+
+
+def test_deadline_backstop_is_hung_and_blocks_resume(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "wedged",
+                "argv": [sys.executable, "-c", "import time; time.sleep(60)"],
+                "deadline_seconds": 1,
+                "cycles": 1,
+            },
+        ],
+    )
+    out = _run(spec)
+    assert out.returncode != 0 and "hang backstop" in out.stderr
+    session = _session_dir()
+    m = json.loads((session / "wedged" / "cycle1" / "manifest.json").read_text())
+    assert m["status"] == "hung" and m["intended_deadline_kill"] is True
+    blocked = _run(spec, "--resume")
+    assert blocked.returncode != 0 and "status 'hung'" in blocked.stderr
+
+
+def test_crash_fails_the_session(tmp_path: Path) -> None:
+    out = _run(
+        _spec(
+            tmp_path,
+            [
+                {
+                    "name": "boom",
+                    "argv": [sys.executable, "-c", "raise SystemExit(3)"],
+                    "cycles": 1,
+                },
+            ],
+        )
+    )
+    assert out.returncode != 0
+    m = json.loads((_session_dir() / "boom" / "cycle1" / "manifest.json").read_text())
+    assert m["status"] == "failed" and m["exit_code"] == 3
+
+
+def test_resume_blocks_on_failed_cell_until_archived(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {"name": "a", "argv": [sys.executable, "-c", "print('ok')"]},
+            {"name": "boom", "argv": [sys.executable, "-c", "raise SystemExit(3)"]},
+        ],
+    )
+    first = _run(spec)
+    assert first.returncode != 0
+    session = _session_dir()
+
+    # a failed attempt must never count as done: resume refuses until it is archived
+    blocked = _run(spec, "--resume")
+    assert blocked.returncode != 0
+    assert (
+        "status 'failed'" in blocked.stderr
+        and "move that directory aside" in blocked.stderr
+    )
+
+    (session / "boom" / "cycle1").rename(session / "boom" / "cycle1.attempt1")
+    second = _run(spec, "--resume")
+    assert "skip a cycle 1 (ok)" in second.stdout
+    assert "run  boom cycle 1" in second.stdout
+
+
+def test_placeholder_substitution_and_unresolved_rejection(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "sub",
+                "argv": [sys.executable, "-c", "print('cycle={cycle} extra={extra}')"],
+                "cycles": 1,
+            },
+        ],
+    )
+    missing = _run(spec)
+    assert missing.returncode != 0 and "unresolved placeholders" in missing.stderr
+
+    shutil.rmtree(_session_dir())  # differing substitutions may not resume a session
+    ok = _run(spec, "--set", "extra=42")
+    assert ok.returncode == 0, ok.stderr
+    session = _session_dir()
+    log = (session / "sub" / "cycle1" / "stdout.log").read_text()
+    assert "cycle=1 extra=42" in log
+    m = json.loads((session / "manifest.json").read_text())
+    assert m["substitutions"] == {"extra": "42"}
+    assert m["packages"] and m["cpu_model"] is not None
+
+
+def test_args_dict_expands_into_the_command(tmp_path: Path) -> None:
+    script = tmp_path / "cellscript.py"
+    script.write_text("import sys; print(sys.argv[1:])")
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "dictargs",
+                "argv": [str(script)],
+                "args": {"n-games": 64, "seed": "{cycle}", "quick": True},
+                "cycles": 1,
+            },
+        ],
+    )
+    out = _run(spec)
+    assert out.returncode == 0, out.stderr
+    session = _session_dir()
+    m = json.loads((session / "dictargs" / "cycle1" / "manifest.json").read_text())
+    assert m["command"][0] == sys.executable  # .py cell: runner's interpreter prepended
+    assert m["command"][-5:] == ["--n-games", "64", "--seed", "1", "--quick"]
+
+
+def test_cycle_composed_placeholders(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "composed",
+                "argv": [
+                    sys.executable,
+                    "-c",
+                    "import sys; print(sys.argv[1])",
+                    "{ckpt_{cycle}}",
+                ],
+                "cycles": 1,
+            },
+        ],
+    )
+    # {cycle} resolves first, so the missing per-cycle key must be caught — digits
+    # included (a bare [a-z_] guard would let "{ckpt_1}" through as a literal arg)
+    missing = _run(spec)
+    assert missing.returncode != 0 and "{ckpt_1}" in missing.stderr
+
+    shutil.rmtree(_session_dir())
+    ok = _run(spec, "--set", "ckpt_1=/tmp/model.pt")
+    assert ok.returncode == 0, ok.stderr
+    session = _session_dir()
+    log = (session / "composed" / "cycle1" / "stdout.log").read_text()
+    assert "/tmp/model.pt" in log
+
+
+def test_resume_refuses_changed_spec_or_substitutions(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [{"name": "a", "argv": [sys.executable, "-c", "print('ok')"], "cycles": 1}],
+    )
+    first = _run(spec)
+    assert first.returncode == 0, first.stderr
+
+    changed = _run(spec, "--resume", "--set", "surprise=1")
+    assert changed.returncode != 0 and "substitutions differ" in changed.stderr
+
+    spec.write_text(spec.read_text().replace('"cycles": 2', '"cycles": 3'))
+    edited = _run(spec, "--resume")
+    assert edited.returncode != 0 and "spec has changed" in edited.stderr
+
+
+def test_missing_required_output_fails_the_cell(tmp_path: Path) -> None:
+    spec = _spec(
+        tmp_path,
+        [
+            {
+                "name": "forgetful",
+                "argv": [sys.executable, "-c", "print('exit 0, wrote nothing')"],
+                "outputs": ["result.jsonl"],
+                "cycles": 1,
+            },
+        ],
+    )
+    out = _run(spec)
+    assert out.returncode != 0 and "missing required outputs" in out.stderr
+    m = json.loads(
+        (_session_dir() / "forgetful" / "cycle1" / "manifest.json").read_text()
+    )
+    assert m["status"] == "failed" and m["missing_outputs"] == ["result.jsonl"]
+
+
+def test_unresolved_expect_tag_is_rejected(tmp_path: Path) -> None:
+    spec = tmp_path / "spec.json"
+    spec.write_text(json.dumps({"session": "t", "expect_tag": "{tag}", "cells": []}))
+    out = _run(spec)
+    assert out.returncode != 0 and "unresolved expect_tag" in out.stderr
+
+
+def test_checked_in_specs_are_well_formed() -> None:
+    specs = sorted((REPO / "experiments" / "specs").glob("*.json"))
+    assert specs, "no checked-in specs found"
+    known = {"session", "expect_tag", "cycles", "cells"}
+    cell_known = {
+        "name",
+        "argv",
+        "args",
+        "deadline_seconds",
+        "cores",
+        "env",
+        "outputs",
+        "cycles",
+    }
+    for path in specs:
+        spec = json.loads(path.read_text())
+        assert spec["session"] == path.stem  # campaign driver maps sessions <-> files
+        assert set(spec) <= known, f"{path.name}: unknown keys {set(spec) - known}"
+        names = [c["name"] for c in spec["cells"]]
+        assert len(names) == len(set(names)), f"{path.name}: duplicate cell names"
+        for cell in spec["cells"]:
+            assert set(cell) <= cell_known, (
+                f"{path.name}:{cell['name']}: unknown keys {set(cell) - cell_known}"
+            )
+            assert cell["argv"] and all(isinstance(a, str) for a in cell["argv"])
+            assert ".venv" not in json.dumps(cell), (
+                f"{path.name}:{cell['name']}: pins an env; use argv[0] 'python'"
+            )
+            assert all(
+                isinstance(v, (str, int, float, bool))
+                for v in cell.get("args", {}).values()
+            ), f"{path.name}:{cell['name']}: args values must be scalars"
+            # deadlines are DERIVED hang backstops (payload + margin), never hand-set
+            if cell["argv"][0].endswith("measure_throughput.py"):
+                args = cell["args"]
+                w, t = args["warmup-seconds"], args["window-seconds"]
+                assert cell["deadline_seconds"] == w + t + 30 + 120, cell["name"]
+            if cell["argv"][0].endswith("train_leg.py"):
+                minutes = cell["args"]["minutes"]
+                assert cell["deadline_seconds"] == minutes * 60 + 30 + 120, cell["name"]

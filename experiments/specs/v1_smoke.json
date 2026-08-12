@@ -1,0 +1,43 @@
+{
+  "session": "v1_smoke",
+  "expect_tag": "{tag}",
+  "cycles": 1,
+  "cells": [
+    {
+      "name": "rf_train_smoke",
+      "argv": [
+        "experiments/train_leg.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "minutes": 4,
+        "cores": "0-3",
+        "out": "{run_dir}/training"
+      },
+      "deadline_seconds": 390,
+      "outputs": [
+        "training/telemetry.jsonl"
+      ]
+    },
+    {
+      "name": "os_train_smoke",
+      "argv": [
+        "experiments/train_leg.py"
+      ],
+      "args": {
+        "side": "os",
+        "actors": 16,
+        "batch": 16,
+        "minutes": 4,
+        "cores": "0-3",
+        "out": "{run_dir}/training"
+      },
+      "deadline_seconds": 390,
+      "outputs": [
+        "training/telemetry.jsonl"
+      ]
+    }
+  ]
+}

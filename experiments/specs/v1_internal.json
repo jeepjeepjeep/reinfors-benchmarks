@@ -1,0 +1,178 @@
+{
+  "session": "v1_internal",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "kernel_rate_vs_batch",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cpu,cuda",
+        "depths": "8",
+        "widths": "256",
+        "batches": "32,64,128,256",
+        "mode": "kernel",
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 900,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "engine_rate_vs_n_games",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cpu,cuda",
+        "depths": "8",
+        "widths": "256",
+        "n-games": "32,64,128,256",
+        "mode": "engine",
+        "engine-leg-seconds": 120,
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 2400,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "f32_ab_f64",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "128,256",
+        "n-games": "64",
+        "mode": "engine",
+        "callback": "fast",
+        "infer-dtype": "f64",
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 1800,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "f32_ab_f32",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "128,256",
+        "n-games": "64",
+        "mode": "engine",
+        "callback": "fast",
+        "infer-dtype": "f32",
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 1800,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "rf_cache_4096",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 4096,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ],
+      "cycles": 1
+    },
+    {
+      "name": "rf_cache_32768",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 32768,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ],
+      "cycles": 1
+    },
+    {
+      "name": "rf_cache_262144",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 262144,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ],
+      "cycles": 1
+    },
+    {
+      "name": "rf_cache_2097152",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "cache": 2097152,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ],
+      "cycles": 1
+    }
+  ]
+}

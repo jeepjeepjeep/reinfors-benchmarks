@@ -1,7 +1,7 @@
 """Tensorboard-style comparison panels for one matched round, from the two learners' own
 structured logs:
 
-  reinfors   <rf_dir>/learner.jsonl   (one line per minibatch -> aggregated per collection cycle)
+  reinfors   <rf_dir>/telemetry.jsonl (one line per minibatch -> aggregated per collection cycle)
   openspiel  <os_dir>/learner.jsonl   (one record per learn step, DataLogger jsonl)
 
 Both series are shown at the SAME aggregation: one point per collection/learning cycle
@@ -12,8 +12,8 @@ deltas between cycles). Losses are definitionally aligned (masked CE, value MSE 
 measured on each side's OWN self-play distribution — per-system learning progress, not
 head-to-head quality.
 
-  uv run python scripts/plot_round.py results/round_chess_rf_120m_n64 \
-      results/round_chess_os_120m_a16_b16 -o results/round1_panels.png
+  uv run python scripts/plot_round.py runs/v1_training/rf_train/cycle1/training \
+      runs/v1_training/os_train/cycle1/training -o /tmp/round_panels.png
 """
 
 import argparse
@@ -29,7 +29,7 @@ import numpy as np
 
 def load_rf(path: Path) -> dict[str, np.ndarray]:
     """One point per collection cycle: rows grouped by their cumulative-states plateau."""
-    rows = [json.loads(line) for line in (path / "learner.jsonl").open()]
+    rows = [json.loads(line) for line in (path / "telemetry.jsonl").open()]
     cycles: list[dict[str, float]] = []
     for r in rows:
         if not cycles or r["states"] != cycles[-1]["states"]:
