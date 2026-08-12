@@ -85,7 +85,7 @@ comparison itself:
 | 32 | a32: TBD | a64:b32: TBD | n32×1: TBD | n64×2: TBD |
 | 64 | a64: TBD | a128:b64: TBD | n64×1: TBD | n128×2: TBD |
 | 128 | a128: TBD | a256:b128: TBD | n128×1: TBD | n256×2: TBD |
-| 256 | a256: TBD | — | n256×1: TBD | — |
+| 256 | a256: TBD | a512:b256: TBD | n256×1: TBD | n512×2: TBD |
 
 The two "2×size" columns are structural mirrors: each runs twice the games of its
 call size — OpenSpiel by capping the batch below the actor count, reinfors by
