@@ -9,8 +9,8 @@
         "benchmarks/h2h/eval_h2h.py"
       ],
       "args": {
-        "rf-checkpoint": "runs/v1_training/rf_train/cycle{cycle}/training/model.pt",
-        "os-path": "runs/v1_training/os_train/cycle{cycle}/training",
+        "rf-model": "runs/v1_training/rf_train/cycle{cycle}/training",
+        "os-model": "runs/v1_training/os_train/cycle{cycle}/training",
         "games": 100,
         "workers": 4,
         "seed": "{cycle}000",

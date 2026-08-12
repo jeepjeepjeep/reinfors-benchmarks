@@ -27,8 +27,8 @@ with the result).
 Smoke test (untrained checkpoints, REQUIRED before any round — validates announcement
 format, HumanBot numeric input, castling ids, draw handling, lazy spawn):
 
-  uv run python benchmarks/h2h/eval_h2h.py --rf-checkpoint results/rf_smoke/ckpt_60s.pt \
-      --os-path results/os_smoke --os-checkpoint 0 --games 2 --sims 8 \
+  uv run python benchmarks/h2h/eval_h2h.py --rf-model results/rf_smoke/ckpt_60s.pt \
+      --os-model results/os_smoke --os-checkpoint 0 --games 2 --sims 8 \
       --device cuda --az-device /cuda:0 --out results/h2h_smoke
 """
 
@@ -401,8 +401,16 @@ def replay_for_pgn(actions: list[int]):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rf-checkpoint", required=True)
-    ap.add_argument("--os-path", required=True)
+    ap.add_argument(
+        "--rf-model",
+        required=True,
+        help="training-leg dir (resolves model.pt inside) or a checkpoint file",
+    )
+    ap.add_argument(
+        "--os-model",
+        required=True,
+        help="their training-leg dir (their model is a directory + checkpoint number)",
+    )
     ap.add_argument(
         "--os-checkpoint",
         default="latest",
@@ -459,6 +467,11 @@ def main() -> None:
     if not hasattr(rf, "Arena"):
         ap.error("this protocol needs a reinfors build with rf.Arena (PRs #159/#160)")
 
+    # each side's model reference resolves to its engine's native format here; the
+    # resolved concrete artifact is what the manifest records
+    rf_model = Path(args.rf_model)
+    args.rf_checkpoint = str(rf_model / "model.pt" if rf_model.is_dir() else rf_model)
+    args.os_path = args.os_model
     if args.os_checkpoint == "latest":
         numbered = [
             int(m.group(1))

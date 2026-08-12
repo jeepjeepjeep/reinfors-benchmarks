@@ -84,11 +84,12 @@ with its decision points:
    says otherwise.
 3. **`v1_training`** — the matched 2h legs at the selected topologies. Review the
    telemetry and surviving checkpoints before spending H2H hours on them.
-4. **`v1_h2h`** — strength evaluation of the cycle-k checkpoint pairs. The spec
-   references the training outputs as plain paths: session directories are
-   deterministic (`runs/<session>/…`), each rf leg publishes its final net as
-   `model.pt`, and the os side resolves `checkpoint-latest` at runtime (their loader
-   needs a directory + number, so no stable filename is possible there).
+4. **`v1_h2h`** — strength evaluation of the cycle-k model pairs. The spec points
+   both sides at their training-leg directories (`rf-model` / `os-model`, knowable at
+   spec-authoring time because session directories are deterministic); the harness
+   resolves each engine's native model format inside — `model.pt` for rf, the
+   highest-numbered checkpoint for os (their loader takes a directory + number) —
+   and records the resolved artifacts and hashes in the match manifest.
 5. **`v1_internal`** — reinfors-only curves and probes; independent of the above.
 
 Which runs fed which decisions is recorded per campaign in
