@@ -15,9 +15,9 @@ pages.
 
 | path | contents |
 |---|---|
-| `benchmarks/internal/` | the internal-family harness: CPU/parallel-scaling sweeps (`benchmark.py`), cross-framework connect4 tracks (`benchmark_vs.py`) |
+| `benchmarks/internal/` | reinfors-only measurements: batch/size curves incl. the f32 A/B (`measure_curves.py`), CPU/parallel-scaling sweeps (`benchmark.py`), cross-framework connect4 tracks (`benchmark_vs.py`) |
 | `benchmarks/h2h/` | the head-to-head strength evaluation: `eval_h2h.py` (Arena protocol, external OpenSpiel engine seat) and its mirror/lifecycle tests |
-| `benchmarks/openspiel/` | the trainer (`train_reinfors_az.py`), parity checks, sweep tooling, shared net config (`common.py`), manifest + preflight modules |
+| `benchmarks/openspiel/` | the trainer (`train_reinfors_az.py`), parity checks, shared net config (`common.py`), manifest + preflight modules |
 | `benchmarks/specs/` | the checked-in V1 campaign: every cell, repeat count and deadline of each experiment family, executed by `benchmarks/runner.py` |
 | `benchmarks/harness/` | shared measurement runtime: `protocol.py` (the matched constants, defined once) and `run.py` (pinned launch, scheduled kill, crash detection, os-telemetry sampler) |
 | `benchmarks/grid/` | the topology-grid measurement: `measure_grid.py` (one harness, both engines, unified interior-window telemetry) |

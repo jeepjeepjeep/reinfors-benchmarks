@@ -1,4 +1,7 @@
-"""Phase 0 of the GPU round: find the (net size x batch) regime where CUDA actually beats CPU.
+"""Batch/size curves: find the (net size x batch) regime where CUDA actually beats CPU.
+
+(Historically "phase 0" of the GPU round — the sweep that located the head-to-head
+operating point before any framework comparison.)
 
 A GPU head-to-head is only meaningful at an operating point where BOTH stacks want the GPU;
 this sweep locates that point before any framework comparison. Two parts:
@@ -22,8 +25,8 @@ Isolation (do BOTH on the bench box):
   - intra-op threads are pinned here via --torch-threads (default 4); the process affinity
     and thread count are echoed into every result row.
 
-    taskset -c 0-3 .venv23/bin/python benchmarks/openspiel/phase0_gpu_sweep.py \
-        --mode both --game chess --devices cpu,cuda --out results/phase0/sweep.jsonl
+    taskset -c 0-3 .venv23/bin/python benchmarks/internal/measure_curves.py \
+        --mode both --game chess --devices cpu,cuda --out results/curves
 """
 
 import argparse
@@ -34,12 +37,14 @@ import sys
 import time
 from pathlib import Path
 
-import manifest
 import numpy as np
 import reinfors as rf
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "openspiel"))
+import manifest
+import protocol
 from common import SweepResnet, seed_all
 
 
@@ -332,8 +337,8 @@ def main() -> None:
         default="legacy",
         help="fast = inference_mode + pinned H2D + no slice + single packed D2H; noop = no-torch (residual decomposition)",
     )
-    ap.add_argument("--sims", type=int, default=64)
-    ap.add_argument("--c-puct", type=float, default=2.0)
+    ap.add_argument("--sims", type=int, default=protocol.SIMS)
+    ap.add_argument("--c-puct", type=float, default=protocol.C_PUCT)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument(
         "--infer-cache",
@@ -348,18 +353,23 @@ def main() -> None:
     ap.add_argument("--chunk-records", type=int, default=64)
     ap.add_argument("--torch-threads", type=int, default=4)
     ap.add_argument("--gpu-threshold", type=float, default=2.0)
-    ap.add_argument("--out", type=str, default="", help="append result rows as jsonl")
+    ap.add_argument(
+        "--out",
+        type=str,
+        default="",
+        help="fresh run directory (rows.jsonl + manifest)",
+    )
     args = ap.parse_args()
-    manifest_path = None
+    out_dir = None
     if args.out:
-        if Path(args.out).exists():
-            raise SystemExit(f"refusing to overwrite {args.out} — pick a fresh --out")
-        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-        manifest_path = str(args.out) + ".manifest.json"
+        out_dir = Path(args.out).resolve()
+        if out_dir.exists():
+            raise SystemExit(f"refusing to overwrite {out_dir} — pick a fresh --out")
+        out_dir.mkdir(parents=True)
         manifest.write(
-            manifest_path,
+            out_dir,
             command=[sys.executable, *sys.argv],
-            run_kind="phase0_sweep",
+            run_kind="curves",
             config=vars(args),
             completed=False,
         )
@@ -398,18 +408,18 @@ def main() -> None:
         bench_engine(args, game, head_actions, results)
     verdict(results, args)
 
-    if args.out:
-        out = Path(args.out)
-        with out.open("x") as f:
+    if out_dir is not None:
+        rows_path = out_dir / "rows.jsonl"
+        with rows_path.open("x") as f:
             f.write(json.dumps(dict(header=header)) + "\n")
             for r in results:
                 f.write(json.dumps(r) + "\n")
-        print(f"\nwrote {len(results)} rows -> {out}")
+        print(f"\nwrote {len(results)} rows -> {rows_path}")
         manifest.finalize(
-            manifest_path,
+            out_dir,
             status="ok",
             result_rows=len(results),
-            output_sha256={str(out): manifest.sha256(out)},
+            output_sha256={"rows.jsonl": manifest.sha256(rows_path)},
         )
 
 

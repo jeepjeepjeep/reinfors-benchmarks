@@ -4,94 +4,71 @@
   "cycles": 3,
   "cells": [
     {
-      "name": "phase0_curves",
+      "name": "batch_curves",
       "argv": [
-        "benchmarks/openspiel/phase0_gpu_sweep.py",
-        "--game",
-        "chess",
-        "--devices",
-        "cuda",
-        "--widths",
-        "256",
-        "--depths",
-        "8",
-        "--batches",
-        "32,64,128",
-        "--n-games",
-        "32,64,128",
-        "--mode",
-        "both",
-        "--engine-leg-seconds",
-        "120",
-        "--out",
-        "{run_dir}/rows.jsonl"
+        "benchmarks/internal/measure_curves.py"
       ],
-      "deadline_seconds": 3600,
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "256",
+        "batches": "32,64,128",
+        "n-games": "32,64,128",
+        "mode": "both",
+        "out": "{run_dir}/curves"
+      },
       "cores": "0-3",
+      "deadline_seconds": 3600,
       "outputs": [
-        "rows.jsonl"
+        "curves/rows.jsonl"
       ]
     },
     {
       "name": "f32_ab_f64",
       "argv": [
-        "benchmarks/openspiel/phase0_gpu_sweep.py",
-        "--game",
-        "chess",
-        "--devices",
-        "cuda",
-        "--widths",
-        "128,256",
-        "--depths",
-        "8",
-        "--n-games",
-        "64",
-        "--mode",
-        "engine",
-        "--engine-leg-seconds",
-        "120",
-        "--callback",
-        "fast",
-        "--infer-dtype",
-        "f64",
-        "--out",
-        "{run_dir}/rows.jsonl"
+        "benchmarks/internal/measure_curves.py"
       ],
-      "deadline_seconds": 1800,
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "128,256",
+        "n-games": "64",
+        "mode": "engine",
+        "callback": "fast",
+        "infer-dtype": "f64",
+        "out": "{run_dir}/curves"
+      },
       "cores": "0-3",
+      "deadline_seconds": 1800,
       "outputs": [
-        "rows.jsonl"
+        "curves/rows.jsonl"
       ]
     },
     {
       "name": "f32_ab_f32",
       "argv": [
-        "benchmarks/openspiel/phase0_gpu_sweep.py",
-        "--game",
-        "chess",
-        "--devices",
-        "cuda",
-        "--widths",
-        "128,256",
-        "--depths",
-        "8",
-        "--n-games",
-        "64",
-        "--mode",
-        "engine",
-        "--engine-leg-seconds",
-        "120",
-        "--callback",
-        "fast",
-        "--infer-dtype",
-        "f32",
-        "--out",
-        "{run_dir}/rows.jsonl"
+        "benchmarks/internal/measure_curves.py"
       ],
-      "deadline_seconds": 1800,
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "128,256",
+        "n-games": "64",
+        "mode": "engine",
+        "callback": "fast",
+        "infer-dtype": "f32",
+        "out": "{run_dir}/curves"
+      },
       "cores": "0-3",
+      "deadline_seconds": 1800,
       "outputs": [
-        "rows.jsonl"
+        "curves/rows.jsonl"
       ]
     },
     {
