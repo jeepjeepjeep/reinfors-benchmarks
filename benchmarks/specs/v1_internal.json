@@ -6,7 +6,7 @@
     {
       "name": "batch_curves",
       "argv": [
-        "benchmarks/internal/measure_curves.py"
+        "benchmarks/internal/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -17,18 +17,18 @@
         "batches": "32,64,128",
         "n-games": "32,64,128",
         "mode": "both",
-        "out": "{run_dir}/curves"
+        "out": "{run_dir}/inference"
       },
       "cores": "0-3",
       "deadline_seconds": 3600,
       "outputs": [
-        "curves/rows.jsonl"
+        "inference/rows.jsonl"
       ]
     },
     {
       "name": "f32_ab_f64",
       "argv": [
-        "benchmarks/internal/measure_curves.py"
+        "benchmarks/internal/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -40,18 +40,18 @@
         "mode": "engine",
         "callback": "fast",
         "infer-dtype": "f64",
-        "out": "{run_dir}/curves"
+        "out": "{run_dir}/inference"
       },
       "cores": "0-3",
       "deadline_seconds": 1800,
       "outputs": [
-        "curves/rows.jsonl"
+        "inference/rows.jsonl"
       ]
     },
     {
       "name": "f32_ab_f32",
       "argv": [
-        "benchmarks/internal/measure_curves.py"
+        "benchmarks/internal/measure_inference.py"
       ],
       "args": {
         "game": "chess",
@@ -63,18 +63,18 @@
         "mode": "engine",
         "callback": "fast",
         "infer-dtype": "f32",
-        "out": "{run_dir}/curves"
+        "out": "{run_dir}/inference"
       },
       "cores": "0-3",
       "deadline_seconds": 1800,
       "outputs": [
-        "curves/rows.jsonl"
+        "inference/rows.jsonl"
       ]
     },
     {
       "name": "rf_cache_4096",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -84,18 +84,18 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ],
       "cycles": 1
     },
     {
       "name": "rf_cache_32768",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -105,18 +105,18 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ],
       "cycles": 1
     },
     {
       "name": "rf_cache_262144",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -126,18 +126,18 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ],
       "cycles": 1
     },
     {
       "name": "rf_cache_2097152",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -147,11 +147,11 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ],
       "cycles": 1
     }

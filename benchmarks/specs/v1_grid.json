@@ -6,7 +6,7 @@
     {
       "name": "os_a8",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -14,17 +14,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "os_a16",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -32,17 +32,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "os_a32",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -50,17 +50,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "os_a64",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -68,17 +68,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "os_a64b32",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "os",
@@ -87,17 +87,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "rf_n64_g1",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -106,17 +106,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "rf_n64_g2",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -125,17 +125,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "rf_n128_g1",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -144,17 +144,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "rf_n128_g2",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -163,17 +163,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "rf_n256_g1",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -182,17 +182,17 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     },
     {
       "name": "rf_n256_g2",
       "argv": [
-        "benchmarks/grid/measure_grid.py"
+        "benchmarks/grid/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
@@ -201,11 +201,11 @@
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
-        "out": "{run_dir}/grid"
+        "out": "{run_dir}/throughput"
       },
       "deadline_seconds": 1350,
       "outputs": [
-        "grid/learner.jsonl"
+        "throughput/learner.jsonl"
       ]
     }
   ]

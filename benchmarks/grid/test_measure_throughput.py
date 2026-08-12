@@ -1,4 +1,4 @@
-"""measure_grid: unified reduce, os telemetry normalization, harness lifecycle."""
+"""measure_throughput: unified reduce, os telemetry normalization, harness lifecycle."""
 
 import json
 import sys
@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "harness"))
-import measure_grid
+import measure_throughput
 import protocol
 import run
 
@@ -53,7 +53,7 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
             },
         ],
     )
-    m = measure_grid.reduce_window(tmp_path / "learner.jsonl", 300, 1200)
+    m = measure_throughput.reduce_window(tmp_path / "learner.jsonl", 300, 1200)
     assert m["window_seconds"] == [300, 1200]
     assert m["states_per_sec"] == pytest.approx(1800 / 900)
     assert m["net_rows_per_sec"] == pytest.approx(900 / 900)
@@ -66,7 +66,7 @@ def test_reduce_needs_two_rows_in_window(tmp_path: Path) -> None:
         tmp_path / "learner.jsonl",
         [{"wall": 400, "states": 1, "infer_rows": 1, "infer_calls": 1, "steps": 1}],
     )
-    assert measure_grid.reduce_window(tmp_path / "learner.jsonl", 300, 1200) is None
+    assert measure_throughput.reduce_window(tmp_path / "learner.jsonl", 300, 1200) is None
 
 
 def test_os_sampler_normalizes_all_three_sources(tmp_path: Path) -> None:
@@ -134,8 +134,8 @@ def test_harness_end_to_end_rf(tmp_path: Path, monkeypatch) -> None:
         "rf_train_argv",
         lambda out, *a, **k: [sys.executable, str(fake), "--out", str(out)],
     )
-    out = tmp_path / "grid"
-    rc = measure_grid.main(
+    out = tmp_path / "throughput"
+    rc = measure_throughput.main(
         [
             "--side",
             "rf",
@@ -162,7 +162,7 @@ def test_harness_end_to_end_rf(tmp_path: Path, monkeypatch) -> None:
     assert len(m["output_sha256"]["learner.jsonl"]) == 64
     # append-only: a rerun into the same directory must refuse
     with pytest.raises(SystemExit, match="refusing to overwrite"):
-        measure_grid.main(["--side", "rf", "--n-games", "8", "--out", str(out)])
+        measure_throughput.main(["--side", "rf", "--n-games", "8", "--out", str(out)])
 
 
 def test_harness_records_a_crash(tmp_path: Path, monkeypatch) -> None:
@@ -171,8 +171,8 @@ def test_harness_records_a_crash(tmp_path: Path, monkeypatch) -> None:
         "rf_train_argv",
         lambda out, *a, **k: [sys.executable, "-c", "raise SystemExit(7)"],
     )
-    out = tmp_path / "grid"
-    rc = measure_grid.main(
+    out = tmp_path / "throughput"
+    rc = measure_throughput.main(
         [
             "--side",
             "rf",
@@ -202,8 +202,8 @@ def test_no_interior_window_fails(tmp_path: Path, monkeypatch) -> None:
         "rf_train_argv",
         lambda out, *a, **k: [sys.executable, "-c", "import time; time.sleep(600)"],
     )
-    out = tmp_path / "grid"
-    rc = measure_grid.main(
+    out = tmp_path / "throughput"
+    rc = measure_throughput.main(
         [
             "--side",
             "rf",
@@ -248,8 +248,8 @@ def test_harness_end_to_end_os_sampler(tmp_path: Path, monkeypatch) -> None:
         "os_train_argv",
         lambda out, *a, **k: [sys.executable, str(fake), str(out)],
     )
-    out = tmp_path / "grid"
-    rc = measure_grid.main(
+    out = tmp_path / "throughput"
+    rc = measure_throughput.main(
         [
             "--side",
             "os",
@@ -280,8 +280,8 @@ def test_harness_end_to_end_os_sampler(tmp_path: Path, monkeypatch) -> None:
 
 def test_side_topology_flags_are_mutually_exclusive() -> None:
     with pytest.raises(SystemExit):
-        measure_grid.parse_args(["--side", "rf", "--actors", "8", "--out", "x"])
+        measure_throughput.parse_args(["--side", "rf", "--actors", "8", "--out", "x"])
     with pytest.raises(SystemExit):
-        measure_grid.parse_args(["--side", "os", "--n-games", "8", "--out", "x"])
-    args = measure_grid.parse_args(["--side", "os", "--actors", "64", "--out", "x"])
+        measure_throughput.parse_args(["--side", "os", "--n-games", "8", "--out", "x"])
+    args = measure_throughput.parse_args(["--side", "os", "--actors", "64", "--out", "x"])
     assert args.batch == 64  # defaults to full-fill

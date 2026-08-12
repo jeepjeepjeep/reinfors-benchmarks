@@ -13,8 +13,8 @@ stderr counters and its actor/learner logs into the identical schema (the manife
 `telemetry_source` records which). The metric is a pure function of that artifact and
 (W, T): re-running the reduce on an archived cell reproduces the published number.
 
-    measure_grid.py --side rf --n-games 128 --n-groups 2 --out runs/x/grid
-    measure_grid.py --side os --actors 64 --batch 32 --out runs/x/grid
+    measure_throughput.py --side rf --n-games 128 --n-groups 2 --out runs/x/throughput
+    measure_throughput.py --side os --actors 64 --batch 32 --out runs/x/throughput
 """
 
 import argparse
@@ -117,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
     manifest.write(
         out,
         command=child_argv,
-        run_kind="grid",
+        run_kind="throughput",
         side=args.side,
         topology=topology,
         warmup_seconds=args.warmup_seconds,

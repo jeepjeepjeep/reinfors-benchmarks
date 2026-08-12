@@ -261,7 +261,7 @@ def test_checked_in_specs_are_well_formed() -> None:
                 for v in cell.get("args", {}).values()
             ), f"{path.name}:{cell['name']}: args values must be scalars"
             # deadlines are DERIVED hang backstops (payload + margin), never hand-set
-            if cell["argv"][0].endswith("measure_grid.py"):
+            if cell["argv"][0].endswith("measure_throughput.py"):
                 args = cell["args"]
                 w, t = args["warmup-seconds"], args["window-seconds"]
                 assert cell["deadline_seconds"] == w + t + 30 + 120, cell["name"]

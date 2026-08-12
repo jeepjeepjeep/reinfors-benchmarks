@@ -25,8 +25,8 @@ Isolation (do BOTH on the bench box):
   - intra-op threads are pinned here via --torch-threads (default 4); the process affinity
     and thread count are echoed into every result row.
 
-    taskset -c 0-3 .venv23/bin/python benchmarks/internal/measure_curves.py \
-        --mode both --game chess --devices cpu,cuda --out results/curves
+    taskset -c 0-3 .venv23/bin/python benchmarks/internal/measure_inference.py \
+        --mode both --game chess --devices cpu,cuda --out results/inference
 """
 
 import argparse
@@ -369,7 +369,7 @@ def main() -> None:
         manifest.write(
             out_dir,
             command=[sys.executable, *sys.argv],
-            run_kind="curves",
+            run_kind="inference",
             config=vars(args),
             completed=False,
         )

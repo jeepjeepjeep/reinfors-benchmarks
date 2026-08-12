@@ -1,11 +1,11 @@
-"""measure_curves: run-directory lifecycle on a tiny cpu net sweep."""
+"""measure_inference: run-directory lifecycle on a tiny cpu net sweep."""
 
 import json
 import subprocess
 import sys
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parent / "measure_curves.py"
+SCRIPT = Path(__file__).resolve().parent / "measure_inference.py"
 
 TINY = [
     "--mode",
@@ -36,7 +36,7 @@ def _run(out: Path) -> subprocess.CompletedProcess:
 
 
 def test_out_dir_lifecycle_and_overwrite_refusal(tmp_path: Path) -> None:
-    out = tmp_path / "curves"
+    out = tmp_path / "inference"
     first = _run(out)
     assert first.returncode == 0, first.stderr
 
@@ -44,7 +44,7 @@ def test_out_dir_lifecycle_and_overwrite_refusal(tmp_path: Path) -> None:
     assert "header" in rows[0] and len(rows) >= 2  # header + one measured cell
 
     m = json.loads((out / "manifest.json").read_text())
-    assert m["run_kind"] == "curves" and m["completed"] and m["status"] == "ok"
+    assert m["run_kind"] == "inference" and m["completed"] and m["status"] == "ok"
     assert m["result_rows"] == len(rows) - 1
     assert len(m["output_sha256"]["rows.jsonl"]) == 64
     assert m["config"]["mode"] == "net"
