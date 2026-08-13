@@ -1,71 +1,46 @@
 {
-  "session": "v1_internal",
+  "session": "v1_levers",
   "expect_tag": "{tag}",
   "cycles": 3,
   "cells": [
     {
-      "name": "kernel_rate_vs_batch",
+      "name": "rf_n128_g2_compiled",
       "argv": [
-        "experiments/measure_inference.py"
+        "experiments/measure_throughput.py"
       ],
       "args": {
-        "game": "chess",
-        "devices": "cpu,cuda",
-        "depths": "8",
-        "widths": "256",
-        "batches": "32,64,128,256",
-        "mode": "kernel",
-        "out": "{run_dir}/inference",
-        "callback": "fast"
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput",
+        "rf-infer": "compiled"
       },
-      "cores": "0-3",
-      "deadline_seconds": 900,
+      "deadline_seconds": 1350,
       "outputs": [
-        "inference/rows.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {
-      "name": "kernel_rate_vs_batch_compiled",
+      "name": "rf_n128_g2_eager",
       "argv": [
-        "experiments/measure_inference.py"
+        "experiments/measure_throughput.py"
       ],
       "args": {
-        "game": "chess",
-        "devices": "cuda",
-        "depths": "8",
-        "widths": "256",
-        "batches": "32,64,128,256",
-        "mode": "kernel",
-        "out": "{run_dir}/inference",
-        "callback": "compiled"
+        "side": "rf",
+        "n-games": 128,
+        "n-groups": 2,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput",
+        "rf-infer": "fast"
       },
-      "cores": "0-3",
-      "deadline_seconds": 900,
+      "deadline_seconds": 1350,
       "outputs": [
-        "inference/rows.jsonl"
-      ]
-    },
-    {
-      "name": "engine_rate_vs_n_games",
-      "argv": [
-        "experiments/measure_inference.py"
-      ],
-      "args": {
-        "game": "chess",
-        "devices": "cpu,cuda",
-        "depths": "8",
-        "widths": "256",
-        "n-games": "32,64,128,256",
-        "mode": "engine",
-        "engine-leg-seconds": 120,
-        "out": "{run_dir}/inference",
-        "callback": "compiled",
-        "infer-dtype": "f32"
-      },
-      "cores": "0-3",
-      "deadline_seconds": 3000,
-      "outputs": [
-        "inference/rows.jsonl"
+        "throughput/telemetry.jsonl"
       ]
     },
     {

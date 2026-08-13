@@ -113,9 +113,12 @@ repeats, deadlines, pinned cores. Direct harness invocation remains available fo
 exploration, but nothing produced that way is publishable evidence.
 
 The families are separate experiments, not a pipeline — results are analysed between
-them, and later specs depend on decisions those analyses produce. Campaign order:
-smoke gates first, then `v1_grid` (selects each side's configuration — a decision
-point), `v1_training` (review telemetry before spending H2H hours), `v1_h2h`, with
-`v1_internal` independent. Each family's details, decision points and gates are in its
+them, and later specs depend on decisions those analyses produce. Every spec file is
+internally dependency-free (one session fixes all values at launch), so each
+between-session analysis is a real update point. Campaign order: smoke gates first,
+then `v1_grid` and `v1_curves` (together a decision point: the grid selects each
+side's configuration, the curves supply the mechanism cross-check and call-size sweet
+spot), then `v1_levers` (lever A/Bs at the confirmed operating point and call size),
+`v1_training` (review telemetry before spending H2H hours), `v1_h2h`. Each family's details, decision points and gates are in its
 [experiment doc](#the-three-questions); a campaign's session manifests record every
 invocation, substitution and resume that produced its evidence.

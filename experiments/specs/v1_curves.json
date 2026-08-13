@@ -1,0 +1,72 @@
+{
+  "session": "v1_curves",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "kernel_rate_vs_batch",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cpu,cuda",
+        "depths": "8",
+        "widths": "256",
+        "batches": "32,64,128,256",
+        "mode": "kernel",
+        "out": "{run_dir}/inference",
+        "callback": "fast"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 900,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "kernel_rate_vs_batch_compiled",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "widths": "256",
+        "batches": "32,64,128,256",
+        "mode": "kernel",
+        "out": "{run_dir}/inference",
+        "callback": "compiled"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 900,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "engine_rate_vs_n_games",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cpu,cuda",
+        "depths": "8",
+        "widths": "256",
+        "n-games": "32,64,128,256",
+        "mode": "engine",
+        "engine-leg-seconds": 120,
+        "out": "{run_dir}/inference",
+        "callback": "compiled",
+        "infer-dtype": "f32"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 3000,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    }
+  ]
+}
