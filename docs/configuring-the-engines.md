@@ -38,6 +38,7 @@ call size of reinfors' n128×2 operating point.
 | f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_internal`) |
 | inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_internal`) |
 | compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n128_g2` / `rf_n128_g2_eager` (`v1_grid`) |
+| compiled batch response | compiled-kernel rows/s at batch 32-256, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_internal`) |
 
 - **f32** — engine-mode A/B, identical except the callback output dtype. The gain
   grows as the net shrinks, because the boundary cost is a larger share of a smaller
@@ -87,18 +88,21 @@ telemetry — overlap can hide at most the smaller of search and inference — m
 the new call size pays on the batch-response curve. Rows/call and inference share per
 rf cell accompany the published table.
 
-**Batch-response curve** (isolated loop, per device; medians over 3 cycles):
+**Batch-response curve** (compiled forward — the operating path — CUDA; medians over
+3 cycles; cell `kernel_rate_vs_batch_compiled`):
 
-| call size | CUDA rows/s | CPU rows/s |
-|---|---|---|
-| 32 | TBD | TBD |
-| 64 | TBD | TBD |
-| 128 | TBD | TBD |
-| 256 | TBD | TBD |
+| call size | rows/s |
+|---|---|
+| 32 | TBD |
+| 64 | TBD |
+| 128 | TBD |
+| 256 | TBD |
 
 The per-row rate has peaked at 64 with a measurable regression at 128 — the mechanism
 pricing every column of the unified grid. Engine-level crossover (smallest call size
-where CUDA clears CPU ×2 through this loop): TBD.
+where CUDA clears CPU ×2 through the data-gen loop; per-device cell
+`engine_rate_vs_n_games`): TBD. The eager cross-device kernel curve is
+[section A's](sizing-the-compute.md).
 
 **Selected operating points: OpenSpiel TBD, reinfors TBD** — these become the encoded
 topologies in `v1_training.json` ([the comparison](the-comparison.md)).
