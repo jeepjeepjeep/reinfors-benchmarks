@@ -54,7 +54,7 @@ def rf_train_argv(
     minutes: float,
     seed: int = 0,
     device: str = "cuda",
-    infer: str = "fast",
+    infer: str = "compiled",
     pad_rows_to: int = -1,
 ) -> list[str]:
     return [

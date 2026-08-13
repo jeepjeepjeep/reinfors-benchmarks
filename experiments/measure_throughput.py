@@ -38,8 +38,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument(
         "--rf-infer",
         choices=["fast", "compiled"],
-        default="fast",
-        help="rf: trainer callback implementation",
+        default="compiled",
+        help="rf: trainer callback implementation (compiled = the operating config)",
     )
     ap.add_argument(
         "--rf-pad-rows-to",
@@ -63,7 +63,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ap.error("--actors is an os parameter")
     if args.side == "os" and args.n_games is not None:
         ap.error("--n-games is an rf parameter")
-    if args.side == "os" and args.rf_infer != "fast":
+    if args.side == "os" and args.rf_infer != "compiled":
         ap.error("--rf-infer is an rf parameter")
     if args.side == "os" and args.rf_pad_rows_to != -1:
         ap.error("--rf-pad-rows-to is an rf parameter")

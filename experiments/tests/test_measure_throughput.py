@@ -120,6 +120,9 @@ def test_child_argv_carries_the_matched_protocol() -> None:
     os_ = protocol.os_train_argv(Path("/x"), 64, 32, protocol.CACHE)
     assert ["--width", "256"] == rf[rf.index("--width") : rf.index("--width") + 2]
     assert ["--sims", "64"] in [rf[i : i + 2] for i in range(len(rf))]
+    # the operating configuration IS the default: compiled callback, no padding
+    assert rf[rf.index("--infer") + 1] == "compiled"
+    assert rf[rf.index("--pad-rows-to") + 1] == "-1"
     assert "--nn_width=256" in os_ and "--max_simulations=64" in os_
     assert "--inference_batch_size=32" in os_ and "--actors=64" in os_
 
@@ -159,7 +162,7 @@ def test_rf_infer_flag_reaches_the_trainer() -> None:
     assert child[child.index("--pad-rows-to") + 1] == "64"
     with pytest.raises(SystemExit):
         measure_throughput.parse_args(
-            ["--side", "os", "--actors", "8", "--rf-infer", "compiled", "--out", "x"]
+            ["--side", "os", "--actors", "8", "--rf-infer", "fast", "--out", "x"]
         )
     with pytest.raises(SystemExit):
         measure_throughput.parse_args(

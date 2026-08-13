@@ -110,8 +110,9 @@ def main() -> None:
     ap.add_argument(
         "--infer",
         choices=["fast", "compiled"],
-        default="fast",
-        help="compiled = torch.compile(reduce-overhead) heads",
+        default="compiled",
+        help="compiled (default; the measured operating config) = torch.compile(heads); "
+        "fast = eager, use for cpu wiring runs and the eager baseline arm",
     )
     ap.add_argument(
         "--pad-rows-to",
