@@ -2,7 +2,7 @@
 pre-registered interior window, kill, reduce, record.
 
 Timeline:
-    [0, W)       warmup — excluded (no rf telemetry even exists before ~160-224s)
+    [0, W)       warmup — excluded (no rf telemetry even exists before ~190-210s)
     [W, W+T]     the measurement window, identical for both sides
     W+T+tail     SIGKILL of the child's process group (early exit = crashed)
 
