@@ -13,6 +13,11 @@ batch sweet spot bound both sides of [the comparison](the-comparison.md).
 |---|---|---|
 | kernel rate vs batch | pure net forwards/s at batch 32/64/128/256, per device — the CUDA:CPU ratio of the two arms is the crossover curve | `kernel_rate_vs_batch` (`v1_internal`) |
 
+The cell pins the eager path (`callback: fast`) — the neutrality claim above holds
+for eager ATen dispatch only. reinfors' operating configuration compiles its callback,
+so its own batch response is the reinfors-specific companion cell
+(`kernel_rate_vs_batch_compiled`) in [engine sizing](configuring-the-engines.md).
+
 **Instrument:** [`experiments/measure_inference.py`](../experiments/measure_inference.py)
 `--mode kernel` — the net alone, no engine. `--devices` is a sweep list: every point
 runs once per listed device; the crossover is not a separate measurement but the

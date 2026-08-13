@@ -38,6 +38,7 @@ call size of reinfors' n128×2 operating point.
 | f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_internal`) |
 | inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_internal`) |
 | compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n128_g2` / `rf_n128_g2_eager` (`v1_grid`) |
+| compiled batch response | compiled-kernel rows/s at batch 32-256, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_internal`) |
 
 - **f32** — engine-mode A/B, identical except the callback output dtype. The gain
   grows as the net shrinks, because the boundary cost is a larger share of a smaller
