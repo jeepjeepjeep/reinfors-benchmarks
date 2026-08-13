@@ -28,6 +28,7 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
                 "states": 1000,
                 "infer_rows": 100,
                 "infer_calls": 10,
+                "padded_rows": 5,
                 "steps": 1,
             },
             {
@@ -42,6 +43,7 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
                 "states": 2800,
                 "infer_rows": 1000,
                 "infer_calls": 55,
+                "padded_rows": 50,
                 "steps": 10,
             },
             {
@@ -58,6 +60,8 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
     assert m["states_per_sec"] == pytest.approx(1800 / 900)
     assert m["net_rows_per_sec"] == pytest.approx(900 / 900)
     assert m["rows_per_call"] == pytest.approx(900 / 45)
+    # padded_rows may be absent on interior rows (os telemetry): .get defaults apply
+    assert m["physical_rows_per_call"] == pytest.approx((900 + 45) / 45)
     assert m["learn_steps"] == 9
 
 
@@ -116,8 +120,54 @@ def test_child_argv_carries_the_matched_protocol() -> None:
     os_ = protocol.os_train_argv(Path("/x"), 64, 32, protocol.CACHE)
     assert ["--width", "256"] == rf[rf.index("--width") : rf.index("--width") + 2]
     assert ["--sims", "64"] in [rf[i : i + 2] for i in range(len(rf))]
+    # the operating configuration IS the default: compiled callback, no padding
+    assert rf[rf.index("--infer") + 1] == "compiled"
+    assert rf[rf.index("--pad-rows-to") + 1] == "-1"
     assert "--nn_width=256" in os_ and "--max_simulations=64" in os_
     assert "--inference_batch_size=32" in os_ and "--actors=64" in os_
+
+
+def test_rf_infer_flag_reaches_the_trainer() -> None:
+    args = measure_throughput.parse_args(
+        [
+            "--side",
+            "rf",
+            "--n-games",
+            "128",
+            "--n-groups",
+            "2",
+            "--rf-infer",
+            "compiled",
+            "--out",
+            "x",
+        ]
+    )
+    child = measure_throughput.build_child_argv(args, Path("/x"))
+    assert child[child.index("--infer") + 1] == "compiled"
+    padded = measure_throughput.parse_args(
+        [
+            "--side",
+            "rf",
+            "--n-games",
+            "128",
+            "--n-groups",
+            "2",
+            "--rf-pad-rows-to",
+            "64",
+            "--out",
+            "x",
+        ]
+    )
+    child = measure_throughput.build_child_argv(padded, Path("/x"))
+    assert child[child.index("--pad-rows-to") + 1] == "64"
+    with pytest.raises(SystemExit):
+        measure_throughput.parse_args(
+            ["--side", "os", "--actors", "8", "--rf-infer", "fast", "--out", "x"]
+        )
+    with pytest.raises(SystemExit):
+        measure_throughput.parse_args(
+            ["--side", "os", "--actors", "8", "--rf-pad-rows-to", "64", "--out", "x"]
+        )
 
 
 def _fake_rf_trainer(tmp_path: Path) -> Path:

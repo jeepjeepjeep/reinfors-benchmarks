@@ -85,16 +85,17 @@ def bench_net(args, shape, head_actions, results) -> None:
             continue
         seed_all()
         net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
+        heads = torch.compile(net.heads) if args.callback == "compiled" else net.heads
         for batch in args.batches:
             x = torch.randn(batch, c, h, w, device=device)
             with torch.no_grad():
                 for _ in range(args.warmup_calls):
-                    net.heads(x)
+                    heads(x)
                 sync(device)
                 t0 = time.perf_counter()
                 calls = 0
                 while time.perf_counter() - t0 < args.net_leg_seconds:
-                    net.heads(x)
+                    heads(x)
                     calls += 1
                 sync(device)
                 wall = time.perf_counter() - t0
@@ -132,6 +133,9 @@ def bench_engine(args, game, head_actions, results) -> None:
         for n_games, engines in itertools.product(args.n_games, args.engines):
             seed_all()
             net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
+            heads = (
+                torch.compile(net.heads) if args.callback == "compiled" else net.heads
+            )
 
             noop_l = np.zeros(
                 (max(n_games * max(engines, 1) + 8, 8), actions), dtype=np.float32
@@ -144,7 +148,7 @@ def bench_engine(args, game, head_actions, results) -> None:
             pin_cap = n_games * max(engines, 1)
             pin_tls = (
                 threading.local()
-                if (args.callback == "fast" and device.startswith("cuda"))
+                if (args.callback in ("fast", "compiled") and device.startswith("cuda"))
                 else None
             )
 
@@ -164,7 +168,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                 # Shared eval-mode net; concurrent forwards from several engine threads are
                 # the POINT when engines > 1 (one engine's CPU phase overlaps another's
                 # forward — a script-level approximation of the collect_async double-buffer).
-                if args.callback == "fast":
+                if args.callback in ("fast", "compiled"):
                     # Plumbing-only fast path (kernels identical; needs the PR #136 build):
                     # inference_mode; pinned staging for the H2D; NO pre-transfer slice (the
                     # binding accepts padded logits — a slice forces a device-side gather);
@@ -181,7 +185,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                             )
                         else:
                             x = src.reshape(-1, c, h, w).to(device)
-                        logits, values = net.heads(x)
+                        logits, values = heads(x)
                         out = torch.cat([logits, values.unsqueeze(1)], dim=1)
                         if args.infer_dtype == "f64":
                             # the A/B's f64 arm: device-side widen + double-width
@@ -195,7 +199,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                         .reshape(-1, c, h, w)
                         .to(device)
                     )
-                    logits, values = net.heads(x)
+                    logits, values = heads(x)
                 if (
                     args.infer_dtype == "f32"
                 ):  # native f32: the binding widens exactly (PR #136)
@@ -219,6 +223,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                     n_games=n_games,
                     seed=args.seed + idx,
                     infer_cache=args.infer_cache,
+                    pad_rows_to=0,
                 )
 
             engs = [make_engine(e) for e in range(engines)]
@@ -228,7 +233,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                 )  # torch/device warmup outside the clock
 
             totals = [
-                dict(rows=0, calls=0, decisions=0, records=0, net_seconds=0.0)
+                dict(rows=0, calls=0, decisions=0, records=0, padded=0, net_seconds=0.0)
                 for _ in engs
             ]
             deadline = time.perf_counter() + args.engine_leg_seconds
@@ -239,19 +244,34 @@ def bench_engine(args, game, head_actions, results) -> None:
                     tel = batch.telemetry
                     tot["rows"] += int(tel["infer_rows"])
                     tot["calls"] += int(tel["infer_calls"])
+                    tot["padded"] += int(tel["padded_rows"])
                     tot["decisions"] += int(tel["decisions"])
                     tot["net_seconds"] += float(tel["infer_seconds"])
                     tot["records"] += batch.obs.shape[0]
 
             t0 = time.perf_counter()
-            threads = [
-                threading.Thread(target=run, args=(eng, tot))
-                for eng, tot in zip(engs, totals)
-            ]
-            for t in threads:
-                t.start()
-            for t in threads:
-                t.join()
+            if engines <= 1:
+                # inline: failures raise loudly instead of dying in a worker thread
+                run(engs[0], totals[0])
+            else:
+                failures: list[BaseException] = []
+
+                def guarded(eng, tot) -> None:
+                    try:
+                        run(eng, tot)
+                    except BaseException as e:  # a dead thread must fail the leg
+                        failures.append(e)
+
+                threads = [
+                    threading.Thread(target=guarded, args=(eng, tot))
+                    for eng, tot in zip(engs, totals)
+                ]
+                for t in threads:
+                    t.start()
+                for t in threads:
+                    t.join()
+                if failures:
+                    raise failures[0]
             wall = time.perf_counter() - t0
             rows = sum(t["rows"] for t in totals)
             calls = sum(t["calls"] for t in totals)
@@ -270,6 +290,9 @@ def bench_engine(args, game, head_actions, results) -> None:
                 rows_s=rows / wall,
                 moves_s=decisions / wall,
                 achieved_batch=rows / max(calls, 1),
+                padded_rows=sum(t["padded"] for t in totals),
+                physical_batch=(rows + sum(t["padded"] for t in totals))
+                / max(calls, 1),
                 net_share=net_seconds / wall,
                 records=sum(t["records"] for t in totals),
                 wall=wall,
@@ -358,9 +381,11 @@ def main() -> None:
     )
     ap.add_argument(
         "--callback",
-        choices=["legacy", "fast", "noop"],
+        choices=["legacy", "fast", "compiled", "noop"],
         default="legacy",
-        help="fast = inference_mode + pinned H2D + no slice + single packed D2H; noop = no-torch (residual decomposition)",
+        help="fast = inference_mode + pinned H2D + no slice + single packed D2H; "
+        "compiled = the fast path with default-mode torch.compile on the forward "
+        "(the operating configuration); noop = no-torch (residual decomposition)",
     )
     ap.add_argument("--sims", type=int, default=protocol.SIMS)
     ap.add_argument("--c-puct", type=float, default=protocol.C_PUCT)

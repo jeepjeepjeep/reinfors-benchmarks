@@ -35,6 +35,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--n-groups", type=int, default=1, help="rf: collection groups")
     ap.add_argument("--actors", type=int, help="os: actor count")
     ap.add_argument("--batch", type=int, help="os: inference batch (default: actors)")
+    ap.add_argument(
+        "--rf-infer",
+        choices=["fast", "compiled"],
+        default="compiled",
+        help="rf: trainer callback implementation (compiled = the operating config)",
+    )
+    ap.add_argument(
+        "--rf-pad-rows-to",
+        type=int,
+        default=-1,
+        help="rf: fixed call rows (-1 = trainer auto rule)",
+    )
     ap.add_argument("--warmup-seconds", type=float, default=protocol.WARMUP_SECONDS)
     ap.add_argument("--window-seconds", type=float, default=protocol.WINDOW_SECONDS)
     ap.add_argument("--cache", type=int, default=protocol.CACHE)
@@ -51,6 +63,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ap.error("--actors is an os parameter")
     if args.side == "os" and args.n_games is not None:
         ap.error("--n-games is an rf parameter")
+    if args.side == "os" and args.rf_infer != "compiled":
+        ap.error("--rf-infer is an rf parameter")
+    if args.side == "os" and args.rf_pad_rows_to != -1:
+        ap.error("--rf-pad-rows-to is an rf parameter")
     if args.side == "os" and args.batch is None:
         args.batch = args.actors
     return args
@@ -63,7 +79,13 @@ def build_child_argv(args: argparse.Namespace, out: Path) -> list[str]:
             args.warmup_seconds + args.window_seconds + args.tail_seconds
         ) / 60 + 10
         child = protocol.rf_train_argv(
-            out, args.n_games, args.n_groups, args.cache, minutes=round(minutes, 1)
+            out,
+            args.n_games,
+            args.n_groups,
+            args.cache,
+            minutes=round(minutes, 1),
+            infer=args.rf_infer,
+            pad_rows_to=args.rf_pad_rows_to,
         )
     else:
         child = protocol.os_train_argv(out, args.actors, args.batch, args.cache)
@@ -90,11 +112,14 @@ def reduce_window(path: Path, lo: float, hi: float) -> dict | None:
     dt = last["wall"] - first["wall"]
     dr = last["infer_rows"] - first["infer_rows"]
     dc = last["infer_calls"] - first["infer_calls"]
+    # os telemetry carries no padded_rows; physical == useful there
+    dp = last.get("padded_rows", 0) - first.get("padded_rows", 0)
     return {
         "window_seconds": [first["wall"], last["wall"]],
         "states_per_sec": (last["states"] - first["states"]) / dt,
         "net_rows_per_sec": dr / dt,
         "rows_per_call": dr / dc if dc > 0 else None,
+        "physical_rows_per_call": (dr + dp) / dc if dc > 0 else None,
         "learn_steps": last["steps"] - first["steps"],
     }
 

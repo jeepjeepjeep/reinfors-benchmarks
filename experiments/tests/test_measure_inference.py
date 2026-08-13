@@ -91,3 +91,52 @@ def test_engine_mode_runs_both_dtype_arms(tmp_path: Path) -> None:
         assert r.returncode == 0, r.stderr
         rows = [json.loads(x) for x in open(out / "rows.jsonl")]
         assert len(rows) >= 2  # header + the engine cell
+
+
+def test_compiled_arm_wiring(tmp_path: Path) -> None:
+    # covers the compiled arm's plumbing on both surfaces; TORCHDYNAMO_DISABLE makes
+    # torch.compile a passthrough so the test doesn't pay cpu compile time — the
+    # actual overhead measurement is a box/CUDA question
+    import os
+
+    env = os.environ | {"TORCHDYNAMO_DISABLE": "1"}
+    for mode, extra in [
+        (
+            "kernel",
+            ["--batches", "2", "--net-leg-seconds", "0.1", "--warmup-calls", "1"],
+        ),
+        ("engine", ["--n-games", "2", "--engine-leg-seconds", "0.2", "--sims", "2"]),
+    ]:
+        out = tmp_path / mode
+        r = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--mode",
+                mode,
+                "--game",
+                "connect4",
+                "--devices",
+                "cpu",
+                "--widths",
+                "8",
+                "--depths",
+                "1",
+                "--callback",
+                "compiled",
+                "--out",
+                str(out),
+                *extra,
+            ],
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        assert r.returncode == 0, r.stderr
+        rows = [json.loads(x) for x in open(out / "rows.jsonl")]
+        assert len(rows) >= 2
+        if mode == "engine":
+            # default-mode compile needs no padding: physical rows == real rows
+            cell = next(x for x in rows if x.get("part") == "engine")
+            assert cell["padded_rows"] == 0
+            assert cell["physical_batch"] == cell["achieved_batch"]

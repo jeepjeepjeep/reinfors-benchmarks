@@ -108,6 +108,19 @@ def main() -> None:
         help="engine infer-cache entries (0 = off)",
     )
     ap.add_argument(
+        "--infer",
+        choices=["fast", "compiled"],
+        default="compiled",
+        help="compiled (default; the measured operating config) = torch.compile(heads); "
+        "fast = eager, use for cpu wiring runs and the eager baseline arm",
+    )
+    ap.add_argument(
+        "--pad-rows-to",
+        type=int,
+        default=-1,
+        help="fixed call rows (0 = off); for graph-capture consumers, not needed by --infer compiled",
+    )
+    ap.add_argument(
         "--checkpoint-every",
         type=float,
         default=60.0,
@@ -180,6 +193,8 @@ def main() -> None:
     )
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
 
+    pad_rows_to = max(args.pad_rows_to, 0)
+
     engine = rf.Engine(
         game,
         rf.Reward(win=1.0, loss=-1.0),
@@ -195,12 +210,19 @@ def main() -> None:
         seed=args.seed,
         infer_cache=args.infer_cache,
         n_groups=args.n_groups,
+        pad_rows_to=pad_rows_to,
     )
 
     collector_net = copy.deepcopy(net)
     collector_net.eval()
     sync_lock = threading.Lock()
     c, h, w = obs_c, obs_h, obs_w
+
+    heads = collector_net.heads
+    if args.infer == "compiled":
+        # default mode: the measured win is inductor codegen; reduce-overhead's
+        # cudagraph path forfeits it (mode probe, 2026-08-13)
+        heads = torch.compile(collector_net.heads)
 
     def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         with sync_lock, torch.inference_mode():
@@ -209,10 +231,10 @@ def main() -> None:
                 .reshape(-1, c, h, w)
                 .to(args.device)
             )
-            logits, values = collector_net.heads(x)
-        # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE — the
-        # binding accepts width >= A and ignores the tail (a pre-transfer slice costs a
-        # device-side gather). This is the measured operating-point path.
+            logits, values = heads(x)
+        # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE —
+        # the binding accepts width >= A and ignores the tail (a pre-transfer slice
+        # costs a device-side gather). This is the measured operating-point path.
         return logits.cpu().numpy(), values.cpu().numpy()
 
     depth = (
@@ -228,6 +250,7 @@ def main() -> None:
     steps = 0
     infer_calls = 0
     infer_rows = 0
+    padded_rows = 0
     infer_seconds = 0.0
     cache_hits = 0
     cache_lookups = 0
@@ -251,6 +274,7 @@ def main() -> None:
             # engine-side net telemetry: rows = forwards (no cache), calls = pooled batches
             infer_calls += batch.telemetry["infer_calls"]
             infer_rows += batch.telemetry["infer_rows"]
+            padded_rows += batch.telemetry["padded_rows"]
             infer_seconds += batch.telemetry["infer_seconds"]
             cache_hits += batch.telemetry["cache_hits"]
             cache_lookups += batch.telemetry["cache_lookups"]
@@ -295,6 +319,7 @@ def main() -> None:
                             "pending": stream.pending(),
                             "infer_calls": infer_calls,
                             "infer_rows": infer_rows,
+                            "padded_rows": padded_rows,
                             "infer_seconds": infer_seconds,
                             "cache_hits": cache_hits,
                             "cache_lookups": cache_lookups,
