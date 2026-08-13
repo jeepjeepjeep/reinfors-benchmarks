@@ -126,6 +126,7 @@ invocation, substitution and resume that produced its evidence.
 ## License
 
 Licensed under either of [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your
-option. Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in this work shall be dual-licensed as above, without any additional terms
-or conditions.
+option — except the OpenSpiel-derived patch files, which are **Apache-2.0 only**; see
+[THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES.md). Unless you explicitly state otherwise,
+any contribution intentionally submitted for inclusion in this work shall be
+dual-licensed as above, without any additional terms or conditions.
