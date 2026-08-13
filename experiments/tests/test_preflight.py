@@ -18,6 +18,8 @@ def test_wheel_tag_rejects_other_lines_and_missing() -> None:
     # a dotted wheel tag means reinfors itself changed mid-campaign: that demands an
     # exact re-freeze at the new tag, never a lenient pass under a later patch tag
     assert not preflight.wheel_tag_ok("v1.0.2", "v1.0.1")
+    assert not preflight.wheel_tag_ok("v1.0.1", "v1.0")
+    assert not preflight.wheel_tag_ok("v1.0.1.extra", "v1.0.1")
     assert not preflight.wheel_tag_ok("v2", "v1")
     assert not preflight.wheel_tag_ok("v10.1", "v1")  # prefix != dotted base
     assert not preflight.wheel_tag_ok("v1.0.1", None)
