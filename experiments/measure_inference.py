@@ -251,8 +251,7 @@ def bench_engine(args, game, head_actions, results) -> None:
 
             t0 = time.perf_counter()
             if engines <= 1:
-                # inline: no worker thread, so compiled callbacks replay on the same
-                # thread that captured them, and any failure raises loudly here
+                # inline: failures raise loudly instead of dying in a worker thread
                 run(engs[0], totals[0])
             else:
                 failures: list[BaseException] = []
@@ -385,9 +384,8 @@ def main() -> None:
         choices=["legacy", "fast", "compiled", "noop"],
         default="legacy",
         help="fast = inference_mode + pinned H2D + no slice + single packed D2H; "
-        'compiled = the fast path with torch.compile(mode="reduce-overhead") on the '
-        "forward (targets the per-call dispatch residual); noop = no-torch "
-        "(residual decomposition)",
+        "compiled = the fast path with default-mode torch.compile on the forward "
+        "(the operating configuration); noop = no-torch (residual decomposition)",
     )
     ap.add_argument("--sims", type=int, default=protocol.SIMS)
     ap.add_argument("--c-puct", type=float, default=protocol.C_PUCT)
@@ -412,12 +410,6 @@ def main() -> None:
         help="fresh run directory (rows.jsonl + manifest)",
     )
     args = ap.parse_args()
-    if args.callback == "compiled" and any(
-        e > 1 for e in map(int, args.engines.split(","))
-    ):
-        ap.error(
-            "--callback compiled requires --engines 1 (cudagraph replay is thread-affine)"
-        )
     out_dir = None
     if args.out:
         out_dir = Path(args.out).resolve()

@@ -15,7 +15,8 @@
         "widths": "256",
         "batches": "32,64,128,256",
         "mode": "kernel",
-        "out": "{run_dir}/inference"
+        "out": "{run_dir}/inference",
+        "callback": "compiled"
       },
       "cores": "0-3",
       "deadline_seconds": 900,
@@ -36,7 +37,9 @@
         "n-games": "32,64,128,256",
         "mode": "engine",
         "engine-leg-seconds": 120,
-        "out": "{run_dir}/inference"
+        "out": "{run_dir}/inference",
+        "callback": "compiled",
+        "infer-dtype": "f32"
       },
       "cores": "0-3",
       "deadline_seconds": 2400,
