@@ -73,6 +73,14 @@ def _check_openspiel_sources() -> list[str]:
     return errors
 
 
+def wheel_tag_ok(expect_tag: str, wheel_tag: str | None) -> bool:
+    """Benchmarks-only campaign patch tags (v1 -> v1.0.1) keep the frozen wheel:
+    the wheel's tag passes when it equals the expected tag or is its dotted base."""
+    if not wheel_tag:
+        return False
+    return wheel_tag == expect_tag or expect_tag.startswith(wheel_tag + ".")
+
+
 def check(expect_tag: str, allow_host: bool = False) -> list[str]:
     errors: list[str] = []
     m = manifest.collect()
@@ -89,9 +97,10 @@ def check(expect_tag: str, allow_host: bool = False) -> list[str]:
             errors.append(
                 f"reinfors build is not from a clean checkout (dirty={rf.get('git_dirty')!r})"
             )
-        if rf.get("git_tag") != expect_tag:
+        if not wheel_tag_ok(expect_tag, rf.get("git_tag")):
             errors.append(
-                f"reinfors build tag is {rf.get('git_tag')!r}, expected {expect_tag!r}"
+                f"reinfors build tag is {rf.get('git_tag')!r}, expected "
+                f"{expect_tag!r} or its dotted base"
             )
         if rf.get("profile") != "release":
             errors.append(
