@@ -41,6 +41,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="fast",
         help="rf: trainer callback implementation",
     )
+    ap.add_argument(
+        "--rf-pad-rows-to",
+        type=int,
+        default=-1,
+        help="rf: fixed call rows (-1 = trainer auto rule)",
+    )
     ap.add_argument("--warmup-seconds", type=float, default=protocol.WARMUP_SECONDS)
     ap.add_argument("--window-seconds", type=float, default=protocol.WINDOW_SECONDS)
     ap.add_argument("--cache", type=int, default=protocol.CACHE)
@@ -59,6 +65,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ap.error("--n-games is an rf parameter")
     if args.side == "os" and args.rf_infer != "fast":
         ap.error("--rf-infer is an rf parameter")
+    if args.side == "os" and args.rf_pad_rows_to != -1:
+        ap.error("--rf-pad-rows-to is an rf parameter")
     if args.side == "os" and args.batch is None:
         args.batch = args.actors
     return args
@@ -77,6 +85,7 @@ def build_child_argv(args: argparse.Namespace, out: Path) -> list[str]:
             args.cache,
             minutes=round(minutes, 1),
             infer=args.rf_infer,
+            pad_rows_to=args.rf_pad_rows_to,
         )
     else:
         child = protocol.os_train_argv(out, args.actors, args.batch, args.cache)
@@ -103,11 +112,14 @@ def reduce_window(path: Path, lo: float, hi: float) -> dict | None:
     dt = last["wall"] - first["wall"]
     dr = last["infer_rows"] - first["infer_rows"]
     dc = last["infer_calls"] - first["infer_calls"]
+    # os telemetry carries no padded_rows; physical == useful there
+    dp = last.get("padded_rows", 0) - first.get("padded_rows", 0)
     return {
         "window_seconds": [first["wall"], last["wall"]],
         "states_per_sec": (last["states"] - first["states"]) / dt,
         "net_rows_per_sec": dr / dt,
         "rows_per_call": dr / dc if dc > 0 else None,
+        "physical_rows_per_call": (dr + dp) / dc if dc > 0 else None,
         "learn_steps": last["steps"] - first["steps"],
     }
 

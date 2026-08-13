@@ -28,6 +28,7 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
                 "states": 1000,
                 "infer_rows": 100,
                 "infer_calls": 10,
+                "padded_rows": 5,
                 "steps": 1,
             },
             {
@@ -42,6 +43,7 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
                 "states": 2800,
                 "infer_rows": 1000,
                 "infer_calls": 55,
+                "padded_rows": 50,
                 "steps": 10,
             },
             {
@@ -58,6 +60,8 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
     assert m["states_per_sec"] == pytest.approx(1800 / 900)
     assert m["net_rows_per_sec"] == pytest.approx(900 / 900)
     assert m["rows_per_call"] == pytest.approx(900 / 45)
+    # padded_rows may be absent on interior rows (os telemetry): .get defaults apply
+    assert m["physical_rows_per_call"] == pytest.approx((900 + 45) / 45)
     assert m["learn_steps"] == 9
 
 
@@ -137,9 +141,29 @@ def test_rf_infer_flag_reaches_the_trainer() -> None:
     )
     child = measure_throughput.build_child_argv(args, Path("/x"))
     assert child[child.index("--infer") + 1] == "compiled"
+    padded = measure_throughput.parse_args(
+        [
+            "--side",
+            "rf",
+            "--n-games",
+            "128",
+            "--n-groups",
+            "2",
+            "--rf-pad-rows-to",
+            "64",
+            "--out",
+            "x",
+        ]
+    )
+    child = measure_throughput.build_child_argv(padded, Path("/x"))
+    assert child[child.index("--pad-rows-to") + 1] == "64"
     with pytest.raises(SystemExit):
         measure_throughput.parse_args(
             ["--side", "os", "--actors", "8", "--rf-infer", "compiled", "--out", "x"]
+        )
+    with pytest.raises(SystemExit):
+        measure_throughput.parse_args(
+            ["--side", "os", "--actors", "8", "--rf-pad-rows-to", "64", "--out", "x"]
         )
 
 

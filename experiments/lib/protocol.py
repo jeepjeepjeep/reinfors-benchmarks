@@ -55,6 +55,7 @@ def rf_train_argv(
     seed: int = 0,
     device: str = "cuda",
     infer: str = "fast",
+    pad_rows_to: int = -1,
 ) -> list[str]:
     return [
         sys.executable,
@@ -89,6 +90,8 @@ def rf_train_argv(
         str(CHECKPOINT_EVERY),
         "--infer",
         infer,
+        "--pad-rows-to",
+        str(pad_rows_to),
     ]
 
 

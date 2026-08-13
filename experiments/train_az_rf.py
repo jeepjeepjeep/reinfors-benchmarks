@@ -111,7 +111,13 @@ def main() -> None:
         "--infer",
         choices=["fast", "compiled"],
         default="fast",
-        help="compiled = torch.compile(reduce-overhead) heads + fixed-shape calls (pad_rows_to)",
+        help="compiled = torch.compile(reduce-overhead) heads",
+    )
+    ap.add_argument(
+        "--pad-rows-to",
+        type=int,
+        default=-1,
+        help="fixed call rows; -1 = auto (games per group when compiled, off otherwise)",
     )
     ap.add_argument(
         "--checkpoint-every",
@@ -186,6 +192,14 @@ def main() -> None:
     )
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
 
+    # fixed-shape calls for cudagraph capture; oversize spikes chunk, not recapture
+    group = -(-args.n_games // args.n_groups)
+    pad_rows_to = (
+        (group if args.infer == "compiled" else 0)
+        if args.pad_rows_to < 0
+        else args.pad_rows_to
+    )
+
     engine = rf.Engine(
         game,
         rf.Reward(win=1.0, loss=-1.0),
@@ -201,10 +215,7 @@ def main() -> None:
         seed=args.seed,
         infer_cache=args.infer_cache,
         n_groups=args.n_groups,
-        # fixed-shape calls for cudagraph capture; oversize spikes chunk, not recapture
-        pad_rows_to=(
-            -(-args.n_games // args.n_groups) if args.infer == "compiled" else 0
-        ),
+        pad_rows_to=pad_rows_to,
     )
 
     collector_net = copy.deepcopy(net)
@@ -244,6 +255,7 @@ def main() -> None:
     steps = 0
     infer_calls = 0
     infer_rows = 0
+    padded_rows = 0
     infer_seconds = 0.0
     cache_hits = 0
     cache_lookups = 0
@@ -267,6 +279,7 @@ def main() -> None:
             # engine-side net telemetry: rows = forwards (no cache), calls = pooled batches
             infer_calls += batch.telemetry["infer_calls"]
             infer_rows += batch.telemetry["infer_rows"]
+            padded_rows += batch.telemetry["padded_rows"]
             infer_seconds += batch.telemetry["infer_seconds"]
             cache_hits += batch.telemetry["cache_hits"]
             cache_lookups += batch.telemetry["cache_lookups"]
@@ -311,6 +324,7 @@ def main() -> None:
                             "pending": stream.pending(),
                             "infer_calls": infer_calls,
                             "infer_rows": infer_rows,
+                            "padded_rows": padded_rows,
                             "infer_seconds": infer_seconds,
                             "cache_hits": cache_hits,
                             "cache_lookups": cache_lookups,

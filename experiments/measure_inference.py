@@ -229,6 +229,8 @@ def bench_engine(args, game, head_actions, results) -> None:
                     n_games=n_games,
                     seed=args.seed + idx,
                     infer_cache=args.infer_cache,
+                    # the production compiled path: one captured shape per engine
+                    pad_rows_to=n_games if args.callback == "compiled" else 0,
                 )
 
             engs = [make_engine(e) for e in range(engines)]
@@ -238,7 +240,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                 )  # torch/device warmup outside the clock
 
             totals = [
-                dict(rows=0, calls=0, decisions=0, records=0, net_seconds=0.0)
+                dict(rows=0, calls=0, decisions=0, records=0, padded=0, net_seconds=0.0)
                 for _ in engs
             ]
             deadline = time.perf_counter() + args.engine_leg_seconds
@@ -249,6 +251,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                     tel = batch.telemetry
                     tot["rows"] += int(tel["infer_rows"])
                     tot["calls"] += int(tel["infer_calls"])
+                    tot["padded"] += int(tel["padded_rows"])
                     tot["decisions"] += int(tel["decisions"])
                     tot["net_seconds"] += float(tel["infer_seconds"])
                     tot["records"] += batch.obs.shape[0]
@@ -295,6 +298,9 @@ def bench_engine(args, game, head_actions, results) -> None:
                 rows_s=rows / wall,
                 moves_s=decisions / wall,
                 achieved_batch=rows / max(calls, 1),
+                padded_rows=sum(t["padded"] for t in totals),
+                physical_batch=(rows + sum(t["padded"] for t in totals))
+                / max(calls, 1),
                 net_share=net_seconds / wall,
                 records=sum(t["records"] for t in totals),
                 wall=wall,
