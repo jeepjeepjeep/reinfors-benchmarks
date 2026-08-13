@@ -111,7 +111,7 @@ def main() -> None:
         "--infer",
         choices=["fast", "compiled"],
         default="fast",
-        help="compiled = torch.compile(reduce-overhead) served from a persistent thread",
+        help="compiled = torch.compile(reduce-overhead) heads + fixed-shape calls (pad_rows_to)",
     )
     ap.add_argument(
         "--checkpoint-every",
@@ -201,6 +201,10 @@ def main() -> None:
         seed=args.seed,
         infer_cache=args.infer_cache,
         n_groups=args.n_groups,
+        # fixed-shape calls for cudagraph capture; oversize spikes chunk, not recapture
+        pad_rows_to=(
+            -(-args.n_games // args.n_groups) if args.infer == "compiled" else 0
+        ),
     )
 
     collector_net = copy.deepcopy(net)
@@ -208,35 +212,24 @@ def main() -> None:
     sync_lock = threading.Lock()
     c, h, w = obs_c, obs_h, obs_w
 
+    heads = collector_net.heads
     if args.infer == "compiled":
-        from compiled import CompiledInferServer
+        # lazy: capture happens at first CALL, on the stream's fixed callback thread;
+        # weight refreshes copy in-place under sync_lock, so replays see new weights
+        heads = torch.compile(collector_net.heads, mode="reduce-overhead")
 
-        server = CompiledInferServer(
-            collector_net.heads,
-            (c, h, w),
-            -(-args.n_games // args.n_groups),
-            args.device,
-        )
-
-        def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-            # sync_lock still excludes weight refresh during a forward; the refresh
-            # copies in-place, so the captured graph sees the new weights
-            with sync_lock:
-                return server.infer(obs_batch)
-    else:
-
-        def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-            with sync_lock, torch.inference_mode():
-                x = (
-                    torch.from_numpy(np.ascontiguousarray(obs_batch))
-                    .reshape(-1, c, h, w)
-                    .to(args.device)
-                )
-                logits, values = collector_net.heads(x)
-            # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE —
-            # the binding accepts width >= A and ignores the tail (a pre-transfer slice
-            # costs a device-side gather). This is the measured operating-point path.
-            return logits.cpu().numpy(), values.cpu().numpy()
+    def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        with sync_lock, torch.inference_mode():
+            x = (
+                torch.from_numpy(np.ascontiguousarray(obs_batch))
+                .reshape(-1, c, h, w)
+                .to(args.device)
+            )
+            logits, values = heads(x)
+        # f32 contract (reinfors PR #136): native f32, padded logits returned WHOLE —
+        # the binding accepts width >= A and ignores the tail (a pre-transfer slice
+        # costs a device-side gather). This is the measured operating-point path.
+        return logits.cpu().numpy(), values.cpu().numpy()
 
     depth = (
         None
