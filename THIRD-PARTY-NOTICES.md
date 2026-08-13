@@ -9,6 +9,7 @@ Apache License, Version 2.0. These two files are therefore available under
 **Apache-2.0 only** — the repository's MIT option does not apply to them.
 The full Apache-2.0 text is in [LICENSE-APACHE](LICENSE-APACHE).
 
-`scripts/setup_openspiel_cpp.sh` additionally restores two upstream build files
-content-identical from OpenSpiel's own history at build time; the restored
-content is likewise OpenSpiel's, under Apache-2.0.
+`scripts/setup_openspiel_cpp.sh` additionally restores two upstream directories
+(`open_spiel/libtorch` and `open_spiel/libnop`, five build files) content-identical
+from OpenSpiel's own history at build time; the restored content is likewise
+OpenSpiel's, under Apache-2.0.
