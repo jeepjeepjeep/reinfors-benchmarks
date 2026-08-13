@@ -21,7 +21,10 @@ Both sides' topology grids run in `v1_grid` and are analysed in
 measured configuration under the full round workload.
 **Selected operating points: OpenSpiel TBD, reinfors TBD** — these are the topologies
 encoded in `v1_training.json` (decision point: revise them there if the grids
-disagree).
+disagree). The reinfors configuration includes its
+[compiled inference callback](configuring-the-engines.md#reinfors-throughput-levers) —
+an rf-side implementation choice inside "each stack at its own best measured
+configuration", exactly as OpenSpiel's all-C++ inference service is its own.
 
 ## 2. The matched round — `v1_training`
 

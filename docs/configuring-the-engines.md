@@ -37,6 +37,7 @@ call size of reinfors' n128×2 operating point.
 |---|---|---|
 | f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_internal`) |
 | inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_internal`) |
+| compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n128_g2` / `rf_n128_g2_eager` (`v1_grid`) |
 
 - **f32** — engine-mode A/B, identical except the callback output dtype. The gain
   grows as the net shrinks, because the boundary cost is a larger share of a smaller
@@ -44,6 +45,13 @@ call size of reinfors' n128×2 operating point.
 - **cache** — full-workload legs (`measure_throughput.py --cache N`). Hit rate depends
   on the game's transposition structure and *rises over training* as the net
   concentrates its own play — the trajectory reads from the matched round's telemetry.
+- **compiled** — `torch.compile` on the callback net in **default mode**: the gain is
+  inductor's kernel generation (conv/batch-norm fusion on an evaluation-mode net) over
+  natural, unpadded call shapes, and it is reinfors' operating configuration (the
+  trainer default). Graph-capture modes (`reduce-overhead`/CUDA graphs, with padded
+  static shapes) measured no faster than eager on this workload — the forward is
+  GPU-bound and kernel-launch submission is already hidden inside each call, so graph
+  replay has nothing to recover and its per-call bookkeeping costs the codegen gain.
 
 ## Results — V1 (pending)
 
@@ -55,7 +63,8 @@ call size of reinfors' n128×2 operating point.
 inference call size (with two groups, reinfors calls carry n/2 rows). Cells report
 states/s; achieved batch and games-in-flight come from each cell's telemetry —
 equal call size does *not* mean equal concurrency, and that difference is the design
-comparison itself:
+comparison itself. The reinfors cells run the operating configuration (compiled
+callback); the eager baseline appears once, in the compiled-lever pair below:
 
 | call size | OpenSpiel (actors = size) | OpenSpiel half-fill (actors = 2×size) | rf ungrouped (n = size) | rf grouped (n = 2×size) |
 |---|---|---|---|---|
@@ -100,6 +109,13 @@ call size (concurrency helps completion but splits CPU further); whether a128:b6
 matches n128×2 at identical concurrency and call size; and the per-row mechanism
 comparison at each side's optimum (µs/row and inference-thread saturation, from the
 same telemetry).
+
+**Compiled vs eager callback** (full workload at the reinfors operating point,
+n128×2, cache on; the compiled cell is the operating point itself):
+
+| config (chess, CUDA) | eager states/s | compiled states/s | gain |
+|---|---|---|---|
+| n128×2, cache 262k | TBD | TBD | +TBD% |
 
 **f32 vs f64** (engine mode, call size 64):
 
