@@ -122,3 +122,10 @@ spot), then `v1_levers` (lever A/Bs at the confirmed operating point and call si
 `v1_training` (review telemetry before spending H2H hours), `v1_h2h`. Each family's details, decision points and gates are in its
 [experiment doc](#the-three-questions); a campaign's session manifests record every
 invocation, substitution and resume that produced its evidence.
+
+## License
+
+Licensed under either of [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your
+option. Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this work shall be dual-licensed as above, without any additional terms
+or conditions.
