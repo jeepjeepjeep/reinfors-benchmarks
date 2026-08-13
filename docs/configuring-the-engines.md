@@ -35,10 +35,10 @@ call size of reinfors' n128×2 operating point.
 
 | lever | measures | cells |
 |---|---|---|
-| f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_internal`) |
-| inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_internal`) |
-| compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n128_g2` / `rf_n128_g2_eager` (`v1_grid`) |
-| compiled batch response | compiled-kernel rows/s at batch 32-256, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_internal`) |
+| f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_levers`) |
+| inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_levers`) |
+| compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n128_g2` (`v1_grid`) / `rf_n128_g2_eager` (`v1_levers`, at the confirmed operating point) |
+| compiled batch response | compiled-kernel rows/s at batch 32-256, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_curves`) |
 
 - **f32** — engine-mode A/B, identical except the callback output dtype. The gain
   grows as the net shrinks, because the boundary cost is a larger share of a smaller
@@ -142,5 +142,5 @@ throughput/host-memory choice, not a cliff. At the 262,144-entry operating point
 reaches TBD% by two hours of training.
 
 *Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G); grids: `v1_grid`, 3 interleaved
-cycles per cell; curve/f32: `v1_internal`, 3 cycles; capacity probes: 1 cycle each.
+cycles per cell; curves: `v1_curves`, 3 cycles; f32 and capacity probes: `v1_levers` (run after the grid/curves checkpoint fixes the operating point and call size).
 Medians with per-cycle spreads throughout.*

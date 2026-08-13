@@ -11,7 +11,7 @@
       "args": {
         "side": "os",
         "actors": 64,
-        "batch": 64,
+        "batch": 32,
         "minutes": 120,
         "cores": "0-3",
         "out": "{run_dir}/training"
