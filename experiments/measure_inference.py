@@ -439,7 +439,7 @@ def main() -> None:
     header = dict(
         game=args.game,
         torch=torch.__version__,
-        build=rf._reinfors.core_build_profile(),
+        build=rf.build_info()["profile"],
         torch_threads=torch.get_num_threads(),
         affinity=str(affinity),
         cuda=torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,

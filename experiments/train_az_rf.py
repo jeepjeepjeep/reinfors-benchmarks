@@ -132,7 +132,7 @@ def main() -> None:
     ap.add_argument("--depth", type=int, default=1)
     args = ap.parse_args()
 
-    if rf.core_build_profile() != "release" and not os.environ.get(
+    if rf.build_info()["profile"] != "release" and not os.environ.get(
         "REINFORS_ALLOW_DEBUG"
     ):
         sys.exit(
@@ -144,7 +144,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     versions = {
         "reinfors": rf.core_version(),
-        "reinfors_profile": rf.core_build_profile(),
+        "reinfors_profile": rf.build_info()["profile"],
         "torch": torch.__version__,
     }
     (out / "config.json").write_text(json.dumps(vars(args) | versions, indent=2))
