@@ -117,7 +117,7 @@ def main() -> None:
         "--pad-rows-to",
         type=int,
         default=-1,
-        help="fixed call rows; -1 = auto (games per group when compiled, off otherwise)",
+        help="fixed call rows (0 = off); for graph-capture consumers, not needed by --infer compiled",
     )
     ap.add_argument(
         "--checkpoint-every",
@@ -192,13 +192,7 @@ def main() -> None:
     )
     buffer = ReplayBuffer(args.buffer_size, dim, actions, args.seed)
 
-    # fixed-shape calls for cudagraph capture; oversize spikes chunk, not recapture
-    group = -(-args.n_games // args.n_groups)
-    pad_rows_to = (
-        (group if args.infer == "compiled" else 0)
-        if args.pad_rows_to < 0
-        else args.pad_rows_to
-    )
+    pad_rows_to = max(args.pad_rows_to, 0)
 
     engine = rf.Engine(
         game,
@@ -225,9 +219,9 @@ def main() -> None:
 
     heads = collector_net.heads
     if args.infer == "compiled":
-        # lazy: capture happens at first CALL, on the stream's fixed callback thread;
-        # weight refreshes copy in-place under sync_lock, so replays see new weights
-        heads = torch.compile(collector_net.heads, mode="reduce-overhead")
+        # default mode: the measured win is inductor codegen; reduce-overhead's
+        # cudagraph path forfeits it (mode probe, 2026-08-13)
+        heads = torch.compile(collector_net.heads)
 
     def infer(obs_batch: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         with sync_lock, torch.inference_mode():

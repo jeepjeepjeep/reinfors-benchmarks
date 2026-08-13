@@ -136,8 +136,7 @@ def test_compiled_arm_wiring(tmp_path: Path) -> None:
         rows = [json.loads(x) for x in open(out / "rows.jsonl")]
         assert len(rows) >= 2
         if mode == "engine":
-            # compiled engines run the production fixed-shape path: every call is
-            # exactly n_games rows, so physical rows are calls * pad
+            # default-mode compile needs no padding: physical rows == real rows
             cell = next(x for x in rows if x.get("part") == "engine")
-            assert cell["physical_batch"] == 2.0
-            assert cell["padded_rows"] >= 0
+            assert cell["padded_rows"] == 0
+            assert cell["physical_batch"] == cell["achieved_batch"]

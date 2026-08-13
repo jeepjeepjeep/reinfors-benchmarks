@@ -85,11 +85,7 @@ def bench_net(args, shape, head_actions, results) -> None:
             continue
         seed_all()
         net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
-        heads = (
-            torch.compile(net.heads, mode="reduce-overhead")
-            if args.callback == "compiled"
-            else net.heads
-        )
+        heads = torch.compile(net.heads) if args.callback == "compiled" else net.heads
         for batch in args.batches:
             x = torch.randn(batch, c, h, w, device=device)
             with torch.no_grad():
@@ -138,9 +134,7 @@ def bench_engine(args, game, head_actions, results) -> None:
             seed_all()
             net = SweepResnet(c, h, w, head_actions, width, depth).to(device).eval()
             heads = (
-                torch.compile(net.heads, mode="reduce-overhead")
-                if args.callback == "compiled"
-                else net.heads
+                torch.compile(net.heads) if args.callback == "compiled" else net.heads
             )
 
             noop_l = np.zeros(
@@ -229,8 +223,7 @@ def bench_engine(args, game, head_actions, results) -> None:
                     n_games=n_games,
                     seed=args.seed + idx,
                     infer_cache=args.infer_cache,
-                    # the production compiled path: one captured shape per engine
-                    pad_rows_to=n_games if args.callback == "compiled" else 0,
+                    pad_rows_to=0,
                 )
 
             engs = [make_engine(e) for e in range(engines)]
