@@ -93,20 +93,27 @@ def build_child_argv(args: argparse.Namespace, out: Path) -> list[str]:
 
 
 def reduce_window(path: Path, lo: float, hi: float) -> dict | None:
-    """Delta of cumulative counters between the first and last rows inside [lo, hi];
-    None if the window holds fewer than two rows."""
-    first = last = None
+    """Delta of cumulative counters between the first and last STATE-ADVANCE events
+    inside [lo, hi]; None with fewer than two events.
+
+    Counters advance in collect/sweep bursts (~21.8k states on both stacks), so
+    edge-row endpoints would quantize the rate to whole bursts over a fixed span —
+    ±1 burst in ~8 was a ±12% swing on the os side. Event endpoints put both ends
+    of the span at the same burst phase, on both stacks."""
     if not Path(path).exists():
         return None
+    rows = []
     for line in open(path, errors="ignore"):
         try:
-            d = json.loads(line)
+            rows.append(json.loads(line))
         except json.JSONDecodeError:
             continue
-        if lo <= d["wall"] <= hi:
+    first = last = None
+    for prev, cur in zip(rows, rows[1:]):
+        if cur["states"] != prev["states"] and lo <= cur["wall"] <= hi:
             if first is None:
-                first = d
-            last = d
+                first = cur
+            last = cur
     if first is None or last is first:
         return None
     dt = last["wall"] - first["wall"]
