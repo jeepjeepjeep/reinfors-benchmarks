@@ -65,6 +65,55 @@ def test_reduce_deltas_inside_window_only(tmp_path: Path) -> None:
     assert m["learn_steps"] == 9
 
 
+def test_reduce_is_burst_quantization_free(tmp_path: Path) -> None:
+    # counters publish in bursts; between bursts the sampler repeats the last value.
+    # 9 bursts of 1000 states arrive every 100s at walls 350..1150; filler rows at
+    # 305 and 1195 repeat stale values. Edge-row endpoints would divide 8000 states
+    # by the 890s row span (=8.99/s); the true rate over whole inter-event
+    # intervals is 8000/800 = 10.0/s exactly.
+    rows = [{"wall": 100.0, "states": 0, "infer_rows": 0, "infer_calls": 0, "steps": 0}]
+    for i in range(9):
+        t = 350.0 + i * 100
+        st = (i + 1) * 1000
+        rows.append(
+            {
+                "wall": t,
+                "states": st,
+                "infer_rows": st * 10,
+                "infer_calls": st // 100,
+                "steps": i + 1,
+            }
+        )
+        rows.append(
+            {
+                "wall": t + 45,
+                "states": st,
+                "infer_rows": st * 10,
+                "infer_calls": st // 100,
+                "steps": i + 1,
+            }
+        )
+    rows.insert(
+        1, {"wall": 305.0, "states": 0, "infer_rows": 0, "infer_calls": 0, "steps": 0}
+    )
+    rows.append(
+        {
+            "wall": 1195.0,
+            "states": 9000,
+            "infer_rows": 90000,
+            "infer_calls": 90,
+            "steps": 9,
+        }
+    )
+    _rows(tmp_path / "learner.jsonl", sorted(rows, key=lambda r: r["wall"]))
+    m = measure_throughput.reduce_window(tmp_path / "learner.jsonl", 300, 1200)
+    assert m["window_seconds"] == [350.0, 1150.0]
+    assert m["states_per_sec"] == pytest.approx(10.0)
+    assert m["net_rows_per_sec"] == pytest.approx(100.0)
+    assert m["rows_per_call"] == pytest.approx(1000.0)
+    assert m["learn_steps"] == 8
+
+
 def test_reduce_needs_two_rows_in_window(tmp_path: Path) -> None:
     _rows(
         tmp_path / "learner.jsonl",

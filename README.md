@@ -118,7 +118,9 @@ internally dependency-free (one session fixes all values at launch), so each
 between-session analysis is a real update point. Campaign order: smoke gates first,
 then `v1_grid` and `v1_curves` (together a decision point: the grid selects each
 side's configuration, the curves supply the mechanism cross-check and call-size sweet
-spot), then `v1_levers` (lever A/Bs at the confirmed operating point and call size),
+spot; a sweep still rising at its edge extends through `v1_grid_ext` — call sizes
+512/1,024 — before anything is selected, as both V1 sweeps did at 256), then
+`v1_levers` (lever A/Bs at the confirmed operating point and call size),
 `v1_training` (review telemetry before spending H2H hours), `v1_h2h`. Each family's details, decision points and gates are in its
 [experiment doc](#the-three-questions); a campaign's session manifests record every
 invocation, substitution and resume that produced its evidence.

@@ -14,7 +14,9 @@ are protocol-matched constants and are deliberately never tuned — see
 ## Sizing reinfors — n_games × n_groups
 
 The full factorial — n_games 32/64/128/256 × 1/2 groups, the `rf_*` cells of
-`v1_grid` via [`measure_throughput.py`](../experiments/measure_throughput.py) —
+`v1_grid` via [`measure_throughput.py`](../experiments/measure_throughput.py),
+extended through n512/n1024 × 1 and n1024/n2048 × 2 by `v1_grid_ext` after the base
+sweep was still rising at its edge —
 measures the workload-level batch response and the grouping lever in one table. With
 two groups each call carries ~n/2 rows, so every grouped config's **matched-rows
 partner sits one diagonal away** (n64×1 ↔ n128×2, n128×1 ↔ n256×2): the grouping
@@ -25,7 +27,8 @@ measured neighbors on both sides.
 
 Their topology axis is independent actor threads feeding a central batcher, so actor
 count is simultaneously their CPU concurrency and their inference batch size — batch
-is *acquired with actors*, where reinfors acquires it by staging. The V1 grid — `os_*` cells of `v1_grid`, actors 32 through 256 — maps the curve in
+is *acquired with actors*, where reinfors acquires it by staging. The V1 grid — `os_*` cells of `v1_grid`, actors 32 through 256, extended through
+a1024 full-fill and a2048:b1024 half-fill by `v1_grid_ext` — maps the curve in
 two columns: **full-fill** (batch = actors) and **half-fill** (batch = actors/2),
 the latter separating batch size from concurrency at every call size. The half-fill
 64-row cell (a128:b64) runs 128 games at 64-row calls — the exact games-in-flight and
@@ -73,6 +76,8 @@ callback); the eager baseline appears once, in the compiled-lever pair below:
 | 64 | a64: TBD | a128:b64: TBD | n64×1: TBD | n128×2: TBD |
 | 128 | a128: TBD | a256:b128: TBD | n128×1: TBD | n256×2: TBD |
 | 256 | a256: TBD | a512:b256: TBD | n256×1: TBD | n512×2: TBD |
+| 512 | a512: TBD | a1024:b512: TBD | n512×1: TBD | n1024×2: TBD |
+| 1024 | a1024: TBD | a2048:b1024: TBD | n1024×1: TBD | n2048×2: TBD |
 
 The two "2×size" columns are structural mirrors: each runs twice the games of its
 call size — OpenSpiel by capping the batch below the actor count, reinfors by
@@ -141,8 +146,9 @@ Hit rate has been monotone in capacity but flattens sharply — capacity is a
 throughput/host-memory choice, not a cliff. At the 262,144-entry operating point it
 reaches TBD% by two hours of training.
 
-*Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G); grids: `v1_grid`, 3 interleaved
-cycles per cell; curves: `v1_curves`, 3 cycles; compiled/eager pair, f32, and capacity
+*Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G); grids: `v1_grid` and its
+512/1,024-call extension `v1_grid_ext`, 3 interleaved cycles per cell; curves:
+`v1_curves`, 3 cycles; compiled/eager pair, f32, and capacity
 probes: `v1_levers` (run after the grid/curves checkpoint fixes the operating point and
 call size). Medians with per-cycle spreads for all 3-cycle cells; the four cache
 capacity probes are single runs and their figures are labeled as such.*

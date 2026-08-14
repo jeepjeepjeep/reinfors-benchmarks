@@ -16,7 +16,8 @@ trace to structural design choices on each side
 
 ## 1. Operating points
 
-Both sides' topology grids run in `v1_grid` and are analysed in
+Both sides' topology grids run in `v1_grid` (with the `v1_grid_ext` extension where
+a sweep was still rising at its edge) and are analysed in
 [configuring the engines](configuring-the-engines.md), which selects each stack's best
 measured configuration under the full round workload.
 **Selected operating points: OpenSpiel TBD, reinfors TBD** — these are the topologies
