@@ -11,7 +11,7 @@ batch sweet spot bound both sides of [the comparison](the-comparison.md).
 
 | experiment | measures | cells |
 |---|---|---|
-| kernel rate vs batch | pure net forwards/s at batch 32/64/128/256, per device — the CUDA:CPU ratio of the two arms is the crossover curve | `kernel_rate_vs_batch` (`v1_curves`) |
+| kernel rate vs batch | pure net forwards/s at batch 32-2,048, per device — the CUDA:CPU ratio of the two arms is the crossover curve | `kernel_rate_vs_batch` (`v1_curves`; 512-2,048 via `v1_curves_ext`) |
 
 The cell pins the eager path (`callback: fast`) — the neutrality claim above holds
 for eager ATen dispatch only. reinfors' operating configuration compiles its callback,
@@ -53,6 +53,9 @@ transfer to other nets or devices — measure yours before sizing anything again
 | 64 | TBD | TBD | TBD |
 | 128 | TBD | TBD | TBD |
 | 256 | TBD | TBD | TBD |
+| 512 | TBD | TBD | TBD |
+| 1024 | TBD | TBD | TBD |
+| 2048 | TBD | TBD | TBD |
 
 The A10G's sweet spot for this net has sat at batch 64, with a measurable per-row
 *regression* at batch 128 — the term the
@@ -64,5 +67,5 @@ regime pooled collection exists to escape). The V1 verdict (smallest batch where
 ratio clears 2.0): TBD.
 
 *Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G), cell `kernel_rate_vs_batch` in
-`v1_curves`, 3 cycles, medians with per-cycle spreads
-([methodology](methodology.md)).*
+`v1_curves` (batch 32-256) and `v1_curves_ext` (512-2,048), 3 cycles, medians with
+per-cycle spreads ([methodology](methodology.md)).*
