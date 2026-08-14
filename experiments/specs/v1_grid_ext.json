@@ -4,6 +4,44 @@
   "cycles": 3,
   "cells": [
     {
+      "name": "os_a2048b1024",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "os",
+        "actors": 2048,
+        "batch": 1024,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ]
+    },
+    {
+      "name": "rf_n2048_g2",
+      "argv": [
+        "experiments/measure_throughput.py"
+      ],
+      "args": {
+        "side": "rf",
+        "n-games": 2048,
+        "n-groups": 2,
+        "warmup-seconds": 300,
+        "window-seconds": 900,
+        "cores": "0-3",
+        "out": "{run_dir}/throughput"
+      },
+      "deadline_seconds": 1350,
+      "outputs": [
+        "throughput/telemetry.jsonl"
+      ]
+    },
+    {
       "name": "os_a512",
       "argv": [
         "experiments/measure_throughput.py"
@@ -48,25 +86,6 @@
         "side": "os",
         "actors": 1024,
         "batch": 512,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
-      "name": "os_a2048b1024",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "os",
-        "actors": 2048,
-        "batch": 1024,
         "warmup-seconds": 300,
         "window-seconds": 900,
         "cores": "0-3",
@@ -123,25 +142,6 @@
       "args": {
         "side": "rf",
         "n-games": 1024,
-        "n-groups": 2,
-        "warmup-seconds": 300,
-        "window-seconds": 900,
-        "cores": "0-3",
-        "out": "{run_dir}/throughput"
-      },
-      "deadline_seconds": 1350,
-      "outputs": [
-        "throughput/telemetry.jsonl"
-      ]
-    },
-    {
-      "name": "rf_n2048_g2",
-      "argv": [
-        "experiments/measure_throughput.py"
-      ],
-      "args": {
-        "side": "rf",
-        "n-games": 2048,
         "n-groups": 2,
         "warmup-seconds": 300,
         "window-seconds": 900,
