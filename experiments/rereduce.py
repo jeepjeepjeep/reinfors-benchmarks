@@ -5,7 +5,7 @@ finalized manifests; those stay untouched. This writes `metrics-v2.json`
 beside each manifest, recomputed from the archived telemetry with the cell's
 own recorded window parameters.
 
-    python experiments/rereduce.py runs/v1_grid runs/v1_curves
+    python experiments/rereduce.py runs/v1_grid runs/v1_levers
 """
 
 import argparse
@@ -23,7 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("roots", nargs="+", help="run directories to walk")
     args = ap.parse_args(argv)
-    done = skipped = 0
+    done = skipped = failed = 0
     for root in args.roots:
         for mf in sorted(Path(root).glob("**/throughput/manifest.json")):
             d = json.loads(mf.read_text())
@@ -35,6 +35,10 @@ def main(argv: list[str] | None = None) -> int:
             metrics = measure_throughput.reduce_window(
                 tel, lo, lo + d["window_seconds"]
             )
+            if metrics is None:
+                failed += 1
+                print(f"FAILED {mf.parent}: fewer than two state-advance events")
+                continue
             out = {
                 "reduce": "event-aligned-v2",
                 "telemetry_sha256": manifest_lib.sha256(tel),
@@ -48,8 +52,8 @@ def main(argv: list[str] | None = None) -> int:
             v2 = (metrics or {}).get("states_per_sec")
             if v1 and v2:
                 print(f"{name:16s} {mf.parent.parent.name}  {v1:7.1f} -> {v2:7.1f}")
-    print(f"re-reduced {done}, skipped {skipped}")
-    return 0
+    print(f"re-reduced {done}, skipped {skipped}, failed {failed}")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
