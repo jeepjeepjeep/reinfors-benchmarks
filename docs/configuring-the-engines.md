@@ -41,7 +41,7 @@ call size of reinfors' n128×2 operating point.
 | f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_levers`) |
 | inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_levers`) |
 | compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n128_g2_compiled` / `rf_n128_g2_eager` (`v1_levers` — contemporaneous, cycle-interleaved, at the confirmed operating point; the grid's `rf_n128_g2` serves selection only) |
-| compiled batch response | compiled-kernel rows/s at batch 32-256, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_curves`) |
+| compiled batch response | compiled-kernel rows/s at batch 32-2,048, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_curves`; 512-2,048 via `v1_curves_ext`) |
 
 - **f32** — engine-mode A/B, identical except the callback output dtype. The gain
   grows as the net shrinks, because the boundary cost is a larger share of a smaller
@@ -94,7 +94,8 @@ the new call size pays on the batch-response curve. Rows/call and inference shar
 rf cell accompany the published table.
 
 **Batch-response curve** (compiled forward — the operating path — CUDA; medians over
-3 cycles; cell `kernel_rate_vs_batch_compiled`):
+3 cycles; cell `kernel_rate_vs_batch_compiled`, 512-2,048 via `v1_curves_ext` —
+2,048 brackets the curve one octave past the largest grid call):
 
 | call size | rows/s |
 |---|---|
@@ -102,6 +103,9 @@ rf cell accompany the published table.
 | 64 | TBD |
 | 128 | TBD |
 | 256 | TBD |
+| 512 | TBD |
+| 1024 | TBD |
+| 2048 | TBD |
 
 The per-row rate has peaked at 64 with a measurable regression at 128 — the mechanism
 pricing every column of the unified grid. Engine-level crossover (smallest call size
@@ -148,7 +152,8 @@ reaches TBD% by two hours of training.
 
 *Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G); grids: `v1_grid` and its
 512/1,024-call extension `v1_grid_ext`, 3 interleaved cycles per cell; curves:
-`v1_curves`, 3 cycles; compiled/eager pair, f32, and capacity
+`v1_curves` with `v1_curves_ext` (kernel batch 512-2,048, engine n512/n1024), 3
+cycles; compiled/eager pair, f32, and capacity
 probes: `v1_levers` (run after the grid/curves checkpoint fixes the operating point and
 call size). Medians with per-cycle spreads for all 3-cycle cells; the four cache
 capacity probes are single runs and their figures are labeled as such.*
