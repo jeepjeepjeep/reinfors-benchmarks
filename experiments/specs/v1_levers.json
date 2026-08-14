@@ -4,13 +4,13 @@
   "cycles": 3,
   "cells": [
     {
-      "name": "rf_n128_g2_compiled",
+      "name": "rf_n512_g2_compiled",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "warmup-seconds": 300,
         "window-seconds": 900,
@@ -24,13 +24,13 @@
       ]
     },
     {
-      "name": "rf_n128_g2_eager",
+      "name": "rf_n512_g2_eager",
       "argv": [
         "experiments/measure_throughput.py"
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "warmup-seconds": 300,
         "window-seconds": 900,
@@ -54,7 +54,7 @@
         "depths": "8",
         "engine-leg-seconds": 120,
         "widths": "128,256",
-        "n-games": "64",
+        "n-games": "256",
         "mode": "engine",
         "callback": "fast",
         "infer-dtype": "f64",
@@ -77,7 +77,7 @@
         "depths": "8",
         "engine-leg-seconds": 120,
         "widths": "128,256",
-        "n-games": "64",
+        "n-games": "256",
         "mode": "engine",
         "callback": "fast",
         "infer-dtype": "f32",
@@ -96,7 +96,7 @@
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "cache": 4096,
         "warmup-seconds": 300,
@@ -117,7 +117,7 @@
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "cache": 32768,
         "warmup-seconds": 300,
@@ -138,7 +138,7 @@
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "cache": 262144,
         "warmup-seconds": 300,
@@ -159,7 +159,7 @@
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "cache": 2097152,
         "warmup-seconds": 300,
