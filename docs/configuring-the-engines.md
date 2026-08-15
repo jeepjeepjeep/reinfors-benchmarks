@@ -39,7 +39,7 @@ call size of reinfors' n512×2 operating point.
 | lever | measures | cells |
 |---|---|---|
 | f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_levers`) |
-| inference-cache capacity | hit rate at 4k / 32k / 256k / 2M entries under the full workload | `rf_cache_*` (`v1_levers`) |
+| inference-cache capacity | hit rate at 4k / 32k / 256k entries under the full workload | `rf_cache_*` (`v1_levers`) |
 | compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n512_g2_compiled` / `rf_n512_g2_eager` (`v1_levers` — contemporaneous, cycle-interleaved, at the confirmed operating point; the grid's `rf_n512_g2` serves selection only) |
 | compiled batch response | compiled-kernel rows/s at batch 32-2,048, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_curves`; 512-2,048 via `v1_curves_ext`) |
 
@@ -154,11 +154,11 @@ n512×2, cache on; the compiled cell is the operating point itself):
 | 4,096 | TBD |
 | 32,768 | TBD |
 | 262,144 | TBD |
-| 2M | TBD |
 
-Hit rate has been monotone in capacity but flattens sharply — capacity is a
-throughput/host-memory choice, not a cliff. At the 262,144-entry operating point it
-reaches TBD% by two hours of training.
+Capacity is a throughput/host-memory choice, not a cliff. The sweep tops out at 262,144
+(the operating point) on this 30 GB host: a 2M-entry cache of chess policy+value rows
+exhausts RAM during the first collect, so capacity above the host's memory is unmeasurable
+here rather than a data point.
 
 *Provenance: V1 campaign (tags v1 wheel / v1.0.x benchmarks), g5.2xlarge (A10G); grids:
 `v1_grid` and its 512/1,024-call extension `v1_grid_ext`, 3 interleaved cycles per cell
@@ -167,5 +167,5 @@ cells); curves:
 `v1_curves` with `v1_curves_ext` (kernel batch 512-2,048, engine n512/n1024), 3
 cycles; compiled/eager pair, f32, and capacity
 probes: `v1_levers` (run after the grid/curves checkpoint fixes the operating point and
-call size). Medians with per-cycle spreads for all 3-cycle cells; the four cache
+call size). Medians with per-cycle spreads for all 3-cycle cells; the three cache
 capacity probes are single runs and their figures are labeled as such.*
