@@ -101,21 +101,24 @@ rf cell accompany the published table.
 3 cycles; cell `kernel_rate_vs_batch_compiled`, 512-2,048 via `v1_curves_ext` —
 2,048 brackets the curve one octave past the largest grid call):
 
-| call size | rows/s |
-|---|---|
-| 32 | TBD |
-| 64 | TBD |
-| 128 | TBD |
-| 256 | TBD |
-| 512 | TBD |
-| 1024 | TBD |
-| 2048 | TBD |
+| call size | rows/s | µs/row |
+|---|---|---|
+| 32 | 14,602 | 68.5 |
+| 64 | 17,562 | 56.9 |
+| 128 | 17,164 | 58.3 |
+| 256 | 24,507 | 40.8 |
+| 512 | 19,666 | 50.8 |
+| 1024 | 26,517 | 37.7 |
+| 2048 | 26,980 | 37.1 |
 
-The per-row rate has peaked at 64 with a measurable regression at 128 — the mechanism
-pricing every column of the unified grid. Engine-level crossover (smallest call size
-where CUDA clears CPU ×2 through the data-gen loop; per-device cell
-`engine_rate_vs_n_games`): TBD. The eager cross-device kernel curve is
-[section A's](sizing-the-compute.md).
+The curve rises overall (14.6k → 27k rows/s) with a sawtooth — dips at 128 and 512,
+peaks at 256 and ≥1024 — an A10G tile-quantization effect, not a workload feature: it
+keeps climbing well past the 256-row call where completed-game throughput turns over,
+so the operating point is set by CPU/concurrency saturation, not the kernel. Engine-level
+crossover (smallest call size where CUDA clears CPU ×2 through the data-gen loop; per-device cell
+`engine_rate_vs_n_games`): below n32 — CUDA runs 11.7k–17.6k rows/s across n32–1024 against
+a flat ~320 on CPU, so CUDA leads by >30× everywhere in range. The eager cross-device
+kernel curve is [section A's](sizing-the-compute.md).
 
 **Selected operating points: OpenSpiel a256 full-fill (batch = actors), reinfors n512×2
 compiled** — the grid maxima above; these become the encoded topologies in

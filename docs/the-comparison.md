@@ -21,9 +21,9 @@ a sweep was still rising at its edge) and are analysed in
 [configuring the engines](configuring-the-engines.md), which selects each stack's best
 measured configuration under the full round workload.
 **Selected operating points: OpenSpiel a256 full-fill (batch = actors), reinfors
-n512×2 compiled** — the [sizing-grid](configuring-the-engines.md#results-v1) maxima,
-encoded in `v1_training.json` (decision point: revise them there if the grids
-disagree). The reinfors configuration includes its
+n512×2 compiled** — the [sizing-grid](configuring-the-engines.md) maxima, encoded in
+`v1_training.json` (decision point: revise them there if the grids disagree). The
+reinfors configuration includes its
 [compiled inference callback](configuring-the-engines.md#reinfors-throughput-levers) —
 an rf-side implementation choice inside "each stack at its own best measured
 configuration", exactly as OpenSpiel's all-C++ inference service is its own.
