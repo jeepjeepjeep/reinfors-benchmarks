@@ -1,0 +1,53 @@
+{
+  "session": "v1_levers_f32c",
+  "expect_tag": "{tag}",
+  "cycles": 3,
+  "cells": [
+    {
+      "name": "f32c_ab_f64",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "128,256",
+        "n-games": "256",
+        "mode": "engine",
+        "callback": "compiled",
+        "infer-dtype": "f64",
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 1800,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    },
+    {
+      "name": "f32c_ab_f32",
+      "argv": [
+        "experiments/measure_inference.py"
+      ],
+      "args": {
+        "game": "chess",
+        "devices": "cuda",
+        "depths": "8",
+        "engine-leg-seconds": 120,
+        "widths": "128,256",
+        "n-games": "256",
+        "mode": "engine",
+        "callback": "compiled",
+        "infer-dtype": "f32",
+        "out": "{run_dir}/inference"
+      },
+      "cores": "0-3",
+      "deadline_seconds": 1800,
+      "outputs": [
+        "inference/rows.jsonl"
+      ]
+    }
+  ]
+}
