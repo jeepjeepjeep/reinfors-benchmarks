@@ -52,7 +52,7 @@
       ],
       "args": {
         "game": "chess",
-        "devices": "cpu,cuda",
+        "devices": "cuda",
         "depths": "8",
         "widths": "256",
         "n-games": "512,1024",
