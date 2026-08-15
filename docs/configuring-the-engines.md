@@ -113,8 +113,17 @@ where CUDA clears CPU ×2 through the data-gen loop; per-device cell
 `engine_rate_vs_n_games`): TBD. The eager cross-device kernel curve is
 [section A's](sizing-the-compute.md).
 
-**Selected operating points: OpenSpiel TBD, reinfors TBD** — these become the encoded
-topologies in `v1_training.json` ([the comparison](the-comparison.md)).
+**Selected operating points: OpenSpiel a256 full-fill (inference batch = actor count),
+reinfors n512×2 compiled** — these become the encoded topologies in `v1_training.json`
+([the comparison](the-comparison.md)); their states/s land with the grid table above.
+
+OpenSpiel's optimum uses no batch-capping. Half-fill — holding the inference batch below
+the actor count to put more games in flight — only pays in the small-call regime, where
+four cores can still feed extra actors (at call size 32 it leads full-fill); by the
+256-row call that is actually optimal the extra actors only contend for cores, full-fill
+leads, and half-fill's own peak sits below the a256 full-fill maximum. So OpenSpiel is
+sized at a256 with batch equal to actors. reinfors selects its grouped n512×2 cell, where
+overlap is an explicit, opt-in lever rather than acquired-with-actors.
 
 Pre-registered questions the grid answers: where each stack's curve turns over call
 size; whether half-fill beats full-fill at matched
