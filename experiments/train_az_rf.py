@@ -94,8 +94,8 @@ def main() -> None:
         "--n-groups",
         type=int,
         default=1,
-        help="2 = double-buffered collect (size n-games as groups x 64 to keep "
-        "each group at the A10G batch-64 sweet spot)",
+        help="2 = double-buffered collect (two game groups on worker threads so "
+        "search overlaps inference)",
     )
     ap.add_argument(
         "--collect-size", type=int, default=512, help="records per stream batch"

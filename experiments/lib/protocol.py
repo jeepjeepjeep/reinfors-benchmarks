@@ -37,11 +37,7 @@ CHECKPOINT_EVERY = 60
 
 # Interior-window defaults (pre-registered; see docs/benchmarks methodology).
 # WARMUP: rf telemetry does not exist before the first learn step — the first
-# collect batch of COLLECT_SIZE records must complete first. Measured first rows at
-# the operating point: 191s eager, 210s with the compiled default (first-call
-# compile rides inside the first collect). 300 clears both with margin. Re-check
-# before trusting it for topologies with a later first collect (n256/n512 are
-# unmeasured).
+# collect batch of COLLECT_SIZE records must complete first. 300s clears it.
 # WINDOW: `states` publishes in ~21.8k-state bursts (~100-130s apart), so the reduce
 # measures between the first and last burst ARRIVALS in the window (whole intervals,
 # whole bursts). 900s yields ~7-11 events; more events tighten the estimate.

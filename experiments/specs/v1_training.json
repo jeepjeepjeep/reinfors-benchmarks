@@ -10,8 +10,8 @@
       ],
       "args": {
         "side": "os",
-        "actors": 64,
-        "batch": 32,
+        "actors": 256,
+        "batch": 256,
         "minutes": 120,
         "cores": "0-3",
         "out": "{run_dir}/training"
@@ -28,7 +28,7 @@
       ],
       "args": {
         "side": "rf",
-        "n-games": 128,
+        "n-games": 512,
         "n-groups": 2,
         "seed": "{cycle}",
         "minutes": 120,
