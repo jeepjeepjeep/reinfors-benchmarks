@@ -57,11 +57,11 @@ call size of reinfors' n512×2 operating point.
   GPU-bound and kernel-launch submission is already hidden inside each call, so graph
   replay has nothing to recover and its per-call bookkeeping costs the codegen gain.
 
-## Results — V1 (pending)
+## Results — V1
 
-> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
-> manifests under `published/v1/`. Directional language reflects the pre-campaign
-> measurements these tables replace.
+> The sizing grid below is final (3 interleaved cycles, event-aligned reduce). The lever
+> tables (compiled/eager, f32, cache) and the batch-response curve are filled from
+> `v1_levers` / `v1_curves` as those sessions land; their cells are marked `TBD`.
 
 **The unified sizing grid** — both stacks, full round workload, aligned on nominal
 inference call size (with two groups, reinfors calls carry n/2 rows). Cells report
@@ -72,12 +72,16 @@ callback); the eager baseline appears once, in the compiled-lever pair below:
 
 | call size | OpenSpiel (actors = size) | OpenSpiel half-fill (actors = 2×size) | rf ungrouped (n = size) | rf grouped (n = 2×size) |
 |---|---|---|---|---|
-| 32 | a32: TBD | a64:b32: TBD | n32×1: TBD | n64×2: TBD |
-| 64 | a64: TBD | a128:b64: TBD | n64×1: TBD | n128×2: TBD |
-| 128 | a128: TBD | a256:b128: TBD | n128×1: TBD | n256×2: TBD |
-| 256 | a256: TBD | a512:b256: TBD | n256×1: TBD | n512×2: TBD |
-| 512 | a512: TBD | a1024:b512: TBD | n512×1: TBD | n1024×2: TBD |
-| 1024 | a1024: TBD | a2048:b1024: TBD | n1024×1: TBD | n2048×2: TBD |
+| 32 | a32: 174.9 | a64:b32: 197.3 | n32×1: 150.7 | n64×2: 186.6 |
+| 64 | a64: 202.3 | a128:b64: 204.9 | n64×1: 173.2 | n128×2: 222.1 |
+| 128 | a128: 197.1 | a256:b128: 195.2 | n128×1: 172.8 | n256×2: 227.4 |
+| 256 | **a256: 236.2** | a512:b256: 205.1 | n256×1: 209.4 | **n512×2: 265.7** |
+| 512 | a512: 218.4 | a1024:b512: 149.1 | n512×1: 205.5 | n1024×2: 235.8 |
+| 1024 | a1024: 139.2 | a2048:b1024: 126.3 | n1024×1: 120.1 | n2048×2: 153.4 |
+
+Column maxima (bold) are the selected operating points. Both curves turn over inside the
+sweep; the extension (call 512/1024) brackets each maximum with a lower neighbor on both
+sides. rf leads best-vs-best by 12.5%.
 
 The two "2×size" columns are structural mirrors: each runs twice the games of its
 call size — OpenSpiel by capping the batch below the actor count, reinfors by
@@ -113,17 +117,11 @@ where CUDA clears CPU ×2 through the data-gen loop; per-device cell
 `engine_rate_vs_n_games`): TBD. The eager cross-device kernel curve is
 [section A's](sizing-the-compute.md).
 
-**Selected operating points: OpenSpiel a256 full-fill (inference batch = actor count),
-reinfors n512×2 compiled** — these become the encoded topologies in `v1_training.json`
-([the comparison](the-comparison.md)); their states/s land with the grid table above.
-
-OpenSpiel's optimum uses no batch-capping. Half-fill — holding the inference batch below
-the actor count to put more games in flight — only pays in the small-call regime, where
-four cores can still feed extra actors (at call size 32 it leads full-fill); by the
-256-row call that is actually optimal the extra actors only contend for cores, full-fill
-leads, and half-fill's own peak sits below the a256 full-fill maximum. So OpenSpiel is
-sized at a256 with batch equal to actors. reinfors selects its grouped n512×2 cell, where
-overlap is an explicit, opt-in lever rather than acquired-with-actors.
+**Selected operating points: OpenSpiel a256 full-fill (batch = actors), reinfors n512×2
+compiled** — the grid maxima above; these become the encoded topologies in
+`v1_training.json` ([the comparison](the-comparison.md)). OpenSpiel caps nothing: in the
+half-fill column, extra actors beat full-fill only below call 256 (the small-call regime
+where four cores still have slack), and lose at the optimum.
 
 Pre-registered questions the grid answers: where each stack's curve turns over call
 size; whether half-fill beats full-fill at matched
@@ -159,8 +157,10 @@ Hit rate has been monotone in capacity but flattens sharply — capacity is a
 throughput/host-memory choice, not a cliff. At the 262,144-entry operating point it
 reaches TBD% by two hours of training.
 
-*Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G); grids: `v1_grid` and its
-512/1,024-call extension `v1_grid_ext`, 3 interleaved cycles per cell; curves:
+*Provenance: V1 campaign (tags v1 wheel / v1.0.x benchmarks), g5.2xlarge (A10G); grids:
+`v1_grid` and its 512/1,024-call extension `v1_grid_ext`, 3 interleaved cycles per cell
+(median states/s; cross-cycle spread ≤3.5% for rf cells, up to 16% for high-actor OS
+cells); curves:
 `v1_curves` with `v1_curves_ext` (kernel batch 512-2,048, engine n512/n1024), 3
 cycles; compiled/eager pair, f32, and capacity
 probes: `v1_levers` (run after the grid/curves checkpoint fixes the operating point and
