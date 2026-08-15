@@ -39,11 +39,12 @@ reinfors-specific and lives with [engine sizing](configuring-the-engines.md).)
 net-shape-dependent. It is measured at the benchmark net (w256 d8) and does not
 transfer to other nets or devices — measure yours before sizing anything against it.
 
-## Results — V1 (pending)
+## Results — V1 (provisional)
 
-> **Placeholder.** Figures land with the V1 campaign — every `TBD` fills from the
-> manifests under `published/v1/`. Directional language reflects the pre-campaign
-> measurements these tables replace.
+> The kernel-rate table is computed from the run telemetry (3 cycles, `v1_curves` +
+> `v1_curves_ext`). It is marked provisional until the backing artifacts are committed to
+> `published/v1/`, at which point the table is regenerated from those tracked artifacts and
+> marked final.
 
 **Kernel rate vs batch** (pure forwards, w256 d8; medians over 3 cycles):
 
@@ -57,13 +58,13 @@ transfer to other nets or devices — measure yours before sizing anything again
 | 1024 | 20,655 | 203 | 102 |
 | 2048 | 20,879 | 203 | 103 |
 
-CUDA rises to a ~21k plateau (dip at 128); CPU declines from batch 64 as the forward
-saturates four cores. The ratio widens monotonically, 53× → 103×.
+CUDA rises to a ~21k plateau (dip at 128); CPU declines past batch 64. The ratio widens
+53× → 103×.
 
-**Crossover:** CUDA clears CPU ×2 at every batch measured — the smallest here (32) already
-runs 53× CPU. The batch-1 regime pooled collection exists to escape sits far below this
-sweep; these are all batched forwards.
+**Crossover:** CUDA clears CPU ×2 at every batch measured — the smallest (32) already runs
+53× CPU. The batch-1 regime pooled collection exists to escape sits below this sweep; these
+are all batched forwards.
 
-*Provenance: V1 campaign (tag TBD), g5.2xlarge (A10G), cell `kernel_rate_vs_batch` in
+*Provenance: V1 campaign (v1 wheel / v1.0.x benchmarks), g5.2xlarge (A10G), cell `kernel_rate_vs_batch` in
 `v1_curves` (batch 32-256) and `v1_curves_ext` (512-2,048), 3 cycles, medians with
 per-cycle spreads ([methodology](methodology.md)).*

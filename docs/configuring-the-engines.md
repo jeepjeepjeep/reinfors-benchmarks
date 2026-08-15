@@ -57,11 +57,13 @@ call size of reinfors' n512×2 operating point.
   GPU-bound and kernel-launch submission is already hidden inside each call, so graph
   replay has nothing to recover and its per-call bookkeeping costs the codegen gain.
 
-## Results — V1
+## Results — V1 (provisional)
 
-> The sizing grid below is final (3 interleaved cycles, event-aligned reduce). The lever
-> tables (compiled/eager, f32, cache) and the batch-response curve are filled from
-> `v1_levers` / `v1_curves` as those sessions land; their cells are marked `TBD`.
+> The grid and batch-response numbers are computed from the run telemetry (3 interleaved
+> cycles, event-aligned reduce). They are marked provisional until the backing manifests
+> and telemetry are committed to `published/v1/`, at which point these tables are
+> regenerated from those tracked artifacts and marked final. The lever tables
+> (compiled/eager, f32, cache) await `v1_levers` and are marked `TBD`.
 
 **The unified sizing grid** — both stacks, full round workload, aligned on nominal
 inference call size (with two groups, reinfors calls carry n/2 rows). Cells report
@@ -79,9 +81,9 @@ callback); the eager baseline appears once, in the compiled-lever pair below:
 | 512 | a512: 218.4 | a1024:b512: 149.1 | n512×1: 205.5 | n1024×2: 235.8 |
 | 1024 | a1024: 139.2 | a2048:b1024: 126.3 | n1024×1: 120.1 | n2048×2: 153.4 |
 
-Column maxima (bold) are the selected operating points. Both curves turn over inside the
-sweep; the extension (call 512/1024) brackets each maximum with a lower neighbor on both
-sides. rf leads best-vs-best by 12.5%.
+The two bold cells are each stack's overall best — the selected operating points. Both
+stacks' maxima are interior to the sweep, with a lower neighbor on each side. rf leads
+best-vs-best by 12.5%.
 
 The two "2×size" columns are structural mirrors: each runs twice the games of its
 call size — OpenSpiel by capping the batch below the actor count, reinfors by
@@ -111,14 +113,12 @@ rf cell accompany the published table.
 | 1024 | 26,517 | 37.7 |
 | 2048 | 26,980 | 37.1 |
 
-The curve rises overall (14.6k → 27k rows/s) with a sawtooth — dips at 128 and 512,
-peaks at 256 and ≥1024 — an A10G tile-quantization effect, not a workload feature: it
-keeps climbing well past the 256-row call where completed-game throughput turns over,
-so the operating point is set by CPU/concurrency saturation, not the kernel. Engine-level
-crossover (smallest call size where CUDA clears CPU ×2 through the data-gen loop; per-device cell
-`engine_rate_vs_n_games`): below n32 — CUDA runs 11.7k–17.6k rows/s across n32–1024 against
-a flat ~320 on CPU, so CUDA leads by >30× everywhere in range. The eager cross-device
-kernel curve is [section A's](sizing-the-compute.md).
+The per-row rate keeps improving through 2,048 (shape-dependent, non-monotone), past the
+256-row call where completed-game throughput turns over — so the kernel is not the binding
+constraint at the operating point. Engine throughput vs n_games (cell
+`engine_rate_vs_n_games`): CUDA 11.7k–17.6k rows/s across n32–1024; CPU ~320 (measured
+n32–256). CUDA leads by >30× at every measured n, so the ×2 crossover is below the swept
+range. The eager cross-device kernel curve is [section A's](sizing-the-compute.md).
 
 **Selected operating points: OpenSpiel a256 full-fill (batch = actors), reinfors n512×2
 compiled** — the grid maxima above; these become the encoded topologies in
