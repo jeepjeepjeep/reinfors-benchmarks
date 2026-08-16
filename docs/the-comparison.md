@@ -15,23 +15,24 @@ before the training comparison was run.
 
 ## Matched two-hour training
 
-> V1 result pending publication.
-
-Each side runs three fresh two-hour legs. Values will be medians with repeat spread.
+Three fresh two-hour legs per side. Values are medians over the three legs, with the
+per-leg range in brackets.
 
 | Metric | OpenSpiel | reinfors |
 |---|---:|---:|
-| States collected | TBD | TBD |
-| Sustained states/s | TBD | TBD |
-| 1,024-sample-equivalent learning steps | TBD | TBD |
-| Gradient samples per state (target 3.0) | TBD | TBD |
+| States collected | 1,845,946 [1,844,431–1,868,467] | 2,026,861 [2,007,938–2,028,903] |
+| Sustained states/s | 264.6 [262.4–270.3] | **289.9** [288.2–291.0] |
+| 1,024-sample-equivalent learning steps | 5,311 | 5,938 |
+| Gradient samples per state (target 3.0) | 2.95 | 3.00 |
+
+reinfors sustains **9.6% higher states/s** and collects **9.8% more training data** in
+the same wall-clock budget. Gradient-sample intensity is matched, so the extra data is
+the only systematic difference carried into the head-to-head.
 
 Cache hit rates are recorded but not compared: the two architectures define a lookup
 and hit differently.
 
 ## Trained-agent head-to-head
-
-> Final V1 experiment in progress.
 
 Each training-cycle pair plays 100 games from seeded random openings, with every opening
 played once per color. Both agents use 64 simulations per move and no native chess
@@ -40,15 +41,15 @@ solver.
 | Metric | Pooled result |
 |---|---:|
 | Games (opening pairs) | 300 (150) |
-| W / D / L, reinfors perspective | TBD |
-| Paired score ± SE | TBD |
-| Implied Elo difference, 95% CI | TBD |
+| W / D / L, reinfors perspective | **104 / 155 / 41** |
+| Paired score ± SE | **0.605 ± 0.020** |
+| Implied Elo difference, 95% CI | **+74** (+46 to +103) |
 
 | Training pair | Games | W / D / L | Score ± SE |
 |---|---:|---:|---:|
-| Cycle 1 | 100 | TBD | TBD |
-| Cycle 2 | 100 | TBD | TBD |
-| Cycle 3 | 100 | TBD | TBD |
+| Cycle 1 | 100 | 42 / 45 / 13 | 0.645 ± 0.037 |
+| Cycle 2 | 100 | 28 / 55 / 17 | 0.555 ± 0.035 |
+| Cycle 3 | 100 | 34 / 55 / 11 | 0.615 ± 0.031 |
 
 The paired-opening standard error is the primary uncertainty estimate; the three rows
 show robustness across independent training runs.
