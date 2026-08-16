@@ -140,16 +140,15 @@ n512×2, cache on; the compiled cell is the operating point itself):
 |---|---|---|---|
 | n512×2, cache 262k | 224.5 | 268.5 | +19.6% |
 
-**f32 vs f64** (engine mode, 256-row calls, compiled forward — the operating path):
+**f32 vs f64** — inference rows/s (engine mode, 256-row calls; compiled is the operating
+path, eager isolates the dtype from the compile):
 
-| config (chess, CUDA) | f64 rows/s | f32 rows/s | gain |
-|---|---|---|---|
-| w256 d8 | 16,232 | 17,036 | +5.0% |
-| w128 d8 | 24,330 | 26,539 | +9.1% |
-
-The gain grows as the net shrinks (the fixed boundary cost is a larger share of a smaller
-forward). The same dtype swap in the eager path gives +5.6% (w256) / +6.9% (w128), so f32
-is a real win in both regimes, not a compile artifact.
+| net | path | f64 | f32 | gain |
+|---|---|---|---|---|
+| w256 d8 | compiled | 16,232 | 17,036 | +5.0% |
+| w256 d8 | eager | 13,583 | 14,341 | +5.6% |
+| w128 d8 | compiled | 24,330 | 26,539 | +9.1% |
+| w128 d8 | eager | 22,131 | 23,661 | +6.9% |
 
 **Inference-cache capacity** (chess self-play, early-training net):
 
