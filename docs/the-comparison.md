@@ -27,8 +27,10 @@ post-warmup interval [300 s, 7,200 s].
 | Gradient samples per state (target 3.0) | 2.95 | 3.00 |
 
 reinfors sustains **9.9% higher states/s** and collects **9.8% more training data** in
-the same wall-clock budget. Gradient-sample intensity is matched, so the extra data is
-the only systematic difference carried into the head-to-head.
+the same wall-clock budget. Because gradient-sample intensity is matched, the throughput
+advantage translates into proportionally more data and updates. It is not the only
+difference carried into the head-to-head: each stack keeps its native batching, cache
+and training schedule (see [fairness controls](#fairness-controls)).
 
 ## Trained-agent head-to-head
 
@@ -48,6 +50,12 @@ solver.
 | Cycle 1 | 100 | 42 / 45 / 13 | 0.645 ± 0.037 |
 | Cycle 2 | 100 | 28 / 55 / 17 | 0.555 ± 0.035 |
 | Cycle 3 | 100 | 34 / 55 / 11 | 0.615 ± 0.031 |
+
+The paired-opening standard errors measure game-sampling uncertainty for these six
+trained networks; they do not include variation across training runs, so the pooled
+interval is not a confidence interval for the general training-method advantage. The
+three rows show that run-to-run variation directly, but three pairs are too few to
+estimate it.
 
 ## Fairness controls
 
