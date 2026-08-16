@@ -38,7 +38,7 @@ call size of reinfors' n512×2 operating point.
 
 | lever | measures | cells |
 |---|---|---|
-| f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256 | `f32_ab_f64` / `f32_ab_f32` (`v1_levers`) |
+| f32 vs f64 callback outputs | rows/s per dtype arm, w128 and w256, compiled forward | `f32c_ab_f64` / `f32c_ab_f32` (`v1_levers_f32c`, the operating path; eager pair `f32_ab_*` in `v1_levers`) |
 | inference-cache capacity | hit rate at 4k / 32k / 256k entries under the full workload | `rf_cache_*` (`v1_levers`) |
 | compiled inference callback | states/s at the operating point, compiled vs eager | `rf_n512_g2_compiled` / `rf_n512_g2_eager` (`v1_levers` — contemporaneous, cycle-interleaved, at the confirmed operating point; the grid's `rf_n512_g2` serves selection only) |
 | compiled batch response | compiled-kernel rows/s at batch 32-2,048, CUDA — the batch term for the operating configuration's grouping model | `kernel_rate_vs_batch_compiled` (`v1_curves`; 512-2,048 via `v1_curves_ext`) |
@@ -59,11 +59,11 @@ call size of reinfors' n512×2 operating point.
 
 ## Results — V1 (provisional)
 
-> The grid and batch-response numbers are computed from the run telemetry (3 interleaved
-> cycles, event-aligned reduce). They are marked provisional until the backing manifests
-> and telemetry are committed to `published/v1/`, at which point these tables are
-> regenerated from those tracked artifacts and marked final. The lever tables
-> (compiled/eager, f32, cache) await `v1_levers` and are marked `TBD`.
+> All numbers below are computed from the run telemetry (grid/levers over 3 interleaved
+> cycles, event-aligned reduce; the cache probes are single runs). They are marked
+> provisional until the backing manifests and telemetry are committed to `published/v1/`,
+> at which point these tables are regenerated from those tracked artifacts and marked
+> final. The matched-round hit-rate trajectory fills from `v1_training`.
 
 **The unified sizing grid** — both stacks, full round workload, aligned on nominal
 inference call size (with two groups, reinfors calls carry n/2 rows). Cells report
@@ -138,22 +138,25 @@ n512×2, cache on; the compiled cell is the operating point itself):
 
 | config (chess, CUDA) | eager states/s | compiled states/s | gain |
 |---|---|---|---|
-| n512×2, cache 262k | TBD | TBD | +TBD% |
+| n512×2, cache 262k | 224.5 | 268.5 | +19.6% |
 
-**f32 vs f64** (engine mode, call size 256):
+**f32 vs f64** — inference rows/s (engine mode, 256-row calls; compiled is the operating
+path, eager isolates the dtype from the compile):
 
-| config (chess, CUDA) | f64 rows/s | f32 rows/s | gain |
-|---|---|---|---|
-| w256 d8 | TBD | TBD | +TBD% |
-| w128 d8 | TBD | TBD | +TBD% |
+| net | path | f64 | f32 | gain |
+|---|---|---|---|---|
+| w256 d8 | compiled | 16,232 | 17,036 | +5.0% |
+| w256 d8 | eager | 13,583 | 14,341 | +5.6% |
+| w128 d8 | compiled | 24,330 | 26,539 | +9.1% |
+| w128 d8 | eager | 22,131 | 23,661 | +6.9% |
 
 **Inference-cache capacity** (chess self-play, early-training net):
 
-| capacity | hit rate |
-|---|---|
-| 4,096 | TBD |
-| 32,768 | TBD |
-| 262,144 | TBD |
+| capacity | states/s | hit rate |
+|---|---|---|
+| 4,096 | 240.6 | 0.5% |
+| 32,768 | 253.1 | 13.5% |
+| 262,144 | 269.9 | 21.0% |
 
 Capacity is a throughput/host-memory choice, not a cliff. The sweep tops out at 262,144
 (the operating point) on this 30 GB host: a 2M-entry cache of chess policy+value rows
@@ -165,7 +168,7 @@ here rather than a data point.
 (median states/s; cross-cycle spread ≤3.5% for rf cells, up to 16% for high-actor OS
 cells); curves:
 `v1_curves` with `v1_curves_ext` (kernel batch 512-2,048, engine n512/n1024), 3
-cycles; compiled/eager pair, f32, and capacity
-probes: `v1_levers` (run after the grid/curves checkpoint fixes the operating point and
-call size). Medians with per-cycle spreads for all 3-cycle cells; the three cache
+cycles; compiled/eager pair, eager f32, and capacity
+probes: `v1_levers`; compiled f32 pair: `v1_levers_f32c` (all run after the grid/curves
+checkpoint fixes the operating point and call size). Medians over 3 cycles; the three cache
 capacity probes are single runs and their figures are labeled as such.*
