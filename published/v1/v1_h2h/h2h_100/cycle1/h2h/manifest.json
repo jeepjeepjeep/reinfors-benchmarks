@@ -1,0 +1,88 @@
+{
+  "started": "2026-08-16T13:50:32Z",
+  "command": [
+    "/home/ubuntu/rl/reinfors-benchmarks/.venv23/bin/python",
+    "experiments/eval_h2h.py",
+    "--rf-model",
+    "runs/v1_training/rf_train/cycle1/training",
+    "--os-model",
+    "runs/v1_training/os_train/cycle1/training",
+    "--games",
+    "100",
+    "--workers",
+    "4",
+    "--seed",
+    "1000",
+    "--device",
+    "cuda",
+    "--az-device",
+    "/cuda:0",
+    "--out",
+    "/home/ubuntu/rl/reinfors-benchmarks/runs/v1_h2h/h2h_100/cycle1/h2h"
+  ],
+  "host": "ip-172-31-93-74",
+  "python": "3.11.15",
+  "benchmarks_sha": "ba1a1725c4ffc67ebf468e3c3520b0e43d1b4e70",
+  "benchmarks_tag": "v1.2",
+  "benchmarks_dirty": false,
+  "openspiel_pin": "112b7770",
+  "smt_active": "0",
+  "reinfors": {
+    "git_sha": "3560b9d45b767f130df6b3082b5c79b6613c9b7b",
+    "git_dirty": false,
+    "git_tag": "v1.2",
+    "profile": "release",
+    "version": "0.0.0",
+    "extension_sha256": "12320eafa4bb2588f15e57e2e3829712215feb8ffeb339826f47f991fab90b35"
+  },
+  "torch": "2.3.0+cu121",
+  "gpu": "NVIDIA A10G",
+  "run_kind": "h2h",
+  "protocol": "v1",
+  "rf_checkpoint": "runs/v1_training/rf_train/cycle1/training/model.pt",
+  "rf_checkpoint_sha256": "619b27ff7c42366893e4f1bea561d8939368e5752d4ab4454baaa5994144d42c",
+  "os_path": "runs/v1_training/os_train/cycle1/training",
+  "os_checkpoint": 85,
+  "os_checkpoint_sha256": "73b079accc13239a17bb1b650f360895e9124b057cb706191b97264f391b0126",
+  "os_optimizer_sha256": "d16622214322236a55384f946e7e1876f8f0dc9e81f77c881685bac9ce79cd5b",
+  "net": {
+    "width": 256,
+    "depth": 8
+  },
+  "sims": {
+    "theirs": 64,
+    "ours": 64
+  },
+  "uct_c": 2.0,
+  "opening": {
+    "kind": "RandomStartingMoves",
+    "plies": 6
+  },
+  "seed": 1000,
+  "concurrency": {
+    "workers": 4,
+    "n_slots": 4,
+    "timeout": 600.0
+  },
+  "devices": {
+    "ours": "cuda",
+    "theirs": "/cuda:0"
+  },
+  "external_cmd": "/home/ubuntu/rl/reinfors-benchmarks/open_spiel_cpp/open_spiel/build/examples/alpha_zero_torch_game_example",
+  "external_cmd_sha256": "7721c8fe2aba4abd1c2251e92ff7d2d2a7ea16d510ca810f4e354c795740e10c",
+  "completed": true,
+  "status": "ok",
+  "wall_seconds": 1069.5,
+  "result": {
+    "games": 100,
+    "wins": 42,
+    "draws": 45,
+    "losses": 13,
+    "score": 0.645,
+    "pair_stderr": 0.0365
+  },
+  "output_sha256": {
+    "games.pgn": "a3cdedb449150d5c94e5bdb558a4b9a89fbb01cd33867cc4f4f0bc3778c05286"
+  },
+  "finished": "2026-08-16T14:08:22Z"
+}

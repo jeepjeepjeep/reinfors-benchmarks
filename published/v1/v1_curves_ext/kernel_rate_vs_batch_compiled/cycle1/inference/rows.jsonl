@@ -1,0 +1,4 @@
+{"header": {"game": "chess", "torch": "2.3.0+cu121", "build": "release", "torch_threads": 4, "affinity": "[0, 1, 2, 3]", "cuda": "NVIDIA A10G"}}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 512, "rows_s": 19674.530812296634, "us_per_row": 50.8271332892471, "calls": 127, "wall": 3.3049835150000035}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 1024, "rows_s": 26500.098373792844, "us_per_row": 37.73570897340312, "calls": 89, "wall": 3.439081573000067}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 2048, "rows_s": 26939.26790273998, "us_per_row": 37.12053362438593, "calls": 51, "wall": 3.8771654959998614}

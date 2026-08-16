@@ -14,11 +14,10 @@ AWS g5.2xlarge host (NVIDIA A10G, four physical CPU cores).
 |---|---|
 | Which configurations should be compared? | **OpenSpiel:** 256 actors, batch 256. **reinfors:** 512 games, two groups. |
 | How did the selected configurations perform in the sizing sweep? | **236.2 states/s** for OpenSpiel and **265.7 states/s** for reinfors. This selects the configurations; it is not the final training comparison. |
-| How do they compare during matched two-hour training? | V1 result pending publication. |
-| Which trained agent is stronger? | Final head-to-head in progress. |
+| How do they compare during matched two-hour training? | **263.9 states/s** for OpenSpiel and **290.1 states/s** for reinfors (**+9.9%**); reinfors collected 9.8% more training data per two-hour round. |
+| Which trained agent is stronger? | The reinfors-trained nets score **0.605 ± 0.020** over 300 paired games (**+74 Elo**, 95% CI +46 to +103). |
 
-Results already shown in the documentation are provisional until their backing
-manifests and telemetry are committed under `published/v1/`.
+Every number is backed by the manifests and telemetry under `published/v1/`.
 
 ## Read the results
 
@@ -51,8 +50,10 @@ software environment; core-count and multi-device scaling are not measured.
 | `docs/` | Results, interpretation and reference material. |
 
 See **[Reproducing the benchmarks](docs/reproducing.md)** for environments, host setup,
-campaign order and commands. OpenSpiel build deviations are recorded separately in
-[the upstream notes](docs/openspiel_upstream_notes.md).
+campaign order and commands. The full V1 campaign is roughly **48 hours of sequential
+measurement** on the dedicated GPU host — the sizing sweeps, training legs and
+head-to-head are not something to re-run quickly on a local machine. OpenSpiel build
+deviations are recorded separately in [the upstream notes](docs/openspiel_upstream_notes.md).
 
 ## License
 

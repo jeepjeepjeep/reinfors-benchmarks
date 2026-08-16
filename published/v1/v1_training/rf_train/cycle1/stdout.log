@@ -1,0 +1,1 @@
+rf {'n_games': 512, 'n_groups': 2}  120m leg done  checkpoint: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/rf_train/cycle1/training/ckpt_7164s.pt

@@ -1,0 +1,3 @@
+[2026-08-14 09:10:59.782] actor-8 started
+[2026-08-14 09:18:09.726] Game 1: Returns: -1 1; Actions: h3 a6 b4 c5 h4 Qb6 a3 Qb5 Rh3 Ra7 e4 Qd3 Qf3 b6 g4 Nh6 Qe2 Kd8 c4 Ra8 Kd1 Bb7 Qe3 Ng8 Rg3 Qd6 Nc3 Qh6 Rb1 Qxh4 Ra1 h5 Ra2 Bxe4 Bd3 Bg6 b5 Nc6 Qxc5 Qh1 Be4 Qf3+ Rxf3 hxg4 bxc6 Ra7 Rg3 Rh2 Qe5 Bh5 Qb8#
+[2026-08-14 09:27:59.923] Game 2: Returns: -1 1; Actions: d4 Na6 Nc3 Nf6 Be3 b5 Nf3 h5 Qc1 g6 Ng5 Ne4 g4 Nec5 Qd1 Nb8 Rg1 Nba6 Nxb5 Ne4 Bd2 Nb8 f3 Nd6 Bf4 Rh6 Bd2 Bb7 c3 h4 Nxa7 Rh7 Qc2 Bh6 b4 Na6 O-O-O Rxa7 Qb2 Bf8 f4 Bg7 Nxh7 Nc4 Rg3 Bc8 Re1 Bf8 g5 f6 Qc2 Nd6 e4 Rb7 Be3 e5 Bg2 Rxb4 gxf6 g5 Qb2 Rb5 Rxg5 Rxb2 Bf3 Rb1+ Kxb1 c6 Reg1 Nf5 Bh5#

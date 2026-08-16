@@ -1,0 +1,65 @@
+[
+  {
+    "cell": "kernel_rate_vs_batch",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 66.2,
+    "dir": "kernel_rate_vs_batch/cycle1"
+  },
+  {
+    "cell": "kernel_rate_vs_batch_compiled",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 26.2,
+    "dir": "kernel_rate_vs_batch_compiled/cycle1"
+  },
+  {
+    "cell": "engine_rate_vs_n_games",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 2917.5,
+    "dir": "engine_rate_vs_n_games/cycle1"
+  },
+  {
+    "cell": "kernel_rate_vs_batch",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 67.2,
+    "dir": "kernel_rate_vs_batch/cycle2"
+  },
+  {
+    "cell": "kernel_rate_vs_batch_compiled",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 23.5,
+    "dir": "kernel_rate_vs_batch_compiled/cycle2"
+  },
+  {
+    "cell": "engine_rate_vs_n_games",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 2901.9,
+    "dir": "engine_rate_vs_n_games/cycle2"
+  },
+  {
+    "cell": "kernel_rate_vs_batch",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 67.3,
+    "dir": "kernel_rate_vs_batch/cycle3"
+  },
+  {
+    "cell": "kernel_rate_vs_batch_compiled",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 23.6,
+    "dir": "kernel_rate_vs_batch_compiled/cycle3"
+  },
+  {
+    "cell": "engine_rate_vs_n_games",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 2904.4,
+    "dir": "engine_rate_vs_n_games/cycle3"
+  }
+]

@@ -1,0 +1,9 @@
+game=chess torch=2.3.0+cu121 build=release torch_threads=4 affinity=[0, 1, 2, 3] cuda=NVIDIA A10G
+net    w256  d8 [cuda] batch 32         14602 rows/s      68.5 us/row
+net    w256  d8 [cuda] batch 64         17559 rows/s      57.0 us/row
+net    w256  d8 [cuda] batch 128        17165 rows/s      58.3 us/row
+net    w256  d8 [cuda] batch 256        24528 rows/s      40.8 us/row
+
+--- verdict (cuda >= 2.0x cpu rows/s) ---
+
+wrote 4 rows -> /home/ubuntu/rl/reinfors-benchmarks/runs/v1_curves/kernel_rate_vs_batch_compiled/cycle2/inference/rows.jsonl

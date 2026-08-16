@@ -1,0 +1,107 @@
+[
+  {
+    "cell": "rf_n512_g2_compiled",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.9,
+    "dir": "rf_n512_g2_compiled/cycle1"
+  },
+  {
+    "cell": "rf_n512_g2_eager",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1233.5,
+    "dir": "rf_n512_g2_eager/cycle1"
+  },
+  {
+    "cell": "f32_ab_f64",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 264.3,
+    "dir": "f32_ab_f64/cycle1"
+  },
+  {
+    "cell": "f32_ab_f32",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 261.9,
+    "dir": "f32_ab_f32/cycle1"
+  },
+  {
+    "cell": "rf_cache_4096",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.5,
+    "dir": "rf_cache_4096/cycle1"
+  },
+  {
+    "cell": "rf_cache_32768",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_cache_32768/cycle1"
+  },
+  {
+    "cell": "rf_cache_262144",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_cache_262144/cycle1"
+  },
+  {
+    "cell": "rf_n512_g2_compiled",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n512_g2_compiled/cycle2"
+  },
+  {
+    "cell": "rf_n512_g2_eager",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1233.6,
+    "dir": "rf_n512_g2_eager/cycle2"
+  },
+  {
+    "cell": "f32_ab_f64",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 263.0,
+    "dir": "f32_ab_f64/cycle2"
+  },
+  {
+    "cell": "f32_ab_f32",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 262.2,
+    "dir": "f32_ab_f32/cycle2"
+  },
+  {
+    "cell": "rf_n512_g2_compiled",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.5,
+    "dir": "rf_n512_g2_compiled/cycle3"
+  },
+  {
+    "cell": "rf_n512_g2_eager",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1233.5,
+    "dir": "rf_n512_g2_eager/cycle3"
+  },
+  {
+    "cell": "f32_ab_f64",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 264.8,
+    "dir": "f32_ab_f64/cycle3"
+  },
+  {
+    "cell": "f32_ab_f32",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 262.2,
+    "dir": "f32_ab_f32/cycle3"
+  }
+]

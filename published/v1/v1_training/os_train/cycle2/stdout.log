@@ -1,0 +1,1 @@
+os {'actors': 256, 'batch': 256}  120m leg done  checkpoint: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle2/training/checkpoint-84.pt

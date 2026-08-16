@@ -1,0 +1,5 @@
+[2026-08-14 16:06:32.587] actor-14 started
+[2026-08-14 16:10:01.072] Game 1: Returns: -1 1; Actions: a4 Nh6 c4 b6 c5 Rg8 Nc3 e6 Nh3 a5 Nf4 e5 g3 g5 Qc2 f5 Qxf5 g4 Qxe5+ Be7 h3 Ra7 d4 Nc6 Qg7 Ne5 e3 Ra6 Qf6 Ra8 Bd3 bxc5 Nb5 Rb8 Qa6 Nf3+ Kf1 Ng1 Bf5 Bg5 Ne2 Be7 Bxg4 Kf8 Qxh6+ Ke8 Ke1 Ba6 Qg7 h6 Bh5#
+[2026-08-14 16:17:04.931] Game 2: Returns: -1 1; Actions: Nc3 e6 Rb1 b6 Nb5 h5 e3 d6 a4 Rh6 Ra1 Rg6 Nf3 Bd7 Ng1 Be7 Bc4 c5 Bf1 Rf6 d3 Bc8 b3 Na6 Ke2 e5 c4 Bb7 Bb2 h4 Nd4 Re6 Nf5 g6 Nxd6+ Kd7 a5 Nc7 Ra4 Bc8 Qc1 f6 b4 Kxd6 Ke1 Na6 Qd1 Nb8 d4 b5 Ke2 f5 Kd2 Bf6 Kc1 Nc6 Ba3 Ba6 Qe1 Qb6 e4 Nh6 Qd2 Qb8 Qg5 cxd4 Qh5 Qc8 h3 Bh8 Rh2 f4 Bb2 Bf6 Ba3 Qb8 f3 bxc4 Bb2 Qxb4 Ba1 Nb8 Qxe5+ Kxe5 Ne2 Qxa5 Nxd4 Qe1+ Kc2 Bc8 Rh1 Re7 Rxc4 Qb1+ Kc3 Qxf1 Rxc8 Qd1 Kc4 Qxh1 Rd8 Rf7 Rd5#
+[2026-08-14 16:17:43.876] Game 3: Returns: 1 -1; Actions: g3 d5 Nc3 e5 h3 Bd7 Nb5 Nc6 f3 Qg5 c4 Qxg3#
+[2026-08-14 16:20:07.123] Game 4: Returns: 1 -1; Actions: g4 a5 d3 Ra7 h4 Nf6 Nh3 c5 a3 Qc7 f4 b6 f5 b5 Ng5 g6 Bg2 c4 Ne6 Qg3+ Kf1 d5 Rg1 Bh6 Nd8 Be6 a4 c3 Qe1 Rc7 Bf3 Be3 Nxf7 Qxg1#

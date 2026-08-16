@@ -1,0 +1,6 @@
+[2026-08-14 10:12:36.408] actor-11 started
+[2026-08-14 10:13:17.467] Game 1: Returns: 1 -1; Actions: f4 d5 b3 c6 h3 Qc7 f5 Kd8 f6 h5 Bb2 Qg3#
+[2026-08-14 10:14:38.070] Game 2: Returns: 1 -1; Actions: Nc3 a5 Na4 h5 c4 d5 a3 d4 e3 c5 b3 h4 f4 Nh6 Bb2 e5 Qf3 exf4 Kf2 dxe3+ Ke1 Qxd2#
+[2026-08-14 10:14:56.964] Game 3: Returns: -1 1; Actions: h3 g5 e4 f6 g3 c6 Qh5#
+[2026-08-14 10:24:45.007] Game 4: Returns: 1 -1; Actions: Nc3 Na6 f3 g6 Nd5 b5 Kf2 c6 Nf6+ exf6 b3 Nc5 e4 g5 a4 h5 Qe1 Bd6 c4 bxc4 h3 Nxa4 Rxa4 Bf8 Bd3 Ne7 Qd1 Rh6 Bf1 Rh8 Ra2 Qc7 Ra1 Qh2 Ke2 Qf4 g4 d6 h4 gxh4 Ba3 Qg5 Bh3 Kd8 Rc1 hxg4 Rc2 Bh6 fxg4 cxb3 Kf1 Qxg4 Nf3 Bxd2 Kf2 Bd7 Qe2 Qxh3 Ne1 Qd3 Ng2 Bc8 Qe1 Bf4 Qc3 Qf1+ Rxf1 Be5 Ra1 bxc2 Qd3 Bg4 Qxc2 Rh5 Qb3 Ke8 Rf1 Be6 Ne3 Rf5+ Kg1 Bd7 Qd1 Ba1 Ng4 Rg5 Bb4 Re5 Qa4 Bc8 Bxd6 Bf5 Qc4 Bxe4 Rf2 Bg6 Qc2 Nd5 Qxc6+ Kd8 Rxf6 Nxf6 Bc5 Bd3 Qxa8+ Kd7 Qf8 Rxc5 Qc8+ Kd6 Qh8 Rc1+ Kh2 Bf1 Qh5 Bb5 Kg2 Ba6 Kh2 Rc8 Qh6 Bc3 Qg7 Kd5 Qg8 Bb5 Qg7 Bd7 Qh6 Ke6 Qh8 Nxg4+ Kg1 Bg7 Qe8+ Kd6 Qd8 h3 Qf6+ Bxf6 Kf1 Bf5 Kg1 Rc1#
+[2026-08-14 10:25:19.974] Game 5: Returns: -1 1; Actions: e4 h6 c3 g5 Be2 d5 Qa4+ Bd7 Qb4 f5 Bh5#

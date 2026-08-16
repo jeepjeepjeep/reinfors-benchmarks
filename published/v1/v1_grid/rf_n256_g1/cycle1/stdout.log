@@ -1,0 +1,1 @@
+rf {'n_games': 256, 'n_groups': 1}  states/s=  208.4  net_rows/s= 10672.2  rows/call= 212.0  learn_steps=517  (window 351s..1095s)
