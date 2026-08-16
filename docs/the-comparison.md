@@ -29,9 +29,6 @@ reinfors sustains **9.6% higher states/s** and collects **9.8% more training dat
 the same wall-clock budget. Gradient-sample intensity is matched, so the extra data is
 the only systematic difference carried into the head-to-head.
 
-Cache hit rates are recorded but not compared: the two architectures define a lookup
-and hit differently.
-
 ## Trained-agent head-to-head
 
 Each training-cycle pair plays 100 games from seeded random openings, with every opening
@@ -50,9 +47,6 @@ solver.
 | Cycle 1 | 100 | 42 / 45 / 13 | 0.645 ± 0.037 |
 | Cycle 2 | 100 | 28 / 55 / 17 | 0.555 ± 0.035 |
 | Cycle 3 | 100 | 34 / 55 / 11 | 0.615 ± 0.031 |
-
-The paired-opening standard error is the primary uncertainty estimate; the three rows
-show robustness across independent training runs.
 
 ## Fairness controls
 
