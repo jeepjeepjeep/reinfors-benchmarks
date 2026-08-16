@@ -16,16 +16,17 @@ before the training comparison was run.
 ## Matched two-hour training
 
 Three fresh two-hour legs per side. Values are medians over the three legs, with the
-per-leg range in brackets.
+per-leg range in brackets; rates use the standard event-aligned reduction over the
+post-warmup interval [300 s, 7,200 s].
 
 | Metric | OpenSpiel | reinfors |
 |---|---:|---:|
 | States collected | 1,845,946 [1,844,431–1,868,467] | 2,026,861 [2,007,938–2,028,903] |
-| Sustained states/s | 264.6 [262.4–270.3] | **289.9** [288.2–291.0] |
+| Sustained states/s | 263.9 [263.2–269.4] | **290.1** [288.5–291.4] |
 | 1,024-sample-equivalent learning steps | 5,311 | 5,938 |
 | Gradient samples per state (target 3.0) | 2.95 | 3.00 |
 
-reinfors sustains **9.6% higher states/s** and collects **9.8% more training data** in
+reinfors sustains **9.9% higher states/s** and collects **9.8% more training data** in
 the same wall-clock budget. Gradient-sample intensity is matched, so the extra data is
 the only systematic difference carried into the head-to-head.
 

@@ -14,7 +14,7 @@ AWS g5.2xlarge host (NVIDIA A10G, four physical CPU cores).
 |---|---|
 | Which configurations should be compared? | **OpenSpiel:** 256 actors, batch 256. **reinfors:** 512 games, two groups. |
 | How did the selected configurations perform in the sizing sweep? | **236.2 states/s** for OpenSpiel and **265.7 states/s** for reinfors. This selects the configurations; it is not the final training comparison. |
-| How do they compare during matched two-hour training? | **264.6 states/s** for OpenSpiel and **289.9 states/s** for reinfors, meaning reinfors collected 9.8% more training data per two-hour round. |
+| How do they compare during matched two-hour training? | **263.9 states/s** for OpenSpiel and **290.1 states/s** for reinfors, meaning reinfors collected 9.8% more training data per two-hour round. |
 | Which trained agent is stronger? | The reinfors-trained nets score **0.605 ± 0.020** over 300 paired games (**+74 Elo**, 95% CI +46 to +103). |
 
 Every number is backed by the manifests and telemetry under `published/v1/`.
