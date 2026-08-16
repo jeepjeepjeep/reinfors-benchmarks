@@ -1,32 +1,53 @@
 # Methodology
 
-The measurement discipline every family follows. Rules that only exist because two
-frameworks are being compared live in [the comparison](the-comparison.md).
+## Measurement host
 
-## Termination: hard kill, interior windows
+Every V1 number comes from one AWS g5.2xlarge: NVIDIA A10G, four physical CPU cores
+(SMT disabled), 32 GiB RAM, Ubuntu 22.04 and gp3 storage at its 125 MB/s baseline.
+Experiments run sequentially, pinned to cores 0–3. Both stacks use the same pinned
+PyTorch/libtorch generation; OpenSpiel runs with `OMP_NUM_THREADS=1`.
 
-Every timed leg ends in a SIGKILL at its scheduled deadline, on both stacks, and rates
-reduce from counter deltas between timestamped samples strictly inside a pre-registered
-interior window — never from run totals. A leg whose window holds fewer than two
-samples **fails** (`no-interior-window`) rather than falling back to totals. The rule
-has a scar behind it: an early sweep counted work completed while one stack drained
-after its deadline, inflating that side by 18–31%. The warmup bound exists for the
-same reason in the other direction — rf telemetry doesn't exist before the first learn
-step (~160–224s), and everything before steady state biases the rate downward (the
-window parameters and their rationale live in
-[`lib/protocol.py`](../experiments/lib/protocol.py)).
+## Rates and deadlines
 
-## The training-relevant rate is states/s, not rows/s
+Timed legs end at a scheduled hard kill. Rates use counter deltas between samples inside
+a pre-registered interior window; startup and shutdown work are excluded. Fewer than two
+interior samples makes a cell fail rather than fall back to run totals.
 
-A *row* is one position forwarded through the net: search effort. A *state* is one
-training example delivered to the learner — and in AlphaZero-style training a position
-only becomes an example when its game **finishes**, because the value target is the
-realized outcome. Under a hard deadline, in-flight games count for nothing.
-Configurations can trade the two against each other — more parallel games buy rows/s
-while slowing every game's progress and growing the in-flight loss at the kill — so
-topology selection and headline comparisons use completed-game states/s at matched
-search budget; rows/s is recorded as diagnosis.
+**States/s**, not network rows/s, selects configurations. A row is one network input; a
+state is one completed training record. AlphaZero value targets require the game outcome,
+so unfinished games at the deadline produce no states. Rows/s remains diagnostic.
 
-One rule binds every table downstream: **no published number appears without a
-repeat-derived spread, a repeat-median label, or an explicit single-run label — and
-every table states its provenance inline** (hardware, window, cells, run type).
+## Repeats and publication
+
+- Sizing and comparison cells use three interleaved repeats unless marked as single-run.
+- Tables report medians and include spread or uncertainty where relevant.
+- Every published number names its hardware, run family and reduction method.
+- Raw telemetry and finalized manifests must exist under `published/` before a result is
+  marked final.
+
+## Experiment map
+
+| Result | Sessions | Repeats |
+|---|---|---|
+| Device batch curve | `v1_curves`, `v1_curves_ext` | Three-cycle median |
+| Engine configuration | `v1_grid`, `v1_grid_ext` | Three-cycle median |
+| Compiled callback and eager dtype | `v1_levers` | Three-cycle median |
+| Compiled dtype | `v1_levers_f32c` | Three-cycle median |
+| Cache capacity | `v1_levers` | Single run per capacity |
+| Matched training | `v1_training` | Three independent legs per stack |
+| Head-to-head | `v1_h2h` | Three training pairs, 100 games each |
+
+The runner records commands, environment, output hashes and telemetry for every session;
+head-to-head manifests also record checkpoint hashes and PGNs. Published artifacts mirror
+the run paths under `published/v1/`.
+
+## Fair comparison
+
+The training round matches the network, search budget, learning objective, optimizer,
+replay size, minibatch size and gradient-sample intensity. Each stack retains its native
+batching, cache and training schedule. See [the comparison](the-comparison.md) for the
+result and [`protocol.py`](../experiments/lib/protocol.py) for exact constants.
+
+The runner enforces clean tagged builds, the pinned environment, CPU/GPU preflight,
+append-only output directories and output hashes. See
+[reproducing the benchmarks](reproducing.md) for commands.
