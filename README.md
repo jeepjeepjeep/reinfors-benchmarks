@@ -50,8 +50,10 @@ software environment; core-count and multi-device scaling are not measured.
 | `docs/` | Results, interpretation and reference material. |
 
 See **[Reproducing the benchmarks](docs/reproducing.md)** for environments, host setup,
-campaign order and commands. OpenSpiel build deviations are recorded separately in
-[the upstream notes](docs/openspiel_upstream_notes.md).
+campaign order and commands. The full V1 campaign is roughly **48 hours of sequential
+measurement** on the dedicated GPU host — the sizing sweeps, training legs and
+head-to-head are not something to re-run quickly on a local machine. OpenSpiel build
+deviations are recorded separately in [the upstream notes](docs/openspiel_upstream_notes.md).
 
 ## License
 

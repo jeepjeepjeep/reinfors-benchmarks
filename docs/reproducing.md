@@ -5,7 +5,8 @@ This page is for contributors reproducing or extending the campaign. Reading the
 
 ## Requirements
 
-- Ubuntu 22.04 on AWS g5.2xlarge for a like-for-like V1 run.
+- Ubuntu 22.04 on AWS g5.2xlarge for a like-for-like V1 run. Budget roughly 48 hours of
+  sequential measurement for the full campaign.
 - A sibling checkout of `reinfors`.
 - `uv`, a Rust toolchain, CUDA and the build dependencies used by OpenSpiel.
 - SMT disabled and benchmark processes pinned to physical cores 0–3.
