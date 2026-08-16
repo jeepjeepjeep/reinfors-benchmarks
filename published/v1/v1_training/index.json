@@ -1,0 +1,44 @@
+[
+  {
+    "cell": "os_train",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 7202.3,
+    "dir": "os_train/cycle1"
+  },
+  {
+    "cell": "rf_train",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 7201.7,
+    "dir": "rf_train/cycle1"
+  },
+  {
+    "cell": "os_train",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 7202.5,
+    "dir": "os_train/cycle2"
+  },
+  {
+    "cell": "rf_train",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 7201.7,
+    "dir": "rf_train/cycle2"
+  },
+  {
+    "cell": "os_train",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 7202.5,
+    "dir": "os_train/cycle3"
+  },
+  {
+    "cell": "rf_train",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 7201.7,
+    "dir": "rf_train/cycle3"
+  }
+]

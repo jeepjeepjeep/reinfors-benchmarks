@@ -1,0 +1,597 @@
+[2026-08-15 22:39:15.300] learner started
+[2026-08-15 22:39:15.300] Running the learner on device 0: /cuda:0
+[2026-08-15 22:42:49.609] Step: 1
+[2026-08-15 22:42:49.609] Collected 22038 states from 260 games, 80.3 states/s; 0.3 states/(s*actor), game length: 84.8
+[2026-08-15 22:42:49.609] Queue size: 0. Buffer size: 22038. States seen: 22038
+[2026-08-15 22:42:57.344] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:42:57.345] Losses: policy: 3.3675, value: 0.8584, l2: 0.3704, sum: 4.5963
+[2026-08-15 22:42:57.345] Cache size: 262144/262144: 100.0%, hits: 1481544, misses: 3014391, hit rate: 32.953%
+[2026-08-15 22:42:57.488] 
+[2026-08-15 22:45:16.436] Step: 2
+[2026-08-15 22:45:16.436] Collected 22027 states from 167 games, 150.0 states/s; 0.6 states/(s*actor), game length: 131.9
+[2026-08-15 22:45:16.436] Queue size: 9. Buffer size: 44065. States seen: 44065
+[2026-08-15 22:45:30.698] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:45:30.698] Losses: policy: 3.2632, value: 0.6065, l2: 0.3646, sum: 4.2344
+[2026-08-15 22:45:30.698] Cache size: 262144/262144: 100.0%, hits: 1026268, misses: 1991203, hit rate: 34.011%
+[2026-08-15 22:45:30.839] 
+[2026-08-15 22:46:40.403] Step: 3
+[2026-08-15 22:46:40.403] Collected 21937 states from  94 games, 261.3 states/s; 1.0 states/(s*actor), game length: 233.4
+[2026-08-15 22:46:40.403] Queue size: 6. Buffer size: 65536. States seen: 66002
+[2026-08-15 22:47:01.484] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:47:01.484] Losses: policy: 3.1626, value: 0.3027, l2: 0.3559, sum: 3.8212
+[2026-08-15 22:47:01.484] Cache size: 262144/262144: 100.0%, hits: 568277, misses: 1077526, hit rate: 34.529%
+[2026-08-15 22:47:01.616] 
+[2026-08-15 22:48:01.407] Step: 4
+[2026-08-15 22:48:01.407] Collected 21850 states from 105 games, 269.7 states/s; 1.1 states/(s*actor), game length: 208.1
+[2026-08-15 22:48:01.407] Queue size: 6. Buffer size: 65536. States seen: 87852
+[2026-08-15 22:48:23.093] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:48:23.093] Losses: policy: 3.0263, value: 0.3442, l2: 0.3467, sum: 3.7172
+[2026-08-15 22:48:23.093] Cache size: 262144/262144: 100.0%, hits: 498923, misses: 954587, hit rate: 34.325%
+[2026-08-15 22:48:23.230] 
+[2026-08-15 22:49:11.120] Step: 5
+[2026-08-15 22:49:11.120] Collected 22051 states from  98 games, 316.3 states/s; 1.2 states/(s*actor), game length: 225.0
+[2026-08-15 22:49:11.120] Queue size: 22. Buffer size: 65536. States seen: 109903
+[2026-08-15 22:49:32.835] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:49:32.841] Losses: policy: 2.9587, value: 0.2270, l2: 0.3389, sum: 3.5246
+[2026-08-15 22:49:32.842] Cache size: 262144/262144: 100.0%, hits: 582211, misses: 772768, hit rate: 42.968%
+[2026-08-15 22:49:32.973] 
+[2026-08-15 22:50:27.499] Step: 6
+[2026-08-15 22:50:27.499] Collected 21922 states from  98 games, 287.0 states/s; 1.1 states/(s*actor), game length: 223.7
+[2026-08-15 22:50:27.499] Queue size: 8. Buffer size: 65536. States seen: 131825
+[2026-08-15 22:50:49.299] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:50:49.299] Losses: policy: 2.9340, value: 0.1611, l2: 0.3320, sum: 3.4271
+[2026-08-15 22:50:49.299] Cache size: 262144/262144: 100.0%, hits: 794221, misses: 855578, hit rate: 48.140%
+[2026-08-15 22:50:49.452] 
+[2026-08-15 22:52:20.024] Step: 7
+[2026-08-15 22:52:20.024] Collected 21911 states from 122 games, 194.7 states/s; 0.8 states/(s*actor), game length: 179.6
+[2026-08-15 22:52:20.024] Queue size: 14. Buffer size: 65536. States seen: 153736
+[2026-08-15 22:52:41.345] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:52:41.345] Losses: policy: 2.9325, value: 0.1509, l2: 0.3262, sum: 3.4095
+[2026-08-15 22:52:41.345] Cache size: 262144/262144: 100.0%, hits: 894530, misses: 1360434, hit rate: 39.669%
+[2026-08-15 22:52:41.478] 
+[2026-08-15 22:53:16.303] Step: 8
+[2026-08-15 22:53:16.303] Collected 21880 states from  96 games, 388.8 states/s; 1.5 states/(s*actor), game length: 227.9
+[2026-08-15 22:53:16.303] Queue size: 17. Buffer size: 65536. States seen: 175616
+[2026-08-15 22:53:37.876] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:53:37.876] Losses: policy: 2.8760, value: 0.0985, l2: 0.3212, sum: 3.2957
+[2026-08-15 22:53:37.876] Cache size: 262144/262144: 100.0%, hits: 565461, misses: 586838, hit rate: 49.072%
+[2026-08-15 22:53:38.012] 
+[2026-08-15 22:54:50.610] Step: 9
+[2026-08-15 22:54:50.610] Collected 21980 states from 130 games, 233.1 states/s; 0.9 states/(s*actor), game length: 169.1
+[2026-08-15 22:54:50.610] Queue size: 15. Buffer size: 65536. States seen: 197596
+[2026-08-15 22:55:11.748] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:55:11.748] Losses: policy: 2.8508, value: 0.1443, l2: 0.3169, sum: 3.3120
+[2026-08-15 22:55:11.748] Cache size: 262144/262144: 100.0%, hits: 774865, misses: 1107635, hit rate: 41.161%
+[2026-08-15 22:55:11.876] 
+[2026-08-15 22:56:31.791] Step: 10
+[2026-08-15 22:56:31.791] Collected 21921 states from 109 games, 216.7 states/s; 0.8 states/(s*actor), game length: 201.1
+[2026-08-15 22:56:31.791] Queue size: 11. Buffer size: 65536. States seen: 219517
+[2026-08-15 22:56:52.789] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:56:52.790] Losses: policy: 2.8046, value: 0.1058, l2: 0.3133, sum: 3.2236
+[2026-08-15 22:56:52.790] Cache size: 262144/262144: 100.0%, hits: 1049264, misses: 1183344, hit rate: 46.997%
+[2026-08-15 22:56:52.924] 
+[2026-08-15 22:58:18.208] Step: 11
+[2026-08-15 22:58:18.208] Collected 21906 states from 108 games, 205.9 states/s; 0.8 states/(s*actor), game length: 202.8
+[2026-08-15 22:58:18.208] Queue size: 18. Buffer size: 65536. States seen: 241423
+[2026-08-15 22:58:39.465] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:58:39.465] Losses: policy: 2.8060, value: 0.0901, l2: 0.3101, sum: 3.2061
+[2026-08-15 22:58:39.465] Cache size: 262144/262144: 100.0%, hits: 882623, misses: 1280899, hit rate: 40.796%
+[2026-08-15 22:58:39.597] 
+[2026-08-15 22:59:32.840] Step: 12
+[2026-08-15 22:59:32.840] Collected 21949 states from  90 games, 294.1 states/s; 1.1 states/(s*actor), game length: 243.9
+[2026-08-15 22:59:32.840] Queue size: 8. Buffer size: 65536. States seen: 263372
+[2026-08-15 22:59:54.488] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 22:59:54.488] Losses: policy: 2.7792, value: 0.0674, l2: 0.3072, sum: 3.1538
+[2026-08-15 22:59:54.488] Cache size: 262144/262144: 100.0%, hits: 680386, misses: 843216, hit rate: 44.656%
+[2026-08-15 22:59:54.622] 
+[2026-08-15 23:00:35.788] Step: 13
+[2026-08-15 23:00:35.788] Collected 22055 states from 101 games, 350.4 states/s; 1.4 states/(s*actor), game length: 218.4
+[2026-08-15 23:00:35.788] Queue size: 21. Buffer size: 65536. States seen: 285427
+[2026-08-15 23:00:57.568] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:00:57.569] Losses: policy: 2.7712, value: 0.0682, l2: 0.3046, sum: 3.1440
+[2026-08-15 23:00:57.569] Cache size: 262144/262144: 100.0%, hits: 512836, misses: 689522, hit rate: 42.653%
+[2026-08-15 23:00:57.707] 
+[2026-08-15 23:02:08.903] Step: 14
+[2026-08-15 23:02:08.903] Collected 21910 states from 123 games, 235.3 states/s; 0.9 states/(s*actor), game length: 178.1
+[2026-08-15 23:02:08.903] Queue size: 11. Buffer size: 65536. States seen: 307337
+[2026-08-15 23:02:30.016] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:02:30.016] Losses: policy: 2.7844, value: 0.0795, l2: 0.3022, sum: 3.1662
+[2026-08-15 23:02:30.016] Cache size: 262144/262144: 100.0%, hits: 858289, misses: 1077274, hit rate: 44.343%
+[2026-08-15 23:02:30.153] 
+[2026-08-15 23:03:53.107] Step: 15
+[2026-08-15 23:03:53.107] Collected 22003 states from 116 games, 211.2 states/s; 0.8 states/(s*actor), game length: 189.7
+[2026-08-15 23:03:53.107] Queue size: 9. Buffer size: 65536. States seen: 329340
+[2026-08-15 23:04:14.566] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:04:14.566] Losses: policy: 2.8179, value: 0.0759, l2: 0.3000, sum: 3.1937
+[2026-08-15 23:04:14.566] Cache size: 262144/262144: 100.0%, hits: 858208, misses: 1249987, hit rate: 40.708%
+[2026-08-15 23:04:14.703] 
+[2026-08-15 23:05:01.223] Step: 16
+[2026-08-15 23:05:01.223] Collected 22074 states from 100 games, 324.1 states/s; 1.3 states/(s*actor), game length: 220.7
+[2026-08-15 23:05:01.223] Queue size: 17. Buffer size: 65536. States seen: 351414
+[2026-08-15 23:05:22.916] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:05:22.917] Losses: policy: 2.8213, value: 0.0750, l2: 0.2979, sum: 3.1943
+[2026-08-15 23:05:22.917] Cache size: 262144/262144: 100.0%, hits: 661473, misses: 749365, hit rate: 46.885%
+[2026-08-15 23:05:23.058] 
+[2026-08-15 23:06:18.977] Step: 17
+[2026-08-15 23:06:18.977] Collected 21873 states from 114 games, 281.3 states/s; 1.1 states/(s*actor), game length: 191.9
+[2026-08-15 23:06:18.977] Queue size: 17. Buffer size: 65536. States seen: 373287
+[2026-08-15 23:06:40.393] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:06:40.393] Losses: policy: 2.8148, value: 0.0681, l2: 0.2959, sum: 3.1788
+[2026-08-15 23:06:40.393] Cache size: 262144/262144: 100.0%, hits: 693195, misses: 874979, hit rate: 44.204%
+[2026-08-15 23:06:40.539] 
+[2026-08-15 23:07:23.845] Step: 18
+[2026-08-15 23:07:23.845] Collected 22038 states from 115 games, 339.7 states/s; 1.3 states/(s*actor), game length: 191.6
+[2026-08-15 23:07:23.845] Queue size: 20. Buffer size: 65536. States seen: 395325
+[2026-08-15 23:07:45.609] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:07:45.609] Losses: policy: 2.7854, value: 0.0616, l2: 0.2940, sum: 3.1410
+[2026-08-15 23:07:45.609] Cache size: 262144/262144: 100.0%, hits: 757773, misses: 694693, hit rate: 52.171%
+[2026-08-15 23:07:45.740] 
+[2026-08-15 23:09:15.083] Step: 19
+[2026-08-15 23:09:15.083] Collected 21991 states from 137 games, 197.7 states/s; 0.8 states/(s*actor), game length: 160.5
+[2026-08-15 23:09:15.083] Queue size: 11. Buffer size: 65536. States seen: 417316
+[2026-08-15 23:09:36.938] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:09:36.939] Losses: policy: 2.8225, value: 0.1155, l2: 0.2922, sum: 3.2302
+[2026-08-15 23:09:36.939] Cache size: 262144/262144: 100.0%, hits: 868560, misses: 1349300, hit rate: 39.162%
+[2026-08-15 23:09:37.071] 
+[2026-08-15 23:10:47.365] Step: 20
+[2026-08-15 23:10:47.365] Collected 21883 states from 124 games, 237.1 states/s; 0.9 states/(s*actor), game length: 176.5
+[2026-08-15 23:10:47.365] Queue size: 14. Buffer size: 65536. States seen: 439199
+[2026-08-15 23:11:08.602] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:11:08.603] Losses: policy: 2.8238, value: 0.1108, l2: 0.2908, sum: 3.2254
+[2026-08-15 23:11:08.603] Cache size: 262144/262144: 100.0%, hits: 772210, misses: 1072458, hit rate: 41.862%
+[2026-08-15 23:11:08.731] 
+[2026-08-15 23:11:51.796] Step: 21
+[2026-08-15 23:11:51.796] Collected 21881 states from 100 games, 339.6 states/s; 1.3 states/(s*actor), game length: 218.8
+[2026-08-15 23:11:51.796] Queue size: 19. Buffer size: 65536. States seen: 461080
+[2026-08-15 23:12:12.964] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:12:12.964] Losses: policy: 2.8319, value: 0.0714, l2: 0.2893, sum: 3.1926
+[2026-08-15 23:12:12.964] Cache size: 262144/262144: 100.0%, hits: 681224, misses: 689331, hit rate: 49.704%
+[2026-08-15 23:12:13.099] 
+[2026-08-15 23:13:06.169] Step: 22
+[2026-08-15 23:13:06.169] Collected 22005 states from 107 games, 295.9 states/s; 1.2 states/(s*actor), game length: 205.7
+[2026-08-15 23:13:06.169] Queue size: 14. Buffer size: 65536. States seen: 483085
+[2026-08-15 23:13:27.813] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:13:27.814] Losses: policy: 2.7962, value: 0.0653, l2: 0.2877, sum: 3.1493
+[2026-08-15 23:13:27.814] Cache size: 262144/262144: 100.0%, hits: 838154, misses: 826975, hit rate: 50.336%
+[2026-08-15 23:13:27.957] 
+[2026-08-15 23:14:32.085] Step: 23
+[2026-08-15 23:14:32.085] Collected 21929 states from 123 games, 255.2 states/s; 1.0 states/(s*actor), game length: 178.3
+[2026-08-15 23:14:32.085] Queue size: 20. Buffer size: 65536. States seen: 505014
+[2026-08-15 23:14:53.561] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:14:53.562] Losses: policy: 2.7584, value: 0.0687, l2: 0.2862, sum: 3.1133
+[2026-08-15 23:14:53.562] Cache size: 262144/262144: 100.0%, hits: 1019901, misses: 967793, hit rate: 51.311%
+[2026-08-15 23:14:53.699] 
+[2026-08-15 23:16:12.898] Step: 24
+[2026-08-15 23:16:12.898] Collected 21906 states from 135 games, 217.3 states/s; 0.8 states/(s*actor), game length: 162.3
+[2026-08-15 23:16:12.898] Queue size: 18. Buffer size: 65536. States seen: 526920
+[2026-08-15 23:16:34.928] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:16:34.929] Losses: policy: 2.7347, value: 0.0800, l2: 0.2847, sum: 3.0995
+[2026-08-15 23:16:34.929] Cache size: 262144/262144: 100.0%, hits: 1034709, misses: 1192091, hit rate: 46.466%
+[2026-08-15 23:16:35.059] 
+[2026-08-15 23:17:34.355] Step: 25
+[2026-08-15 23:17:34.355] Collected 21918 states from 110 games, 269.1 states/s; 1.1 states/(s*actor), game length: 199.3
+[2026-08-15 23:17:34.355] Queue size: 22. Buffer size: 65536. States seen: 548838
+[2026-08-15 23:17:55.670] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:17:55.671] Losses: policy: 2.7207, value: 0.0849, l2: 0.2833, sum: 3.0889
+[2026-08-15 23:17:55.671] Cache size: 262144/262144: 100.0%, hits: 817316, misses: 911420, hit rate: 47.278%
+[2026-08-15 23:17:55.806] 
+[2026-08-15 23:18:46.961] Step: 26
+[2026-08-15 23:18:46.961] Collected 22149 states from 105 games, 305.1 states/s; 1.2 states/(s*actor), game length: 210.9
+[2026-08-15 23:18:46.961] Queue size: 11. Buffer size: 65536. States seen: 570987
+[2026-08-15 23:19:08.709] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:19:08.709] Losses: policy: 2.7211, value: 0.0789, l2: 0.2818, sum: 3.0819
+[2026-08-15 23:19:08.709] Cache size: 262144/262144: 100.0%, hits: 725194, misses: 809141, hit rate: 47.264%
+[2026-08-15 23:19:08.848] 
+[2026-08-15 23:19:53.936] Step: 27
+[2026-08-15 23:19:53.936] Collected 22059 states from 124 games, 329.4 states/s; 1.3 states/(s*actor), game length: 177.9
+[2026-08-15 23:19:53.936] Queue size: 17. Buffer size: 65536. States seen: 593046
+[2026-08-15 23:20:15.194] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:20:15.195] Losses: policy: 2.7267, value: 0.0931, l2: 0.2805, sum: 3.1003
+[2026-08-15 23:20:15.195] Cache size: 262144/262144: 100.0%, hits: 767376, misses: 710994, hit rate: 51.907%
+[2026-08-15 23:20:15.323] 
+[2026-08-15 23:21:14.130] Step: 28
+[2026-08-15 23:21:14.130] Collected 22130 states from 126 games, 276.0 states/s; 1.1 states/(s*actor), game length: 175.6
+[2026-08-15 23:21:14.130] Queue size: 20. Buffer size: 65536. States seen: 615176
+[2026-08-15 23:21:35.596] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:21:35.597] Losses: policy: 2.7432, value: 0.0918, l2: 0.2792, sum: 3.1142
+[2026-08-15 23:21:35.597] Cache size: 262144/262144: 100.0%, hits: 706362, misses: 913543, hit rate: 43.605%
+[2026-08-15 23:21:35.732] 
+[2026-08-15 23:22:31.033] Step: 29
+[2026-08-15 23:22:31.033] Collected 21893 states from 122 games, 284.7 states/s; 1.1 states/(s*actor), game length: 179.5
+[2026-08-15 23:22:31.033] Queue size: 15. Buffer size: 65536. States seen: 637069
+[2026-08-15 23:22:52.147] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:22:52.148] Losses: policy: 2.7605, value: 0.0738, l2: 0.2778, sum: 3.1121
+[2026-08-15 23:22:52.148] Cache size: 262144/262144: 100.0%, hits: 814721, misses: 851140, hit rate: 48.907%
+[2026-08-15 23:22:52.292] 
+[2026-08-15 23:23:55.888] Step: 30
+[2026-08-15 23:23:55.888] Collected 21946 states from 136 games, 258.6 states/s; 1.0 states/(s*actor), game length: 161.4
+[2026-08-15 23:23:55.888] Queue size: 14. Buffer size: 65536. States seen: 659015
+[2026-08-15 23:24:17.374] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:24:17.374] Losses: policy: 2.7777, value: 0.0845, l2: 0.2763, sum: 3.1386
+[2026-08-15 23:24:17.374] Cache size: 262144/262144: 100.0%, hits: 898768, misses: 973032, hit rate: 48.016%
+[2026-08-15 23:24:17.507] 
+[2026-08-15 23:25:31.096] Step: 31
+[2026-08-15 23:25:31.096] Collected 22034 states from 154 games, 231.4 states/s; 0.9 states/(s*actor), game length: 143.1
+[2026-08-15 23:25:31.096] Queue size: 27. Buffer size: 65536. States seen: 681049
+[2026-08-15 23:25:52.527] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:25:52.527] Losses: policy: 2.7915, value: 0.0839, l2: 0.2749, sum: 3.1503
+[2026-08-15 23:25:52.527] Cache size: 262144/262144: 100.0%, hits: 998487, misses: 1107329, hit rate: 47.416%
+[2026-08-15 23:25:52.657] 
+[2026-08-15 23:26:54.825] Step: 32
+[2026-08-15 23:26:54.825] Collected 21845 states from 125 games, 260.9 states/s; 1.0 states/(s*actor), game length: 174.8
+[2026-08-15 23:26:54.825] Queue size: 17. Buffer size: 65536. States seen: 702894
+[2026-08-15 23:27:16.368] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:27:16.368] Losses: policy: 2.7771, value: 0.0899, l2: 0.2735, sum: 3.1405
+[2026-08-15 23:27:16.368] Cache size: 262144/262144: 100.0%, hits: 828679, misses: 958377, hit rate: 46.371%
+[2026-08-15 23:27:16.504] 
+[2026-08-15 23:28:26.772] Step: 33
+[2026-08-15 23:28:26.772] Collected 22232 states from 131 games, 241.8 states/s; 0.9 states/(s*actor), game length: 169.7
+[2026-08-15 23:28:26.772] Queue size: 15. Buffer size: 65536. States seen: 725126
+[2026-08-15 23:28:47.960] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:28:47.960] Losses: policy: 2.7653, value: 0.0822, l2: 0.2722, sum: 3.1198
+[2026-08-15 23:28:47.960] Cache size: 262144/262144: 100.0%, hits: 974994, misses: 1054170, hit rate: 48.049%
+[2026-08-15 23:28:48.092] 
+[2026-08-15 23:29:59.280] Step: 34
+[2026-08-15 23:29:59.280] Collected 22024 states from 114 games, 238.1 states/s; 0.9 states/(s*actor), game length: 193.2
+[2026-08-15 23:29:59.280] Queue size: 11. Buffer size: 65536. States seen: 747150
+[2026-08-15 23:30:20.439] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:30:20.440] Losses: policy: 2.7447, value: 0.0858, l2: 0.2708, sum: 3.1013
+[2026-08-15 23:30:20.440] Cache size: 262144/262144: 100.0%, hits: 924796, misses: 1069363, hit rate: 46.375%
+[2026-08-15 23:30:20.573] 
+[2026-08-15 23:31:11.182] Step: 35
+[2026-08-15 23:31:11.182] Collected 21878 states from  99 games, 304.3 states/s; 1.2 states/(s*actor), game length: 221.0
+[2026-08-15 23:31:11.182] Queue size: 14. Buffer size: 65536. States seen: 769028
+[2026-08-15 23:31:32.377] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:31:32.378] Losses: policy: 2.7322, value: 0.0871, l2: 0.2695, sum: 3.0889
+[2026-08-15 23:31:32.378] Cache size: 262144/262144: 100.0%, hits: 676018, misses: 799215, hit rate: 45.824%
+[2026-08-15 23:31:32.507] 
+[2026-08-15 23:32:17.615] Step: 36
+[2026-08-15 23:32:17.615] Collected 21846 states from 106 games, 328.8 states/s; 1.3 states/(s*actor), game length: 206.1
+[2026-08-15 23:32:17.615] Queue size: 21. Buffer size: 65536. States seen: 790874
+[2026-08-15 23:32:39.347] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:32:39.348] Losses: policy: 2.7215, value: 0.0638, l2: 0.2681, sum: 3.0534
+[2026-08-15 23:32:39.348] Cache size: 262144/262144: 100.0%, hits: 671166, misses: 726563, hit rate: 48.018%
+[2026-08-15 23:32:39.477] 
+[2026-08-15 23:33:30.897] Step: 37
+[2026-08-15 23:33:30.897] Collected 22145 states from 126 games, 302.2 states/s; 1.2 states/(s*actor), game length: 175.8
+[2026-08-15 23:33:30.897] Queue size: 17. Buffer size: 65536. States seen: 813019
+[2026-08-15 23:33:52.230] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:33:52.231] Losses: policy: 2.7159, value: 0.0726, l2: 0.2667, sum: 3.0552
+[2026-08-15 23:33:52.231] Cache size: 262144/262144: 100.0%, hits: 673680, misses: 812920, hit rate: 45.317%
+[2026-08-15 23:33:52.364] 
+[2026-08-15 23:34:55.398] Step: 38
+[2026-08-15 23:34:55.398] Collected 21868 states from 134 games, 258.8 states/s; 1.0 states/(s*actor), game length: 163.2
+[2026-08-15 23:34:55.398] Queue size: 13. Buffer size: 65536. States seen: 834887
+[2026-08-15 23:35:17.081] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:35:17.082] Losses: policy: 2.7396, value: 0.0745, l2: 0.2652, sum: 3.0793
+[2026-08-15 23:35:17.082] Cache size: 262144/262144: 100.0%, hits: 938548, misses: 964365, hit rate: 49.322%
+[2026-08-15 23:35:17.221] 
+[2026-08-15 23:36:13.776] Step: 39
+[2026-08-15 23:36:13.776] Collected 21963 states from 139 games, 280.2 states/s; 1.1 states/(s*actor), game length: 158.0
+[2026-08-15 23:36:13.776] Queue size: 21. Buffer size: 65536. States seen: 856850
+[2026-08-15 23:36:35.244] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:36:35.245] Losses: policy: 2.7627, value: 0.1292, l2: 0.2641, sum: 3.1560
+[2026-08-15 23:36:35.245] Cache size: 262144/262144: 100.0%, hits: 975145, misses: 864330, hit rate: 53.012%
+[2026-08-15 23:36:35.382] 
+[2026-08-15 23:37:53.525] Step: 40
+[2026-08-15 23:37:53.525] Collected 22168 states from 148 games, 222.2 states/s; 0.9 states/(s*actor), game length: 149.8
+[2026-08-15 23:37:53.525] Queue size: 20. Buffer size: 65536. States seen: 879018
+[2026-08-15 23:38:14.977] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:38:14.978] Losses: policy: 2.7210, value: 0.1025, l2: 0.2632, sum: 3.0867
+[2026-08-15 23:38:14.978] Cache size: 262144/262144: 100.0%, hits: 1041350, misses: 1165097, hit rate: 47.196%
+[2026-08-15 23:38:15.118] 
+[2026-08-15 23:39:08.955] Step: 41
+[2026-08-15 23:39:08.955] Collected 21854 states from 123 games, 289.7 states/s; 1.1 states/(s*actor), game length: 177.7
+[2026-08-15 23:39:08.955] Queue size: 10. Buffer size: 65536. States seen: 900872
+[2026-08-15 23:39:30.646] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:39:30.646] Losses: policy: 2.7072, value: 0.0850, l2: 0.2622, sum: 3.0544
+[2026-08-15 23:39:30.646] Cache size: 262144/262144: 100.0%, hits: 892329, misses: 832209, hit rate: 51.743%
+[2026-08-15 23:39:30.777] 
+[2026-08-15 23:40:28.837] Step: 42
+[2026-08-15 23:40:28.837] Collected 21949 states from 119 games, 274.8 states/s; 1.1 states/(s*actor), game length: 184.4
+[2026-08-15 23:40:28.837] Queue size: 12. Buffer size: 65536. States seen: 922821
+[2026-08-15 23:40:50.340] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:40:50.340] Losses: policy: 2.6681, value: 0.0650, l2: 0.2610, sum: 2.9942
+[2026-08-15 23:40:50.340] Cache size: 262144/262144: 100.0%, hits: 932071, misses: 888698, hit rate: 51.191%
+[2026-08-15 23:40:50.473] 
+[2026-08-15 23:41:42.209] Step: 43
+[2026-08-15 23:41:42.209] Collected 21899 states from 125 games, 298.5 states/s; 1.2 states/(s*actor), game length: 175.2
+[2026-08-15 23:41:42.209] Queue size: 12. Buffer size: 65536. States seen: 944720
+[2026-08-15 23:42:03.833] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:42:03.833] Losses: policy: 2.6477, value: 0.0724, l2: 0.2598, sum: 2.9799
+[2026-08-15 23:42:03.833] Cache size: 262144/262144: 100.0%, hits: 860740, misses: 806379, hit rate: 51.630%
+[2026-08-15 23:42:03.967] 
+[2026-08-15 23:43:05.563] Step: 44
+[2026-08-15 23:43:05.563] Collected 22287 states from 130 games, 267.4 states/s; 1.0 states/(s*actor), game length: 171.4
+[2026-08-15 23:43:05.563] Queue size: 18. Buffer size: 65536. States seen: 967007
+[2026-08-15 23:43:26.668] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:43:26.668] Losses: policy: 2.6246, value: 0.0903, l2: 0.2587, sum: 2.9735
+[2026-08-15 23:43:26.668] Cache size: 262144/262144: 100.0%, hits: 959875, misses: 928696, hit rate: 50.825%
+[2026-08-15 23:43:26.796] 
+[2026-08-15 23:44:18.798] Step: 45
+[2026-08-15 23:44:18.798] Collected 21923 states from 122 games, 299.4 states/s; 1.2 states/(s*actor), game length: 179.7
+[2026-08-15 23:44:18.798] Queue size: 13. Buffer size: 65536. States seen: 988930
+[2026-08-15 23:44:40.482] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:44:40.482] Losses: policy: 2.6360, value: 0.0841, l2: 0.2575, sum: 2.9776
+[2026-08-15 23:44:40.482] Cache size: 262144/262144: 100.0%, hits: 914117, misses: 804027, hit rate: 53.204%
+[2026-08-15 23:44:40.619] 
+[2026-08-15 23:46:04.873] Step: 46
+[2026-08-15 23:46:04.873] Collected 21911 states from 143 games, 206.6 states/s; 0.8 states/(s*actor), game length: 153.2
+[2026-08-15 23:46:04.873] Queue size: 18. Buffer size: 65536. States seen: 1010841
+[2026-08-15 23:46:26.241] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:46:26.241] Losses: policy: 2.6684, value: 0.0991, l2: 0.2564, sum: 3.0239
+[2026-08-15 23:46:26.241] Cache size: 262144/262144: 100.0%, hits: 971402, misses: 1253489, hit rate: 43.661%
+[2026-08-15 23:46:26.370] 
+[2026-08-15 23:47:11.233] Step: 47
+[2026-08-15 23:47:11.233] Collected 22034 states from 103 games, 332.0 states/s; 1.3 states/(s*actor), game length: 213.9
+[2026-08-15 23:47:11.233] Queue size: 12. Buffer size: 65536. States seen: 1032875
+[2026-08-15 23:47:32.998] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:47:32.998] Losses: policy: 2.6559, value: 0.0603, l2: 0.2552, sum: 2.9714
+[2026-08-15 23:47:32.998] Cache size: 262144/262144: 100.0%, hits: 911955, misses: 702174, hit rate: 56.498%
+[2026-08-15 23:47:33.133] 
+[2026-08-15 23:48:23.007] Step: 48
+[2026-08-15 23:48:23.007] Collected 22017 states from 126 games, 306.8 states/s; 1.2 states/(s*actor), game length: 174.7
+[2026-08-15 23:48:23.007] Queue size: 22. Buffer size: 65536. States seen: 1054892
+[2026-08-15 23:48:44.952] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:48:44.952] Losses: policy: 2.6643, value: 0.0877, l2: 0.2540, sum: 3.0060
+[2026-08-15 23:48:44.952] Cache size: 262144/262144: 100.0%, hits: 768207, misses: 790937, hit rate: 49.271%
+[2026-08-15 23:48:45.089] 
+[2026-08-15 23:49:37.066] Step: 49
+[2026-08-15 23:49:37.066] Collected 21876 states from 126 games, 295.4 states/s; 1.2 states/(s*actor), game length: 173.6
+[2026-08-15 23:49:37.066] Queue size: 21. Buffer size: 65536. States seen: 1076768
+[2026-08-15 23:49:58.701] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:49:58.701] Losses: policy: 2.6540, value: 0.0794, l2: 0.2529, sum: 2.9863
+[2026-08-15 23:49:58.701] Cache size: 262144/262144: 100.0%, hits: 769005, misses: 815056, hit rate: 48.546%
+[2026-08-15 23:49:58.843] 
+[2026-08-15 23:51:06.138] Step: 50
+[2026-08-15 23:51:06.138] Collected 22095 states from 138 games, 248.1 states/s; 1.0 states/(s*actor), game length: 160.1
+[2026-08-15 23:51:06.138] Queue size: 12. Buffer size: 65536. States seen: 1098863
+[2026-08-15 23:51:27.333] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:51:27.334] Losses: policy: 2.6572, value: 0.0838, l2: 0.2517, sum: 2.9927
+[2026-08-15 23:51:27.334] Cache size: 262144/262144: 100.0%, hits: 1001053, misses: 1007351, hit rate: 49.843%
+[2026-08-15 23:51:27.474] 
+[2026-08-15 23:52:20.199] Step: 51
+[2026-08-15 23:52:20.199] Collected 21871 states from 125 games, 295.3 states/s; 1.2 states/(s*actor), game length: 175.0
+[2026-08-15 23:52:20.199] Queue size: 16. Buffer size: 65536. States seen: 1120734
+[2026-08-15 23:52:41.836] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:52:41.836] Losses: policy: 2.6629, value: 0.0874, l2: 0.2506, sum: 3.0008
+[2026-08-15 23:52:41.836] Cache size: 262144/262144: 100.0%, hits: 785061, misses: 826599, hit rate: 48.711%
+[2026-08-15 23:52:41.970] 
+[2026-08-15 23:53:42.743] Step: 52
+[2026-08-15 23:53:42.743] Collected 22088 states from 134 games, 267.6 states/s; 1.0 states/(s*actor), game length: 164.8
+[2026-08-15 23:53:42.743] Queue size: 21. Buffer size: 65536. States seen: 1142822
+[2026-08-15 23:54:04.251] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:54:04.252] Losses: policy: 2.6993, value: 0.0857, l2: 0.2494, sum: 3.0345
+[2026-08-15 23:54:04.252] Cache size: 262144/262144: 100.0%, hits: 902731, misses: 926922, hit rate: 49.339%
+[2026-08-15 23:54:04.385] 
+[2026-08-15 23:54:52.228] Step: 53
+[2026-08-15 23:54:52.228] Collected 21901 states from 134 games, 315.2 states/s; 1.2 states/(s*actor), game length: 163.4
+[2026-08-15 23:54:52.228] Queue size: 10. Buffer size: 65536. States seen: 1164723
+[2026-08-15 23:55:13.570] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:55:13.570] Losses: policy: 2.6985, value: 0.0805, l2: 0.2484, sum: 3.0274
+[2026-08-15 23:55:13.570] Cache size: 262144/262144: 100.0%, hits: 828681, misses: 747758, hit rate: 52.567%
+[2026-08-15 23:55:13.716] 
+[2026-08-15 23:56:01.768] Step: 54
+[2026-08-15 23:56:01.768] Collected 21933 states from 128 games, 315.4 states/s; 1.2 states/(s*actor), game length: 171.4
+[2026-08-15 23:56:01.768] Queue size: 20. Buffer size: 65536. States seen: 1186656
+[2026-08-15 23:56:23.233] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:56:23.233] Losses: policy: 2.6750, value: 0.0735, l2: 0.2474, sum: 2.9959
+[2026-08-15 23:56:23.233] Cache size: 262144/262144: 100.0%, hits: 1037031, misses: 727599, hit rate: 58.768%
+[2026-08-15 23:56:23.365] 
+[2026-08-15 23:57:34.989] Step: 55
+[2026-08-15 23:57:34.989] Collected 21972 states from 152 games, 235.7 states/s; 0.9 states/(s*actor), game length: 144.6
+[2026-08-15 23:57:34.989] Queue size: 19. Buffer size: 65536. States seen: 1208628
+[2026-08-15 23:57:56.215] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:57:56.216] Losses: policy: 2.6436, value: 0.0969, l2: 0.2464, sum: 2.9868
+[2026-08-15 23:57:56.216] Cache size: 262144/262144: 100.0%, hits: 1030494, misses: 1067435, hit rate: 49.120%
+[2026-08-15 23:57:56.350] 
+[2026-08-15 23:59:15.051] Step: 56
+[2026-08-15 23:59:15.051] Collected 21902 states from 142 games, 218.9 states/s; 0.9 states/(s*actor), game length: 154.2
+[2026-08-15 23:59:15.051] Queue size: 24. Buffer size: 65536. States seen: 1230530
+[2026-08-15 23:59:36.775] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-15 23:59:36.776] Losses: policy: 2.6336, value: 0.0839, l2: 0.2454, sum: 2.9629
+[2026-08-15 23:59:36.776] Cache size: 262144/262144: 100.0%, hits: 1116446, misses: 1170542, hit rate: 48.817%
+[2026-08-15 23:59:36.910] 
+[2026-08-16 00:00:25.276] Step: 57
+[2026-08-16 00:00:25.276] Collected 21940 states from 118 games, 312.4 states/s; 1.2 states/(s*actor), game length: 185.9
+[2026-08-16 00:00:25.276] Queue size: 22. Buffer size: 65536. States seen: 1252470
+[2026-08-16 00:00:46.941] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:00:46.941] Losses: policy: 2.6534, value: 0.0726, l2: 0.2443, sum: 2.9704
+[2026-08-16 00:00:46.941] Cache size: 262144/262144: 100.0%, hits: 833076, misses: 759372, hit rate: 52.314%
+[2026-08-16 00:00:47.074] 
+[2026-08-16 00:01:57.071] Step: 58
+[2026-08-16 00:01:57.071] Collected 22067 states from 132 games, 240.4 states/s; 0.9 states/(s*actor), game length: 167.2
+[2026-08-16 00:01:57.071] Queue size: 17. Buffer size: 65536. States seen: 1274537
+[2026-08-16 00:02:18.572] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:02:18.572] Losses: policy: 2.6574, value: 0.0789, l2: 0.2433, sum: 2.9795
+[2026-08-16 00:02:18.572] Cache size: 262144/262144: 100.0%, hits: 998727, misses: 1053244, hit rate: 48.672%
+[2026-08-16 00:02:18.707] 
+[2026-08-16 00:03:09.142] Step: 59
+[2026-08-16 00:03:09.142] Collected 22015 states from 115 games, 305.5 states/s; 1.2 states/(s*actor), game length: 191.4
+[2026-08-16 00:03:09.142] Queue size: 23. Buffer size: 65536. States seen: 1296552
+[2026-08-16 00:03:30.409] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:03:30.410] Losses: policy: 2.6491, value: 0.0630, l2: 0.2421, sum: 2.9542
+[2026-08-16 00:03:30.410] Cache size: 262144/262144: 100.0%, hits: 780783, misses: 786156, hit rate: 49.829%
+[2026-08-16 00:03:30.543] 
+[2026-08-16 00:04:36.769] Step: 60
+[2026-08-16 00:04:36.769] Collected 22278 states from 130 games, 254.2 states/s; 1.0 states/(s*actor), game length: 171.4
+[2026-08-16 00:04:36.769] Queue size: 18. Buffer size: 65536. States seen: 1318830
+[2026-08-16 00:04:58.019] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:04:58.020] Losses: policy: 2.6339, value: 0.0764, l2: 0.2409, sum: 2.9511
+[2026-08-16 00:04:58.020] Cache size: 262144/262144: 100.0%, hits: 848378, misses: 1004576, hit rate: 45.785%
+[2026-08-16 00:04:58.157] 
+[2026-08-16 00:05:51.106] Step: 61
+[2026-08-16 00:05:51.106] Collected 21973 states from 119 games, 295.6 states/s; 1.2 states/(s*actor), game length: 184.6
+[2026-08-16 00:05:51.106] Queue size: 15. Buffer size: 65536. States seen: 1340803
+[2026-08-16 00:06:12.669] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:06:12.669] Losses: policy: 2.6409, value: 0.0779, l2: 0.2397, sum: 2.9585
+[2026-08-16 00:06:12.669] Cache size: 262144/262144: 100.0%, hits: 879007, misses: 820209, hit rate: 51.730%
+[2026-08-16 00:06:12.804] 
+[2026-08-16 00:07:17.711] Step: 62
+[2026-08-16 00:07:17.711] Collected 21900 states from 142 games, 252.9 states/s; 1.0 states/(s*actor), game length: 154.2
+[2026-08-16 00:07:17.711] Queue size: 21. Buffer size: 65536. States seen: 1362703
+[2026-08-16 00:07:39.040] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:07:39.041] Losses: policy: 2.6654, value: 0.0894, l2: 0.2386, sum: 2.9935
+[2026-08-16 00:07:39.041] Cache size: 262144/262144: 100.0%, hits: 876225, misses: 987381, hit rate: 47.018%
+[2026-08-16 00:07:39.182] 
+[2026-08-16 00:08:21.008] Step: 63
+[2026-08-16 00:08:21.008] Collected 21870 states from 110 games, 345.5 states/s; 1.3 states/(s*actor), game length: 198.8
+[2026-08-16 00:08:21.008] Queue size: 12. Buffer size: 65536. States seen: 1384573
+[2026-08-16 00:08:42.479] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:08:42.480] Losses: policy: 2.6597, value: 0.0589, l2: 0.2376, sum: 2.9562
+[2026-08-16 00:08:42.480] Cache size: 262144/262144: 100.0%, hits: 936369, misses: 651294, hit rate: 58.978%
+[2026-08-16 00:08:42.611] 
+[2026-08-16 00:09:46.523] Step: 64
+[2026-08-16 00:09:46.523] Collected 22059 states from 136 games, 258.0 states/s; 1.0 states/(s*actor), game length: 162.2
+[2026-08-16 00:09:46.523] Queue size: 21. Buffer size: 65536. States seen: 1406632
+[2026-08-16 00:10:08.066] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:10:08.066] Losses: policy: 2.6523, value: 0.0679, l2: 0.2365, sum: 2.9566
+[2026-08-16 00:10:08.066] Cache size: 262144/262144: 100.0%, hits: 895224, misses: 973624, hit rate: 47.902%
+[2026-08-16 00:10:08.199] 
+[2026-08-16 00:11:23.964] Step: 65
+[2026-08-16 00:11:23.964] Collected 21907 states from 128 games, 224.8 states/s; 0.9 states/(s*actor), game length: 171.1
+[2026-08-16 00:11:23.964] Queue size: 7. Buffer size: 65536. States seen: 1428539
+[2026-08-16 00:11:45.628] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:11:45.628] Losses: policy: 2.6293, value: 0.0841, l2: 0.2354, sum: 2.9488
+[2026-08-16 00:11:45.628] Cache size: 262144/262144: 100.0%, hits: 1095480, misses: 1131478, hit rate: 49.192%
+[2026-08-16 00:11:45.763] 
+[2026-08-16 00:12:39.540] Step: 66
+[2026-08-16 00:12:39.540] Collected 21969 states from 121 games, 290.7 states/s; 1.1 states/(s*actor), game length: 181.6
+[2026-08-16 00:12:39.540] Queue size: 17. Buffer size: 65536. States seen: 1450508
+[2026-08-16 00:13:01.277] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:13:01.278] Losses: policy: 2.6366, value: 0.0807, l2: 0.2343, sum: 2.9517
+[2026-08-16 00:13:01.278] Cache size: 262144/262144: 100.0%, hits: 893150, misses: 835326, hit rate: 51.673%
+[2026-08-16 00:13:01.410] 
+[2026-08-16 00:14:01.942] Step: 67
+[2026-08-16 00:14:01.942] Collected 21874 states from 127 games, 265.5 states/s; 1.0 states/(s*actor), game length: 172.2
+[2026-08-16 00:14:01.942] Queue size: 18. Buffer size: 65536. States seen: 1472382
+[2026-08-16 00:14:23.153] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:14:23.154] Losses: policy: 2.6486, value: 0.0770, l2: 0.2334, sum: 2.9590
+[2026-08-16 00:14:23.154] Cache size: 262144/262144: 100.0%, hits: 889245, misses: 919091, hit rate: 49.175%
+[2026-08-16 00:14:23.290] 
+[2026-08-16 00:15:10.517] Step: 68
+[2026-08-16 00:15:10.517] Collected 21894 states from 107 games, 319.3 states/s; 1.2 states/(s*actor), game length: 204.6
+[2026-08-16 00:15:10.517] Queue size: 21. Buffer size: 65536. States seen: 1494276
+[2026-08-16 00:15:31.852] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:15:31.852] Losses: policy: 2.6358, value: 0.0607, l2: 0.2322, sum: 2.9288
+[2026-08-16 00:15:31.852] Cache size: 262144/262144: 100.0%, hits: 834504, misses: 737941, hit rate: 53.070%
+[2026-08-16 00:15:31.989] 
+[2026-08-16 00:16:31.872] Step: 69
+[2026-08-16 00:16:31.872] Collected 21889 states from 129 games, 269.1 states/s; 1.1 states/(s*actor), game length: 169.7
+[2026-08-16 00:16:31.872] Queue size: 16. Buffer size: 65536. States seen: 1516165
+[2026-08-16 00:16:53.026] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:16:53.027] Losses: policy: 2.6194, value: 0.0697, l2: 0.2311, sum: 2.9202
+[2026-08-16 00:16:53.027] Cache size: 262144/262144: 100.0%, hits: 1015724, misses: 902377, hit rate: 52.955%
+[2026-08-16 00:16:53.161] 
+[2026-08-16 00:17:57.126] Step: 70
+[2026-08-16 00:17:57.126] Collected 22078 states from 119 games, 259.0 states/s; 1.0 states/(s*actor), game length: 185.5
+[2026-08-16 00:17:57.126] Queue size: 14. Buffer size: 65536. States seen: 1538243
+[2026-08-16 00:18:18.524] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:18:18.525] Losses: policy: 2.5963, value: 0.0721, l2: 0.2300, sum: 2.8984
+[2026-08-16 00:18:18.525] Cache size: 262144/262144: 100.0%, hits: 943156, misses: 967322, hit rate: 49.368%
+[2026-08-16 00:18:18.664] 
+[2026-08-16 00:18:57.261] Step: 71
+[2026-08-16 00:18:57.261] Collected 21849 states from 109 games, 363.3 states/s; 1.4 states/(s*actor), game length: 200.4
+[2026-08-16 00:18:57.261] Queue size: 24. Buffer size: 65536. States seen: 1560092
+[2026-08-16 00:19:18.582] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:19:18.582] Losses: policy: 2.6051, value: 0.0751, l2: 0.2289, sum: 2.9092
+[2026-08-16 00:19:18.582] Cache size: 262144/262144: 100.0%, hits: 728736, misses: 624397, hit rate: 53.855%
+[2026-08-16 00:19:18.719] 
+[2026-08-16 00:20:15.218] Step: 72
+[2026-08-16 00:20:15.218] Collected 21926 states from 126 games, 281.3 states/s; 1.1 states/(s*actor), game length: 174.0
+[2026-08-16 00:20:15.218] Queue size: 11. Buffer size: 65536. States seen: 1582018
+[2026-08-16 00:20:36.721] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:20:36.721] Losses: policy: 2.5883, value: 0.0925, l2: 0.2281, sum: 2.9089
+[2026-08-16 00:20:36.721] Cache size: 262144/262144: 100.0%, hits: 934857, misses: 867999, hit rate: 51.854%
+[2026-08-16 00:20:36.860] 
+[2026-08-16 00:21:58.566] Step: 73
+[2026-08-16 00:21:58.566] Collected 21850 states from 142 games, 211.4 states/s; 0.8 states/(s*actor), game length: 153.9
+[2026-08-16 00:21:58.566] Queue size: 16. Buffer size: 65536. States seen: 1603868
+[2026-08-16 00:22:19.987] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:22:19.988] Losses: policy: 2.6042, value: 0.0860, l2: 0.2271, sum: 2.9173
+[2026-08-16 00:22:19.988] Cache size: 262144/262144: 100.0%, hits: 1247461, misses: 1193924, hit rate: 51.096%
+[2026-08-16 00:22:20.122] 
+[2026-08-16 00:23:15.158] Step: 74
+[2026-08-16 00:23:15.158] Collected 22213 states from 116 games, 290.0 states/s; 1.1 states/(s*actor), game length: 191.5
+[2026-08-16 00:23:15.158] Queue size: 20. Buffer size: 65536. States seen: 1626081
+[2026-08-16 00:23:36.855] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:23:36.855] Losses: policy: 2.5956, value: 0.0711, l2: 0.2261, sum: 2.8928
+[2026-08-16 00:23:36.855] Cache size: 262144/262144: 100.0%, hits: 919600, misses: 848767, hit rate: 52.003%
+[2026-08-16 00:23:36.992] 
+[2026-08-16 00:24:25.579] Step: 75
+[2026-08-16 00:24:25.579] Collected 22040 states from 123 games, 313.0 states/s; 1.2 states/(s*actor), game length: 179.2
+[2026-08-16 00:24:25.579] Queue size: 17. Buffer size: 65536. States seen: 1648121
+[2026-08-16 00:24:47.063] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:24:47.063] Losses: policy: 2.6234, value: 0.0704, l2: 0.2252, sum: 2.9190
+[2026-08-16 00:24:47.063] Cache size: 262144/262144: 100.0%, hits: 848820, misses: 757956, hit rate: 52.828%
+[2026-08-16 00:24:47.195] 
+[2026-08-16 00:25:47.399] Step: 76
+[2026-08-16 00:25:47.399] Collected 21965 states from 122 games, 268.5 states/s; 1.0 states/(s*actor), game length: 180.0
+[2026-08-16 00:25:47.399] Queue size: 17. Buffer size: 65536. States seen: 1670086
+[2026-08-16 00:26:09.079] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:26:09.079] Losses: policy: 2.6022, value: 0.0810, l2: 0.2241, sum: 2.9074
+[2026-08-16 00:26:09.079] Cache size: 262144/262144: 100.0%, hits: 883856, misses: 924743, hit rate: 48.870%
+[2026-08-16 00:26:09.216] 
+[2026-08-16 00:27:11.258] Step: 77
+[2026-08-16 00:27:11.258] Collected 22135 states from 122 games, 264.0 states/s; 1.0 states/(s*actor), game length: 181.4
+[2026-08-16 00:27:11.258] Queue size: 15. Buffer size: 65536. States seen: 1692221
+[2026-08-16 00:27:32.879] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:27:32.879] Losses: policy: 2.6202, value: 0.0894, l2: 0.2231, sum: 2.9327
+[2026-08-16 00:27:32.879] Cache size: 262144/262144: 100.0%, hits: 1051213, misses: 936238, hit rate: 52.893%
+[2026-08-16 00:27:33.013] 
+[2026-08-16 00:28:23.503] Step: 78
+[2026-08-16 00:28:23.503] Collected 21933 states from 116 games, 303.6 states/s; 1.2 states/(s*actor), game length: 189.1
+[2026-08-16 00:28:23.503] Queue size: 18. Buffer size: 65536. States seen: 1714154
+[2026-08-16 00:28:44.889] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:28:44.889] Losses: policy: 2.5985, value: 0.0654, l2: 0.2220, sum: 2.8859
+[2026-08-16 00:28:44.889] Cache size: 262144/262144: 100.0%, hits: 870561, misses: 783667, hit rate: 52.626%
+[2026-08-16 00:28:45.028] 
+[2026-08-16 00:29:34.079] Step: 79
+[2026-08-16 00:29:34.079] Collected 21936 states from 118 games, 310.8 states/s; 1.2 states/(s*actor), game length: 185.9
+[2026-08-16 00:29:34.079] Queue size: 16. Buffer size: 65536. States seen: 1736090
+[2026-08-16 00:29:56.296] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:29:56.297] Losses: policy: 2.6000, value: 0.0601, l2: 0.2210, sum: 2.8811
+[2026-08-16 00:29:56.306] Cache size: 262144/262144: 100.0%, hits: 784125, misses: 786539, hit rate: 49.923%
+[2026-08-16 00:29:56.445] 
+[2026-08-16 00:31:10.816] Step: 80
+[2026-08-16 00:31:10.816] Collected 22126 states from 133 games, 228.7 states/s; 0.9 states/(s*actor), game length: 166.4
+[2026-08-16 00:31:10.816] Queue size: 17. Buffer size: 65536. States seen: 1758216
+[2026-08-16 00:31:32.069] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:31:32.070] Losses: policy: 2.6346, value: 0.0931, l2: 0.2201, sum: 2.9477
+[2026-08-16 00:31:32.070] Cache size: 262144/262144: 100.0%, hits: 1105095, misses: 1103345, hit rate: 50.040%
+[2026-08-16 00:31:32.203] 
+[2026-08-16 00:32:19.451] Step: 81
+[2026-08-16 00:32:19.451] Collected 22053 states from 109 games, 321.3 states/s; 1.3 states/(s*actor), game length: 202.3
+[2026-08-16 00:32:19.451] Queue size: 17. Buffer size: 65536. States seen: 1780269
+[2026-08-16 00:32:41.411] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:32:41.412] Losses: policy: 2.6192, value: 0.0861, l2: 0.2197, sum: 2.9249
+[2026-08-16 00:32:41.412] Cache size: 262144/262144: 100.0%, hits: 769681, misses: 756342, hit rate: 50.437%
+[2026-08-16 00:32:41.544] 
+[2026-08-16 00:33:34.509] Step: 82
+[2026-08-16 00:33:34.509] Collected 22038 states from 116 games, 293.6 states/s; 1.1 states/(s*actor), game length: 190.0
+[2026-08-16 00:33:34.509] Queue size: 16. Buffer size: 65536. States seen: 1802307
+[2026-08-16 00:33:55.850] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:33:55.850] Losses: policy: 2.6161, value: 0.0700, l2: 0.2189, sum: 2.9049
+[2026-08-16 00:33:55.850] Cache size: 262144/262144: 100.0%, hits: 851262, misses: 822490, hit rate: 50.860%
+[2026-08-16 00:33:55.987] 
+[2026-08-16 00:34:57.310] Step: 83
+[2026-08-16 00:34:57.310] Collected 22073 states from 130 games, 266.6 states/s; 1.0 states/(s*actor), game length: 169.8
+[2026-08-16 00:34:57.310] Queue size: 18. Buffer size: 65536. States seen: 1824380
+[2026-08-16 00:35:18.834] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:35:18.835] Losses: policy: 2.6267, value: 0.0634, l2: 0.2180, sum: 2.9081
+[2026-08-16 00:35:18.835] Cache size: 262144/262144: 100.0%, hits: 890704, misses: 942641, hit rate: 48.584%
+[2026-08-16 00:35:18.966] 
+[2026-08-16 00:36:27.942] Step: 84
+[2026-08-16 00:36:27.942] Collected 22130 states from 129 games, 244.2 states/s; 1.0 states/(s*actor), game length: 171.6
+[2026-08-16 00:36:27.942] Queue size: 16. Buffer size: 65536. States seen: 1846510
+[2026-08-16 00:36:49.096] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:36:49.096] Losses: policy: 2.6477, value: 0.0841, l2: 0.2171, sum: 2.9489
+[2026-08-16 00:36:49.096] Cache size: 262144/262144: 100.0%, hits: 1062829, misses: 1031750, hit rate: 50.742%
+[2026-08-16 00:36:49.231] 
+[2026-08-16 00:37:59.581] Step: 85
+[2026-08-16 00:37:59.581] Collected 21957 states from 124 games, 239.6 states/s; 0.9 states/(s*actor), game length: 177.1
+[2026-08-16 00:37:59.581] Queue size: 18. Buffer size: 65536. States seen: 1868467
+[2026-08-16 00:38:21.232] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_training/os_train/cycle1/training/checkpoint--1
+[2026-08-16 00:38:21.233] Losses: policy: 2.6340, value: 0.0719, l2: 0.2162, sum: 2.9220
+[2026-08-16 00:38:21.233] Cache size: 262144/262144: 100.0%, hits: 1030185, misses: 1060035, hit rate: 49.286%
+[2026-08-16 00:38:21.368] 

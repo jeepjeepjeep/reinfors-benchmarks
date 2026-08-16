@@ -1,0 +1,2 @@
+[2026-08-14 10:12:36.408] actor-15 started
+[2026-08-14 10:16:22.896] Game 1: Returns: 1 -1; Actions: d3 c6 Nf3 a6 Be3 c5 Ne5 f6 b3 b5 g4 d6 d4 Nd7 Kd2 a5 f4 c4 Bf2 Nb6 Kc3 a4 Bh3 h6 Nd2 Bd7 Nb1 Qc8 Ng6 Rb8 Nd2 Rb7 Re1 Nd5+ Kb2 Nb4 Bg1 h5 Kc1 Nxa2+ Kb2 e6 bxa4 Rb8 Rxa2 f5 e4 Kf7 Rf1 Be8 Qf3 d5 gxh5 Rb6 Kc3 Ba3 Nh4 b4#

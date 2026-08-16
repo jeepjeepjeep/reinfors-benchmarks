@@ -1,0 +1,9 @@
+{"header": {"game": "chess", "torch": "2.3.0+cu121", "build": "release", "torch_threads": 4, "affinity": "[0, 1, 2, 3]", "cuda": "NVIDIA A10G"}}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cpu", "batch": 32, "rows_s": 260.26758485158257, "us_per_row": 3842.1995600037917, "calls": 25, "wall": 3.0737596480030334}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cpu", "batch": 64, "rows_s": 262.63367970585796, "us_per_row": 3807.5847740471477, "calls": 13, "wall": 3.1679105320072267}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cpu", "batch": 128, "rows_s": 238.91130760089163, "us_per_row": 4185.653705728025, "calls": 6, "wall": 3.214582045999123}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cpu", "batch": 256, "rows_s": 247.7877245777045, "us_per_row": 4035.712429678521, "calls": 3, "wall": 3.099427145993104}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 32, "rows_s": 13858.360090683249, "us_per_row": 72.15860992616895, "calls": 1304, "wall": 3.011034474999178}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 64, "rows_s": 15277.598265569357, "us_per_row": 65.45531454729168, "calls": 725, "wall": 3.0371265949943336}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 128, "rows_s": 14295.249922027477, "us_per_row": 69.95330654968859, "calls": 344, "wall": 3.080183993995888}
+{"part": "net", "game": "chess", "width": 256, "depth": 8, "device": "cuda", "batch": 256, "rows_s": 19266.471506594247, "us_per_row": 51.90363994038735, "calls": 234, "wall": 3.1092356469889637}

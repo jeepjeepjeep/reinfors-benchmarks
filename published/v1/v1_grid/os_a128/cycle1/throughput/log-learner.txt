@@ -1,0 +1,72 @@
+[2026-08-13 14:43:03.243] learner started
+[2026-08-13 14:43:03.243] Running the learner on device 0: /cuda:0
+[2026-08-13 14:46:48.898] Step: 1
+[2026-08-13 14:46:48.898] Collected 21871 states from 199 games, 76.6 states/s; 0.6 states/(s*actor), game length: 109.9
+[2026-08-13 14:46:48.898] Queue size: 0. Buffer size: 21871. States seen: 21871
+[2026-08-13 14:46:55.587] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:46:55.588] Losses: policy: 3.2449, value: 0.8150, l2: 0.3698, sum: 4.4297
+[2026-08-13 14:46:55.588] Cache size: 262144/262144: 100.0%, hits: 1232670, misses: 2507296, hit rate: 32.959%
+[2026-08-13 14:46:55.694] 
+[2026-08-13 14:48:18.864] Step: 2
+[2026-08-13 14:48:18.864] Collected 21878 states from 102 games, 243.2 states/s; 1.9 states/(s*actor), game length: 214.5
+[2026-08-13 14:48:18.864] Queue size: 4. Buffer size: 43749. States seen: 43749
+[2026-08-13 14:48:32.404] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:48:32.404] Losses: policy: 3.0909, value: 0.3222, l2: 0.3636, sum: 3.7767
+[2026-08-13 14:48:32.404] Cache size: 262144/262144: 100.0%, hits: 493068, misses: 952358, hit rate: 34.112%
+[2026-08-13 14:48:32.511] 
+[2026-08-13 14:50:16.541] Step: 3
+[2026-08-13 14:50:16.541] Collected 22021 states from 117 games, 187.1 states/s; 1.5 states/(s*actor), game length: 188.2
+[2026-08-13 14:50:16.541] Queue size: 5. Buffer size: 65536. States seen: 65770
+[2026-08-13 14:50:37.132] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:50:37.132] Losses: policy: 3.0498, value: 0.2491, l2: 0.3541, sum: 3.6530
+[2026-08-13 14:50:37.132] Cache size: 262144/262144: 100.0%, hits: 655001, misses: 1236420, hit rate: 34.630%
+[2026-08-13 14:50:37.245] 
+[2026-08-13 14:52:22.589] Step: 4
+[2026-08-13 14:52:22.589] Collected 22045 states from 118 games, 174.9 states/s; 1.4 states/(s*actor), game length: 186.8
+[2026-08-13 14:52:22.589] Queue size: 10. Buffer size: 65536. States seen: 87815
+[2026-08-13 14:52:43.167] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:52:43.168] Losses: policy: 2.9619, value: 0.1941, l2: 0.3441, sum: 3.5001
+[2026-08-13 14:52:43.168] Cache size: 262144/262144: 100.0%, hits: 670038, misses: 1237355, hit rate: 35.128%
+[2026-08-13 14:52:43.281] 
+[2026-08-13 14:54:03.729] Step: 5
+[2026-08-13 14:54:03.729] Collected 22029 states from 100 games, 217.8 states/s; 1.7 states/(s*actor), game length: 220.3
+[2026-08-13 14:54:03.729] Queue size: 9. Buffer size: 65536. States seen: 109844
+[2026-08-13 14:54:24.318] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:54:24.318] Losses: policy: 2.9772, value: 0.2185, l2: 0.3354, sum: 3.5311
+[2026-08-13 14:54:24.318] Cache size: 262144/262144: 100.0%, hits: 582562, misses: 968548, hit rate: 37.558%
+[2026-08-13 14:54:24.448] 
+[2026-08-13 14:56:16.431] Step: 6
+[2026-08-13 14:56:16.431] Collected 21919 states from 119 games, 165.2 states/s; 1.3 states/(s*actor), game length: 184.2
+[2026-08-13 14:56:16.431] Queue size: 9. Buffer size: 65536. States seen: 131763
+[2026-08-13 14:56:37.208] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:56:37.208] Losses: policy: 2.9767, value: 0.1731, l2: 0.3280, sum: 3.4779
+[2026-08-13 14:56:37.208] Cache size: 262144/262144: 100.0%, hits: 701843, misses: 1323929, hit rate: 34.646%
+[2026-08-13 14:56:37.320] 
+[2026-08-13 14:57:57.035] Step: 7
+[2026-08-13 14:57:57.035] Collected 21849 states from 102 games, 217.2 states/s; 1.7 states/(s*actor), game length: 214.2
+[2026-08-13 14:57:57.035] Queue size: 12. Buffer size: 65536. States seen: 153612
+[2026-08-13 14:58:17.813] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 14:58:17.814] Losses: policy: 2.9512, value: 0.1270, l2: 0.3218, sum: 3.4000
+[2026-08-13 14:58:17.814] Cache size: 262144/262144: 100.0%, hits: 714108, misses: 948124, hit rate: 42.961%
+[2026-08-13 14:58:17.926] 
+[2026-08-13 14:59:51.705] Step: 8
+[2026-08-13 14:59:51.705] Collected 21908 states from 102 games, 191.1 states/s; 1.5 states/(s*actor), game length: 214.8
+[2026-08-13 14:59:51.705] Queue size: 10. Buffer size: 65536. States seen: 175520
+[2026-08-13 15:00:12.337] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 15:00:12.337] Losses: policy: 2.9282, value: 0.0902, l2: 0.3164, sum: 3.3347
+[2026-08-13 15:00:12.337] Cache size: 262144/262144: 100.0%, hits: 925045, misses: 1091157, hit rate: 45.881%
+[2026-08-13 15:00:12.457] 
+[2026-08-13 15:01:14.667] Step: 9
+[2026-08-13 15:01:14.667] Collected 21989 states from 104 games, 265.0 states/s; 2.1 states/(s*actor), game length: 211.4
+[2026-08-13 15:01:14.667] Queue size: 8. Buffer size: 65536. States seen: 197509
+[2026-08-13 15:01:35.202] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 15:01:35.202] Losses: policy: 2.8651, value: 0.0757, l2: 0.3117, sum: 3.2525
+[2026-08-13 15:01:35.202] Cache size: 262144/262144: 100.0%, hits: 604379, misses: 757489, hit rate: 44.379%
+[2026-08-13 15:01:35.319] 
+[2026-08-13 15:03:07.375] Step: 10
+[2026-08-13 15:03:07.375] Collected 21907 states from 106 games, 194.4 states/s; 1.5 states/(s*actor), game length: 206.7
+[2026-08-13 15:03:07.375] Queue size: 15. Buffer size: 65536. States seen: 219416
+[2026-08-13 15:03:28.037] Checkpoint saved: /home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a128/cycle1/throughput/checkpoint--1
+[2026-08-13 15:03:28.037] Losses: policy: 2.8285, value: 0.0704, l2: 0.3077, sum: 3.2065
+[2026-08-13 15:03:28.037] Cache size: 262144/262144: 100.0%, hits: 821401, misses: 1080740, hit rate: 43.183%
+[2026-08-13 15:03:28.149] 

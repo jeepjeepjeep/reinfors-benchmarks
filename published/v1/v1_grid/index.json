@@ -1,0 +1,338 @@
+[
+  {
+    "cell": "os_a32",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.8,
+    "dir": "os_a32/cycle1"
+  },
+  {
+    "cell": "os_a64",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.8,
+    "dir": "os_a64/cycle1"
+  },
+  {
+    "cell": "os_a128",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1232.2,
+    "dir": "os_a128/cycle1"
+  },
+  {
+    "cell": "os_a256",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1232.1,
+    "dir": "os_a256/cycle1"
+  },
+  {
+    "cell": "os_a64b32",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.8,
+    "dir": "os_a64b32/cycle1"
+  },
+  {
+    "cell": "os_a128b64",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a128b64/cycle1"
+  },
+  {
+    "cell": "os_a256b128",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a256b128/cycle1"
+  },
+  {
+    "cell": "os_a512b256",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1232.1,
+    "dir": "os_a512b256/cycle1"
+  },
+  {
+    "cell": "rf_n32_g1",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.5,
+    "dir": "rf_n32_g1/cycle1"
+  },
+  {
+    "cell": "rf_n64_g1",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n64_g1/cycle1"
+  },
+  {
+    "cell": "rf_n128_g1",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n128_g1/cycle1"
+  },
+  {
+    "cell": "rf_n256_g1",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n256_g1/cycle1"
+  },
+  {
+    "cell": "rf_n64_g2",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n64_g2/cycle1"
+  },
+  {
+    "cell": "rf_n128_g2",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n128_g2/cycle1"
+  },
+  {
+    "cell": "rf_n256_g2",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n256_g2/cycle1"
+  },
+  {
+    "cell": "rf_n512_g2",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n512_g2/cycle1"
+  },
+  {
+    "cell": "os_a32",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.9,
+    "dir": "os_a32/cycle2"
+  },
+  {
+    "cell": "os_a64",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a64/cycle2"
+  },
+  {
+    "cell": "os_a128",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.9,
+    "dir": "os_a128/cycle2"
+  },
+  {
+    "cell": "os_a256",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.9,
+    "dir": "os_a256/cycle2"
+  },
+  {
+    "cell": "os_a64b32",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.9,
+    "dir": "os_a64b32/cycle2"
+  },
+  {
+    "cell": "os_a128b64",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a128b64/cycle2"
+  },
+  {
+    "cell": "os_a256b128",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1232.1,
+    "dir": "os_a256b128/cycle2"
+  },
+  {
+    "cell": "os_a512b256",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1232.1,
+    "dir": "os_a512b256/cycle2"
+  },
+  {
+    "cell": "rf_n32_g1",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.5,
+    "dir": "rf_n32_g1/cycle2"
+  },
+  {
+    "cell": "rf_n64_g1",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n64_g1/cycle2"
+  },
+  {
+    "cell": "rf_n128_g1",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n128_g1/cycle2"
+  },
+  {
+    "cell": "rf_n256_g1",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n256_g1/cycle2"
+  },
+  {
+    "cell": "rf_n64_g2",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n64_g2/cycle2"
+  },
+  {
+    "cell": "rf_n128_g2",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n128_g2/cycle2"
+  },
+  {
+    "cell": "rf_n256_g2",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n256_g2/cycle2"
+  },
+  {
+    "cell": "rf_n512_g2",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n512_g2/cycle2"
+  },
+  {
+    "cell": "os_a32",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a32/cycle3"
+  },
+  {
+    "cell": "os_a64",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a64/cycle3"
+  },
+  {
+    "cell": "os_a128",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a128/cycle3"
+  },
+  {
+    "cell": "os_a256",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a256/cycle3"
+  },
+  {
+    "cell": "os_a64b32",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.8,
+    "dir": "os_a64b32/cycle3"
+  },
+  {
+    "cell": "os_a128b64",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.9,
+    "dir": "os_a128b64/cycle3"
+  },
+  {
+    "cell": "os_a256b128",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1232.1,
+    "dir": "os_a256b128/cycle3"
+  },
+  {
+    "cell": "os_a512b256",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1232.0,
+    "dir": "os_a512b256/cycle3"
+  },
+  {
+    "cell": "rf_n32_g1",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.5,
+    "dir": "rf_n32_g1/cycle3"
+  },
+  {
+    "cell": "rf_n64_g1",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.7,
+    "dir": "rf_n64_g1/cycle3"
+  },
+  {
+    "cell": "rf_n128_g1",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n128_g1/cycle3"
+  },
+  {
+    "cell": "rf_n256_g1",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n256_g1/cycle3"
+  },
+  {
+    "cell": "rf_n64_g2",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n64_g2/cycle3"
+  },
+  {
+    "cell": "rf_n128_g2",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n128_g2/cycle3"
+  },
+  {
+    "cell": "rf_n256_g2",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n256_g2/cycle3"
+  },
+  {
+    "cell": "rf_n512_g2",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 1231.6,
+    "dir": "rf_n512_g2/cycle3"
+  }
+]

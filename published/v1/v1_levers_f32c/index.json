@@ -1,0 +1,44 @@
+[
+  {
+    "cell": "f32c_ab_f64",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 278.7,
+    "dir": "f32c_ab_f64/cycle1"
+  },
+  {
+    "cell": "f32c_ab_f32",
+    "cycle": 1,
+    "status": "ok",
+    "elapsed_seconds": 272.7,
+    "dir": "f32c_ab_f32/cycle1"
+  },
+  {
+    "cell": "f32c_ab_f64",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 273.0,
+    "dir": "f32c_ab_f64/cycle2"
+  },
+  {
+    "cell": "f32c_ab_f32",
+    "cycle": 2,
+    "status": "ok",
+    "elapsed_seconds": 273.9,
+    "dir": "f32c_ab_f32/cycle2"
+  },
+  {
+    "cell": "f32c_ab_f64",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 272.4,
+    "dir": "f32c_ab_f64/cycle3"
+  },
+  {
+    "cell": "f32c_ab_f32",
+    "cycle": 3,
+    "status": "ok",
+    "elapsed_seconds": 273.4,
+    "dir": "f32c_ab_f32/cycle3"
+  }
+]

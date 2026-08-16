@@ -1,0 +1,135 @@
+{
+  "started": "2026-08-15T21:53:46Z",
+  "command": [
+    "experiments/runner.py",
+    "experiments/specs/v1_levers_f32c.json",
+    "--set",
+    "tag=v1.0.6"
+  ],
+  "host": "ip-172-31-93-74",
+  "python": "3.11.15",
+  "benchmarks_sha": "410329ad07ae4b1156baf8fff6869883a8bde472",
+  "benchmarks_tag": "v1.0.6",
+  "benchmarks_dirty": false,
+  "openspiel_pin": "112b7770",
+  "smt_active": "0",
+  "reinfors": {
+    "git_sha": "4911f4ce3a0f8057e80ba2d6869a2c4c34986c57",
+    "git_dirty": false,
+    "git_tag": "v1",
+    "profile": "release",
+    "extension_sha256": "d4be8fc07f4ec625bf524936c3fba18b74755699712b5982d8cb16493123c3ff"
+  },
+  "torch": "2.3.0+cu121",
+  "gpu": "NVIDIA A10G",
+  "run_kind": "session",
+  "spec": {
+    "session": "v1_levers_f32c",
+    "expect_tag": "{tag}",
+    "cycles": 3,
+    "cells": [
+      {
+        "name": "f32c_ab_f64",
+        "argv": [
+          "experiments/measure_inference.py"
+        ],
+        "args": {
+          "game": "chess",
+          "devices": "cuda",
+          "depths": "8",
+          "engine-leg-seconds": 120,
+          "widths": "128,256",
+          "n-games": "256",
+          "mode": "engine",
+          "callback": "compiled",
+          "infer-dtype": "f64",
+          "out": "{run_dir}/inference"
+        },
+        "cores": "0-3",
+        "deadline_seconds": 1800,
+        "outputs": [
+          "inference/rows.jsonl"
+        ]
+      },
+      {
+        "name": "f32c_ab_f32",
+        "argv": [
+          "experiments/measure_inference.py"
+        ],
+        "args": {
+          "game": "chess",
+          "devices": "cuda",
+          "depths": "8",
+          "engine-leg-seconds": 120,
+          "widths": "128,256",
+          "n-games": "256",
+          "mode": "engine",
+          "callback": "compiled",
+          "infer-dtype": "f32",
+          "out": "{run_dir}/inference"
+        },
+        "cores": "0-3",
+        "deadline_seconds": 1800,
+        "outputs": [
+          "inference/rows.jsonl"
+        ]
+      }
+    ]
+  },
+  "spec_sha256": "b1182effdfec2e8be00c4954f7fc5387fa3dbca96deea6639da2730a1e80a2d6",
+  "substitutions": {
+    "tag": "v1.0.6"
+  },
+  "completed": true,
+  "packages": [
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.3",
+    "PyYAML==6.0.3",
+    "absl-py==2.5.0",
+    "attrs==26.1.0",
+    "chess==1.11.2",
+    "filelock==3.29.0",
+    "fsspec==2026.4.0",
+    "ml_collections==1.1.0",
+    "mpmath==1.3.0",
+    "networkx==3.6.1",
+    "numpy==2.4.6",
+    "nvidia-cublas-cu12==12.1.3.1",
+    "nvidia-cuda-cupti-cu12==12.1.105",
+    "nvidia-cuda-nvrtc-cu12==12.1.105",
+    "nvidia-cuda-runtime-cu12==12.1.105",
+    "nvidia-cudnn-cu12==8.9.2.26",
+    "nvidia-cufft-cu12==11.0.2.54",
+    "nvidia-curand-cu12==10.3.2.106",
+    "nvidia-cusolver-cu12==11.4.5.107",
+    "nvidia-cusparse-cu12==12.1.0.106",
+    "nvidia-nccl-cu12==2.20.5",
+    "nvidia-nvjitlink-cu12==12.9.86",
+    "nvidia-nvtx-cu12==12.1.105",
+    "open-spiel==2.0.1",
+    "reinfors==0.0.0",
+    "scipy==1.17.1",
+    "setuptools==83.0.0",
+    "sympy==1.14.0",
+    "torch==2.3.0+cu121",
+    "triton==2.3.0",
+    "typing_extensions==4.15.0"
+  ],
+  "os": {
+    "platform": "Linux-6.8.0-1061-aws-x86_64-with-glibc2.35",
+    "kernel": "6.8.0-1061-aws",
+    "machine": "x86_64"
+  },
+  "cpu_model": "AMD EPYC 7R32",
+  "affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "cuda_driver": "595.71.05",
+  "cuda_runtime": "12.1",
+  "env": {},
+  "status": "ok",
+  "finished": "2026-08-15T22:21:11Z"
+}

@@ -1,0 +1,50 @@
+{
+  "started": "2026-08-14T02:00:31Z",
+  "command": [
+    "/home/ubuntu/rl/reinfors-benchmarks/.venv23/bin/python",
+    "experiments/measure_throughput.py",
+    "--side",
+    "os",
+    "--actors",
+    "256",
+    "--warmup-seconds",
+    "300",
+    "--window-seconds",
+    "900",
+    "--cores",
+    "0-3",
+    "--out",
+    "/home/ubuntu/rl/reinfors-benchmarks/runs/v1_grid/os_a256/cycle3/throughput"
+  ],
+  "host": "ip-172-31-93-74",
+  "python": "3.11.15",
+  "benchmarks_sha": "e0084a7e3a6a029df00cf0045472271e895c2d35",
+  "benchmarks_tag": "v1",
+  "benchmarks_dirty": false,
+  "openspiel_pin": "112b7770",
+  "smt_active": "0",
+  "reinfors": {
+    "git_sha": "4911f4ce3a0f8057e80ba2d6869a2c4c34986c57",
+    "git_dirty": false,
+    "git_tag": "v1",
+    "profile": "release",
+    "extension_sha256": "d4be8fc07f4ec625bf524936c3fba18b74755699712b5982d8cb16493123c3ff"
+  },
+  "torch": "2.3.0+cu121",
+  "gpu": "NVIDIA A10G",
+  "run_kind": "cell",
+  "cell": "os_a256",
+  "cycle": 3,
+  "deadline_seconds": 1350,
+  "env_overrides": {},
+  "completed": true,
+  "exit_code": 0,
+  "intended_deadline_kill": false,
+  "elapsed_seconds": 1232.0,
+  "output_sha256": {
+    "throughput/telemetry.jsonl": "fb2ada56b712822f04c798c3e3adbef176b899a0f91d6a3b90a42fb9fc2b6f53"
+  },
+  "missing_outputs": [],
+  "status": "ok",
+  "finished": "2026-08-14T02:21:03Z"
+}

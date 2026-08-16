@@ -1,0 +1,202 @@
+our net: SweepResnet w256 d8  params=10,116,940
+  finished 1/100 games
+  finished 2/100 games
+  finished 3/100 games
+  finished 4/100 games
+  finished 5/100 games
+  finished 6/100 games
+  finished 7/100 games
+  finished 8/100 games
+  finished 9/100 games
+  finished 10/100 games
+  finished 11/100 games
+  finished 12/100 games
+  finished 13/100 games
+  finished 14/100 games
+  finished 15/100 games
+  finished 16/100 games
+  finished 17/100 games
+  finished 18/100 games
+  finished 19/100 games
+  finished 20/100 games
+  finished 21/100 games
+  finished 22/100 games
+  finished 23/100 games
+  finished 24/100 games
+  finished 25/100 games
+  finished 26/100 games
+  finished 27/100 games
+  finished 28/100 games
+  finished 29/100 games
+  finished 30/100 games
+  finished 31/100 games
+  finished 32/100 games
+  finished 33/100 games
+  finished 34/100 games
+  finished 35/100 games
+  finished 36/100 games
+  finished 37/100 games
+  finished 38/100 games
+  finished 39/100 games
+  finished 40/100 games
+  finished 41/100 games
+  finished 42/100 games
+  finished 43/100 games
+  finished 44/100 games
+  finished 45/100 games
+  finished 46/100 games
+  finished 47/100 games
+  finished 48/100 games
+  finished 49/100 games
+  finished 50/100 games
+  finished 51/100 games
+  finished 52/100 games
+  finished 53/100 games
+  finished 54/100 games
+  finished 55/100 games
+  finished 56/100 games
+  finished 57/100 games
+  finished 58/100 games
+  finished 59/100 games
+  finished 60/100 games
+  finished 61/100 games
+  finished 62/100 games
+  finished 63/100 games
+  finished 64/100 games
+  finished 65/100 games
+  finished 66/100 games
+  finished 67/100 games
+  finished 68/100 games
+  finished 69/100 games
+  finished 70/100 games
+  finished 71/100 games
+  finished 72/100 games
+  finished 73/100 games
+  finished 74/100 games
+  finished 75/100 games
+  finished 76/100 games
+  finished 77/100 games
+  finished 78/100 games
+  finished 79/100 games
+  finished 80/100 games
+  finished 81/100 games
+  finished 82/100 games
+  finished 83/100 games
+  finished 84/100 games
+  finished 85/100 games
+  finished 86/100 games
+  finished 87/100 games
+  finished 88/100 games
+  finished 89/100 games
+  finished 90/100 games
+  finished 91/100 games
+  finished 92/100 games
+  finished 93/100 games
+  finished 94/100 games
+  finished 95/100 games
+  finished 96/100 games
+  finished 97/100 games
+  finished 98/100 games
+  finished 99/100 games
+  finished 100/100 games
+  game   1  opening  1 as white: W  [b4 f6 Bb2 a5 h3 c5]
+  game   2  opening  1 as black: D  [b4 f6 Bb2 a5 h3 c5]
+  game   3  opening  2 as white: L  [Nf3 Nf6 c4 c6 Qb3 c5]
+  game   4  opening  2 as black: W  [Nf3 Nf6 c4 c6 Qb3 c5]
+  game   5  opening  3 as white: D  [a3 g5 Nc3 a6 Ne4 e6]
+  game   6  opening  3 as black: W  [a3 g5 Nc3 a6 Ne4 e6]
+  game   7  opening  4 as white: W  [b3 e6 b4 f6 e3 Kf7]
+  game   8  opening  4 as black: D  [b3 e6 b4 f6 e3 Kf7]
+  game   9  opening  5 as white: D  [c3 c5 b3 Nc6 f3 Qa5]
+  game  10  opening  5 as black: D  [c3 c5 b3 Nc6 f3 Qa5]
+  game  11  opening  6 as white: D  [e4 h5 Ne2 Rh6 Ng3 d6]
+  game  12  opening  6 as black: D  [e4 h5 Ne2 Rh6 Ng3 d6]
+  game  13  opening  7 as white: W  [Nh3 f6 Rg1 c6 e4 f5]
+  game  14  opening  7 as black: D  [Nh3 f6 Rg1 c6 e4 f5]
+  game  15  opening  8 as white: W  [Nf3 Nf6 e4 d6 Ne5 Bd7]
+  game  16  opening  8 as black: L  [Nf3 Nf6 e4 d6 Ne5 Bd7]
+  game  17  opening  9 as white: D  [Na3 e6 c4 Qe7 Rb1 Nf6]
+  game  18  opening  9 as black: W  [Na3 e6 c4 Qe7 Rb1 Nf6]
+  game  19  opening 10 as white: D  [Na3 f5 Nb1 e6 d4 Bd6]
+  game  20  opening 10 as black: D  [Na3 f5 Nb1 e6 d4 Bd6]
+  game  21  opening 11 as white: W  [e3 h5 h4 e5 Ba6 Rh6]
+  game  22  opening 11 as black: W  [e3 h5 h4 e5 Ba6 Rh6]
+  game  23  opening 12 as white: W  [Nf3 f5 b3 a6 d4 Ra7]
+  game  24  opening 12 as black: W  [Nf3 f5 b3 a6 d4 Ra7]
+  game  25  opening 13 as white: D  [f4 Nh6 Nh3 a5 g3 Ng4]
+  game  26  opening 13 as black: D  [f4 Nh6 Nh3 a5 g3 Ng4]
+  game  27  opening 14 as white: D  [g3 b5 Bh3 c5 d4 Nh6]
+  game  28  opening 14 as black: D  [g3 b5 Bh3 c5 d4 Nh6]
+  game  29  opening 15 as white: D  [e4 e5 Qh5 Nf6 Qf3 c5]
+  game  30  opening 15 as black: D  [e4 e5 Qh5 Nf6 Qf3 c5]
+  game  31  opening 16 as white: W  [d3 Nf6 Bh6 d6 Nf3 g5]
+  game  32  opening 16 as black: W  [d3 Nf6 Bh6 d6 Nf3 g5]
+  game  33  opening 17 as white: D  [b3 Nh6 a4 f5 g3 c5]
+  game  34  opening 17 as black: W  [b3 Nh6 a4 f5 g3 c5]
+  game  35  opening 18 as white: W  [d3 a6 h3 Nf6 c4 Ra7]
+  game  36  opening 18 as black: D  [d3 a6 h3 Nf6 c4 Ra7]
+  game  37  opening 19 as white: W  [Na3 g5 Nh3 c6 Nb1 h5]
+  game  38  opening 19 as black: D  [Na3 g5 Nh3 c6 Nb1 h5]
+  game  39  opening 20 as white: L  [f4 a6 b4 Ra7 h3 h5]
+  game  40  opening 20 as black: W  [f4 a6 b4 Ra7 h3 h5]
+  game  41  opening 21 as white: D  [Nc3 c5 Nh3 h6 d3 Rh7]
+  game  42  opening 21 as black: D  [Nc3 c5 Nh3 h6 d3 Rh7]
+  game  43  opening 22 as white: D  [g3 Nh6 Nc3 g6 a4 b5]
+  game  44  opening 22 as black: D  [g3 Nh6 Nc3 g6 a4 b5]
+  game  45  opening 23 as white: D  [d4 g5 Be3 e5 Qd3 b6]
+  game  46  opening 23 as black: D  [d4 g5 Be3 e5 Qd3 b6]
+  game  47  opening 24 as white: D  [Nc3 Na6 Nb5 Nb4 a4 d5]
+  game  48  opening 24 as black: D  [Nc3 Na6 Nb5 Nb4 a4 d5]
+  game  49  opening 25 as white: L  [g3 h5 Nh3 g6 a3 a5]
+  game  50  opening 25 as black: D  [g3 h5 Nh3 g6 a3 a5]
+  game  51  opening 26 as white: L  [Nc3 b5 Nb1 h5 b3 b4]
+  game  52  opening 26 as black: D  [Nc3 b5 Nb1 h5 b3 b4]
+  game  53  opening 27 as white: D  [h4 d6 Nf3 g5 a3 Nd7]
+  game  54  opening 27 as black: W  [h4 d6 Nf3 g5 a3 Nd7]
+  game  55  opening 28 as white: W  [g4 a6 h4 Nc6 a4 Nb8]
+  game  56  opening 28 as black: D  [g4 a6 h4 Nc6 a4 Nb8]
+  game  57  opening 29 as white: D  [g4 d6 f4 e5 a4 e4]
+  game  58  opening 29 as black: D  [g4 d6 f4 e5 a4 e4]
+  game  59  opening 30 as white: W  [h4 Nh6 g4 d5 b3 g6]
+  game  60  opening 30 as black: D  [h4 Nh6 g4 d5 b3 g6]
+  game  61  opening 31 as white: D  [Nf3 Nf6 c4 h6 e3 Nc6]
+  game  62  opening 31 as black: D  [Nf3 Nf6 c4 h6 e3 Nc6]
+  game  63  opening 32 as white: L  [b4 h5 f4 b5 e3 d6]
+  game  64  opening 32 as black: W  [b4 h5 f4 b5 e3 d6]
+  game  65  opening 33 as white: L  [c3 e5 Nf3 g6 e3 f5]
+  game  66  opening 33 as black: D  [c3 e5 Nf3 g6 e3 f5]
+  game  67  opening 34 as white: D  [g3 c6 b4 Nf6 e3 Qa5]
+  game  68  opening 34 as black: D  [g3 c6 b4 Nf6 e3 Qa5]
+  game  69  opening 35 as white: L  [Na3 a6 g3 Nc6 Bg2 g6]
+  game  70  opening 35 as black: D  [Na3 a6 g3 Nc6 Bg2 g6]
+  game  71  opening 36 as white: W  [a3 Na6 Nc3 e6 f3 c5]
+  game  72  opening 36 as black: D  [a3 Na6 Nc3 e6 f3 c5]
+  game  73  opening 37 as white: L  [Nf3 b6 Ne5 h6 h3 e6]
+  game  74  opening 37 as black: D  [Nf3 b6 Ne5 h6 h3 e6]
+  game  75  opening 38 as white: D  [d3 Nc6 e3 b6 g4 Ba6]
+  game  76  opening 38 as black: W  [d3 Nc6 e3 b6 g4 Ba6]
+  game  77  opening 39 as white: W  [a3 e5 f3 Na6 b3 Nb8]
+  game  78  opening 39 as black: W  [a3 e5 f3 Na6 b3 Nb8]
+  game  79  opening 40 as white: W  [Nc3 d6 Na4 f5 Rb1 h5]
+  game  80  opening 40 as black: L  [Nc3 d6 Na4 f5 Rb1 h5]
+  game  81  opening 41 as white: W  [Na3 g5 c4 Nh6 f4 b5]
+  game  82  opening 41 as black: W  [Na3 g5 c4 Nh6 f4 b5]
+  game  83  opening 42 as white: D  [g3 c5 b3 Qb6 Bh3 h6]
+  game  84  opening 42 as black: W  [g3 c5 b3 Qb6 Bh3 h6]
+  game  85  opening 43 as white: W  [d3 f5 Nf3 g6 Ng5 b5]
+  game  86  opening 43 as black: D  [d3 f5 Nf3 g6 Ng5 b5]
+  game  87  opening 44 as white: W  [g4 b6 Bh3 a6 b3 Bb7]
+  game  88  opening 44 as black: D  [g4 b6 Bh3 a6 b3 Bb7]
+  game  89  opening 45 as white: L  [d4 f6 Nd2 a6 e4 Nh6]
+  game  90  opening 45 as black: D  [d4 f6 Nd2 a6 e4 Nh6]
+  game  91  opening 46 as white: W  [b4 b5 Bb2 g6 c3 Bh6]
+  game  92  opening 46 as black: D  [b4 b5 Bb2 g6 c3 Bh6]
+  game  93  opening 47 as white: D  [d4 g5 Nf3 h6 Na3 f5]
+  game  94  opening 47 as black: D  [d4 g5 Nf3 h6 Na3 f5]
+  game  95  opening 48 as white: D  [e4 h5 h4 g6 d4 Rh6]
+  game  96  opening 48 as black: D  [e4 h5 h4 g6 d4 Rh6]
+  game  97  opening 49 as white: W  [d4 Nc6 f3 b6 a3 g6]
+  game  98  opening 49 as black: W  [d4 Nc6 f3 b6 a3 g6]
+  game  99  opening 50 as white: D  [Na3 d6 Nc4 Qd7 Nxd6+ exd6]
+  game 100  opening 50 as black: D  [Na3 d6 Nc4 Qd7 Nxd6+ exd6]
+chess head-to-head (reinfors net vs open_spiel net, v1 protocol, 64 sims both): 34W 55D 11L -> score 0.615 (pair stderr 0.030 over 50 pairs)

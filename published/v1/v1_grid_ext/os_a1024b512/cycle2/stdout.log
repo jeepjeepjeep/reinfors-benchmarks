@@ -1,0 +1,1 @@
+os {'actors': 1024, 'batch': 512}  states/s=  149.1  net_rows/s= 13021.1  rows/call= 512.0  learn_steps=298  (window 400s..1135s)
