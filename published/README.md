@@ -9,6 +9,5 @@ metrics), the unified telemetry, raw logs, and PGNs. Because the paths mirror
 copy and the complete private tree, and every figure re-derives from the manifests
 and telemetry here.
 
-Campaign git tags were renamed after the V1 campaign completed (`v1`, `v1.0.1`…`v1.0.6`,
-`v1.1`, `v1.2` → the same names prefixed `bench_`, at the same commits). Manifests record
-the tag names as they were at run time; resolve them against the `bench_`-prefixed tags.
+Manifests record campaign tags without the `bench_` prefix (`v1`, `v1.0.4`, …); the
+corresponding git tags are `bench_v1`, `bench_v1.0.4`, and so on.
