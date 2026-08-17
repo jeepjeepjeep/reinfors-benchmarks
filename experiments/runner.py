@@ -9,7 +9,7 @@ manifests finalized atomically, raw-output hashing, and a session index.
 Spec:
 {
   "session": "v1-campaign",
-  "expect_tag": "v1",
+  "expect_tag": "bench_v1",
   "cycles": 3,                      # repeats, interleaved: cycle over all cells, repeat
   "cells": [
     {"name": "rf_n64_g1",

@@ -59,8 +59,11 @@ Publication runs always go through the runner:
 
 ```bash
 .venv23/bin/python experiments/runner.py \
-  experiments/specs/v1_grid.json --set tag=<frozen-tag>
+  experiments/specs/v1_grid.json --set tag=bench_v1
 ```
+
+Campaign tags carry a `bench_` prefix; manifests record them without it, so a manifest's
+`v1` corresponds to the git tag `bench_v1`.
 
 The runner verifies the frozen environment, captures each command and environment,
 keeps run directories append-only, and hashes required outputs. Direct harness runs are
