@@ -99,7 +99,9 @@ def main() -> None:
     a = ax[0][2]
     a.plot(rf["states"] / 1e6, rf["policy_loss"], label="reinfors", **style)
     a.plot(os_["states"] / 1e6, os_["policy_loss"], label="openspiel", **style)
-    a.set(title="policy loss vs states collected (learning per data)", xlabel="states (M)")
+    a.set(
+        title="policy loss vs states collected (learning per data)", xlabel="states (M)"
+    )
     a.legend()
 
     a = ax[1][0]
@@ -111,13 +113,20 @@ def main() -> None:
     a = ax[1][1]
     a.plot(rf_h, rf["hit_rate"], label="reinfors", **style)
     a.plot(os_h, os_["hit_rate"], label="openspiel", **style)
-    a.set(title="infer-cache hit rate, per interval (both sides)", xlabel="hours", ylabel="%")
+    a.set(
+        title="infer-cache hit rate, per interval (both sides)",
+        xlabel="hours",
+        ylabel="%",
+    )
     a.legend()
 
     a = ax[1][2]
     a.plot(os_h, os_["game_len"], label="openspiel", color="tab:orange", **style)
-    a.set(title="self-play game length (openspiel only — rf gap, not logged)",
-          xlabel="hours", ylabel="plies")
+    a.set(
+        title="self-play game length (openspiel only — rf gap, not logged)",
+        xlabel="hours",
+        ylabel="plies",
+    )
     a.legend()
 
     fig.tight_layout()
