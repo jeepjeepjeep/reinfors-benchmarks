@@ -21,6 +21,8 @@ def test_wheel_tag_rejects_other_lines_and_missing() -> None:
     assert not preflight.wheel_tag_ok("bench_v1.0.1", "bench_v1.0")
     assert not preflight.wheel_tag_ok("bench_v1.0.1.extra", "bench_v1.0.1")
     assert not preflight.wheel_tag_ok("bench_v2", "bench_v1")
-    assert not preflight.wheel_tag_ok("bench_v10.1", "bench_v1")  # prefix != dotted base
+    assert not preflight.wheel_tag_ok(
+        "bench_v10.1", "bench_v1"
+    )  # prefix != dotted base
     assert not preflight.wheel_tag_ok("bench_v1.0.1", None)
     assert not preflight.wheel_tag_ok("bench_v1.0.1", "")

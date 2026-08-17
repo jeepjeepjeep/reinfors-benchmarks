@@ -1,9 +1,17 @@
 """measure_inference: run-directory lifecycle on a tiny cpu net sweep."""
 
+import importlib.util
 import json
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
+
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("reinfors") is None,
+    reason="harness subprocess tests need reinfors installed",
+)
 
 SCRIPT = Path(__file__).resolve().parents[1] / "measure_inference.py"
 

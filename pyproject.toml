@@ -11,7 +11,8 @@ dependencies = [
     "open_spiel>=1.5",
     "chess>=1.10",  # SAN<->UCI conversion in the chess H2H bridge
     "matplotlib>=3.8",  # scripts/plot_round.py telemetry panels
-    # reinfors is installed from a locally built wheel (see README) until it is published.
+    # reinfors comes from a locally built wheel at the campaign's frozen tag (see README) —
+    # never from PyPI, so measured code is pinned to a commit rather than a release.
 ]
 
 [dependency-groups]
@@ -19,3 +20,6 @@ dev = ["pytest>=8"]
 
 [tool.uv]
 package = false
+
+[tool.pytest.ini_options]
+testpaths = ["experiments/tests"]

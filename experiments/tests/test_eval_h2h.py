@@ -16,7 +16,10 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from eval_h2h import Mirror
+_eval_h2h = pytest.importorskip(
+    "eval_h2h", reason="bridge tests need reinfors installed"
+)
+Mirror = _eval_h2h.Mirror
 
 
 def apply_their_rendering(mirror: Mirror, loose_san: str) -> str:
