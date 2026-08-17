@@ -76,7 +76,7 @@ def _check_openspiel_sources() -> list[str]:
 def wheel_tag_ok(expect_tag: str, wheel_tag: str | None) -> bool:
     """Benchmarks-only campaign patch tags (bench_v1 -> bench_v1.0.1) keep the frozen wheel:
     the wheel's tag passes when it equals the expected tag, or when it is the
-    campaign's UNDOTTED base tag (v1 under v1.0.x). Any dotted wheel tag means
+    campaign's UNDOTTED base tag (bench_v1 under bench_v1.0.x). Any dotted wheel tag means
     reinfors changed mid-campaign and demands an exact re-freeze."""
     if not wheel_tag:
         return False
